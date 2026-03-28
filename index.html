@@ -1582,7 +1582,7 @@ function toast(msg) {
 //  GEMINI API
 // ═══════════════════════════════════════════
 async function callGemini(prompt, systemInstruction) {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${API_KEY}`;;
   const body = {
     contents: [{ parts: [{ text: prompt }] }],
   };
