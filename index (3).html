@@ -1,0 +1,2686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JURIS — Intelligent Law Student Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #1a1a2e;
+  --parchment: #f5f0e8;
+  --gold: #c5a55a;
+  --gold-light: #dbc88e;
+  --gold-dark: #a08840;
+  --crimson: #8b2635;
+  --crimson-light: #b33a4a;
+  --navy: #16213e;
+  --slate: #3a3a5c;
+  --mist: #e8e4dc;
+  --warm-white: #faf8f4;
+  --success: #4a7c59;
+  --warning: #c5873a;
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-body: 'DM Sans', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --shadow-sm: 0 1px 3px rgba(26,26,46,0.08);
+  --shadow-md: 0 4px 12px rgba(26,26,46,0.1);
+  --shadow-lg: 0 8px 30px rgba(26,26,46,0.12);
+  --shadow-xl: 0 20px 60px rgba(26,26,46,0.15);
+  --radius: 8px;
+  --radius-lg: 14px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--parchment);
+  color: var(--ink);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 3px; }
+
+/* ─── SPLASH / API KEY SCREEN ─── */
+#splash-screen {
+  position: fixed; inset: 0; z-index: 9999;
+  background: var(--navy);
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column;
+  transition: opacity 0.6s, transform 0.6s;
+}
+#splash-screen.hidden { opacity: 0; pointer-events: none; transform: scale(1.02); }
+
+.splash-inner {
+  text-align: center;
+  max-width: 480px;
+  padding: 3rem;
+}
+
+.splash-logo {
+  font-family: var(--font-display);
+  font-size: 4.5rem;
+  font-weight: 300;
+  color: var(--gold);
+  letter-spacing: 0.3em;
+  margin-bottom: 0.25rem;
+}
+.splash-tagline {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  color: rgba(197,165,90,0.6);
+  font-style: italic;
+  letter-spacing: 0.08em;
+  margin-bottom: 3rem;
+}
+
+.splash-divider {
+  width: 60px;
+  height: 1px;
+  background: var(--gold);
+  margin: 0 auto 2rem;
+  opacity: 0.4;
+}
+
+.splash-label {
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(245,240,232,0.5);
+  margin-bottom: 0.75rem;
+}
+
+.api-input-wrap {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+.api-input-wrap input {
+  width: 100%;
+  padding: 14px 18px;
+  background: rgba(245,240,232,0.06);
+  border: 1px solid rgba(197,165,90,0.25);
+  border-radius: var(--radius);
+  color: var(--parchment);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  outline: none;
+  transition: border-color 0.3s;
+}
+.api-input-wrap input:focus {
+  border-color: var(--gold);
+}
+.api-input-wrap input::placeholder {
+  color: rgba(245,240,232,0.25);
+}
+
+.btn-enter {
+  background: var(--gold);
+  color: var(--navy);
+  border: none;
+  padding: 14px 48px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.btn-enter:hover { background: var(--gold-light); transform: translateY(-1px); }
+.btn-enter:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+.splash-note {
+  margin-top: 1.5rem;
+  font-size: 0.7rem;
+  color: rgba(245,240,232,0.3);
+  line-height: 1.6;
+}
+
+/* ─── MAIN APP LAYOUT ─── */
+#app { display: none; min-height: 100vh; }
+#app.active { display: flex; }
+
+/* Sidebar */
+.sidebar {
+  width: 260px;
+  background: var(--navy);
+  color: var(--parchment);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  z-index: 100;
+  transition: transform 0.3s;
+}
+
+.sidebar-header {
+  padding: 1.5rem 1.25rem;
+  border-bottom: 1px solid rgba(197,165,90,0.15);
+}
+.sidebar-brand {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  font-weight: 300;
+  color: var(--gold);
+  letter-spacing: 0.25em;
+}
+.sidebar-sub {
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(197,165,90,0.45);
+  margin-top: 2px;
+}
+
+.sidebar-nav { flex: 1; padding: 1rem 0; overflow-y: auto; }
+
+.nav-section-label {
+  font-size: 0.6rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(245,240,232,0.3);
+  padding: 1rem 1.25rem 0.4rem;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 1.25rem;
+  cursor: pointer;
+  font-size: 0.82rem;
+  color: rgba(245,240,232,0.6);
+  transition: all 0.2s;
+  border-left: 2px solid transparent;
+}
+.nav-item:hover {
+  color: var(--parchment);
+  background: rgba(197,165,90,0.06);
+}
+.nav-item.active {
+  color: var(--gold);
+  background: rgba(197,165,90,0.1);
+  border-left-color: var(--gold);
+}
+.nav-item svg { width: 16px; height: 16px; flex-shrink: 0; opacity: 0.7; }
+.nav-item.active svg { opacity: 1; }
+
+.sidebar-footer {
+  padding: 1rem 1.25rem;
+  border-top: 1px solid rgba(197,165,90,0.15);
+  font-size: 0.65rem;
+  color: rgba(245,240,232,0.25);
+}
+
+/* Main Content */
+.main-content {
+  margin-left: 260px;
+  flex: 1;
+  min-height: 100vh;
+}
+
+/* Top Bar */
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 2rem;
+  background: var(--warm-white);
+  border-bottom: 1px solid rgba(26,26,46,0.06);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+.page-title {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: var(--ink);
+}
+.top-actions { display: flex; align-items: center; gap: 12px; }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: var(--radius);
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+.btn-primary {
+  background: var(--gold);
+  color: var(--navy);
+}
+.btn-primary:hover { background: var(--gold-light); }
+.btn-ghost {
+  background: transparent;
+  color: var(--slate);
+  border: 1px solid rgba(26,26,46,0.12);
+}
+.btn-ghost:hover { border-color: var(--gold); color: var(--gold-dark); }
+.btn-danger { background: var(--crimson); color: white; }
+.btn-danger:hover { background: var(--crimson-light); }
+
+.btn svg { width: 14px; height: 14px; }
+
+/* Content Area */
+.content-area {
+  padding: 2rem;
+  max-width: 1200px;
+}
+
+/* Page sections */
+.page { display: none; }
+.page.active { display: block; animation: fadeUp 0.35s ease; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── CARDS ─── */
+.card {
+  background: var(--warm-white);
+  border: 1px solid rgba(26,26,46,0.06);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  margin-bottom: 1.25rem;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.2s;
+}
+.card:hover { box-shadow: var(--shadow-md); }
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+.card-title {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+.card-badge {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: rgba(197,165,90,0.12);
+  color: var(--gold-dark);
+}
+
+/* Grid layouts */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+
+/* Stats */
+.stat-card {
+  background: var(--warm-white);
+  border: 1px solid rgba(26,26,46,0.06);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+}
+.stat-value {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--gold-dark);
+}
+.stat-label {
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--slate);
+  margin-top: 4px;
+}
+
+/* Progress bars */
+.progress-bar {
+  width: 100%;
+  height: 6px;
+  background: var(--mist);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 6px;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold-dark), var(--gold));
+  border-radius: 3px;
+  transition: width 0.6s ease;
+}
+
+/* Form elements */
+.form-group { margin-bottom: 1rem; }
+.form-label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--slate);
+  margin-bottom: 6px;
+}
+.form-input, .form-select, .form-textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid rgba(26,26,46,0.12);
+  border-radius: var(--radius);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  color: var(--ink);
+  background: white;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  border-color: var(--gold);
+}
+.form-textarea { resize: vertical; min-height: 100px; }
+
+/* Tags */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.68rem;
+  font-weight: 500;
+  gap: 4px;
+}
+.tag-gold { background: rgba(197,165,90,0.15); color: var(--gold-dark); }
+.tag-crimson { background: rgba(139,38,53,0.1); color: var(--crimson); }
+.tag-success { background: rgba(74,124,89,0.1); color: var(--success); }
+
+/* Tables */
+.table-wrap { overflow-x: auto; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+th {
+  text-align: left;
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--slate);
+  padding: 10px 12px;
+  border-bottom: 2px solid var(--mist);
+}
+td {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(26,26,46,0.04);
+  color: var(--ink);
+}
+tr:hover td { background: rgba(197,165,90,0.03); }
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid rgba(26,26,46,0.08);
+  margin-bottom: 1.5rem;
+}
+.tab {
+  padding: 10px 20px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--slate);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+}
+.tab:hover { color: var(--ink); }
+.tab.active { color: var(--gold-dark); border-bottom-color: var(--gold); }
+
+/* File upload zone */
+.upload-zone {
+  border: 2px dashed rgba(197,165,90,0.3);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: rgba(197,165,90,0.03);
+}
+.upload-zone:hover {
+  border-color: var(--gold);
+  background: rgba(197,165,90,0.06);
+}
+.upload-zone svg { width: 32px; height: 32px; color: var(--gold); margin-bottom: 8px; }
+.upload-zone p { font-size: 0.82rem; color: var(--slate); }
+.upload-zone .upload-hint { font-size: 0.7rem; color: rgba(58,58,92,0.5); margin-top: 4px; }
+
+/* Modal */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(26,26,46,0.5);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s;
+}
+.modal-overlay.active { opacity: 1; pointer-events: all; }
+.modal {
+  background: var(--warm-white);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  max-width: 560px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-xl);
+  transform: translateY(20px);
+  transition: transform 0.3s;
+}
+.modal-overlay.active .modal { transform: translateY(0); }
+.modal-title {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 1.25rem;
+}
+
+/* Chat / AI Panel */
+.ai-panel {
+  background: var(--warm-white);
+  border: 1px solid rgba(26,26,46,0.06);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.ai-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: var(--navy);
+  color: var(--gold);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+.ai-panel-header svg { width: 16px; height: 16px; }
+
+.ai-messages {
+  padding: 1rem;
+  max-height: 400px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.ai-msg {
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  font-size: 0.82rem;
+  line-height: 1.6;
+  max-width: 85%;
+  white-space: pre-wrap;
+}
+.ai-msg.user {
+  background: rgba(197,165,90,0.12);
+  color: var(--ink);
+  align-self: flex-end;
+  border-bottom-right-radius: 2px;
+}
+.ai-msg.assistant {
+  background: var(--mist);
+  color: var(--ink);
+  align-self: flex-start;
+  border-bottom-left-radius: 2px;
+}
+.ai-msg.system {
+  background: rgba(139,38,53,0.06);
+  color: var(--crimson);
+  font-size: 0.75rem;
+  align-self: center;
+  text-align: center;
+}
+
+.ai-input-wrap {
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  border-top: 1px solid rgba(26,26,46,0.06);
+}
+.ai-input-wrap input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1px solid rgba(26,26,46,0.1);
+  border-radius: var(--radius);
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  outline: none;
+}
+.ai-input-wrap input:focus { border-color: var(--gold); }
+.ai-input-wrap button {
+  background: var(--gold);
+  color: var(--navy);
+  border: none;
+  padding: 10px 18px;
+  border-radius: var(--radius);
+  font-weight: 600;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.ai-input-wrap button:hover { background: var(--gold-light); }
+
+/* Loading dots */
+.loading-dots { display: inline-flex; gap: 4px; align-items: center; }
+.loading-dots span {
+  width: 6px; height: 6px;
+  background: var(--gold);
+  border-radius: 50%;
+  animation: dotPulse 1.2s infinite;
+}
+.loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+.loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes dotPulse {
+  0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+  40% { opacity: 1; transform: scale(1); }
+}
+
+/* Outline viewer */
+.outline-section {
+  margin-bottom: 1rem;
+  border-left: 3px solid var(--gold);
+  padding-left: 1rem;
+}
+.outline-topic {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 0.4rem;
+}
+.outline-rule {
+  font-size: 0.82rem;
+  color: var(--slate);
+  line-height: 1.7;
+  margin-bottom: 0.3rem;
+}
+
+/* Calendar */
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+.cal-header-cell {
+  text-align: center;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--slate);
+  padding: 8px 0;
+}
+.cal-cell {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 4px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.cal-cell:hover { background: rgba(197,165,90,0.08); }
+.cal-cell.today { background: rgba(197,165,90,0.15); font-weight: 700; }
+.cal-cell.has-event::after {
+  content: '';
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: var(--crimson);
+  margin-top: 2px;
+}
+.cal-cell.empty { pointer-events: none; }
+
+/* Heat map */
+.heat-map { display: flex; gap: 3px; flex-wrap: wrap; }
+.heat-cell {
+  width: 28px; height: 28px;
+  border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.55rem;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  position: relative;
+}
+.heat-cell[data-level="0"] { background: var(--mist); color: var(--slate); }
+.heat-cell[data-level="1"] { background: rgba(197,165,90,0.3); color: var(--gold-dark); }
+.heat-cell[data-level="2"] { background: rgba(197,165,90,0.55); }
+.heat-cell[data-level="3"] { background: var(--gold); }
+.heat-cell[data-level="4"] { background: var(--gold-dark); }
+
+/* Toast */
+.toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.toast {
+  background: var(--navy);
+  color: var(--parchment);
+  padding: 12px 20px;
+  border-radius: var(--radius);
+  font-size: 0.8rem;
+  box-shadow: var(--shadow-lg);
+  animation: toastIn 0.3s ease, toastOut 0.3s ease 2.7s forwards;
+  border-left: 3px solid var(--gold);
+}
+@keyframes toastIn { from { opacity: 0; transform: translateX(40px); } }
+@keyframes toastOut { to { opacity: 0; transform: translateX(40px); } }
+
+/* Responsive */
+@media (max-width: 900px) {
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.open { transform: translateX(0); }
+  .main-content { margin-left: 0; }
+  .grid-3 { grid-template-columns: 1fr 1fr; }
+  .grid-4 { grid-template-columns: 1fr 1fr; }
+  .content-area { padding: 1rem; }
+}
+@media (max-width: 600px) {
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+}
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--slate);
+}
+.empty-state svg { width: 48px; height: 48px; color: var(--mist); margin-bottom: 1rem; }
+.empty-state h3 {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  color: var(--ink);
+  margin-bottom: 0.5rem;
+}
+.empty-state p { font-size: 0.82rem; }
+
+/* Specific components */
+.course-card {
+  background: var(--warm-white);
+  border: 1px solid rgba(26,26,46,0.06);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  cursor: pointer;
+  transition: all 0.25s;
+  position: relative;
+  overflow: hidden;
+}
+.course-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--gold);
+}
+.course-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+.course-name {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.course-prof {
+  font-size: 0.75rem;
+  color: var(--slate);
+}
+.course-progress { margin-top: 10px; }
+.course-progress-label {
+  font-size: 0.68rem;
+  color: var(--slate);
+  display: flex;
+  justify-content: space-between;
+}
+
+/* Bluebook output */
+.citation-output {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  background: rgba(22,33,62,0.03);
+  border: 1px solid rgba(26,26,46,0.08);
+  border-radius: var(--radius);
+  padding: 1rem;
+  line-height: 1.8;
+  white-space: pre-wrap;
+}
+
+/* Toggle switch */
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+}
+.toggle-label { font-size: 0.82rem; color: var(--ink); }
+.toggle {
+  width: 40px; height: 22px;
+  background: var(--mist);
+  border-radius: 11px;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.toggle.on { background: var(--gold); }
+.toggle::after {
+  content: '';
+  position: absolute;
+  top: 3px; left: 3px;
+  width: 16px; height: 16px;
+  background: white;
+  border-radius: 50%;
+  transition: transform 0.2s;
+  box-shadow: var(--shadow-sm);
+}
+.toggle.on::after { transform: translateX(18px); }
+
+/* ─── TOP BAR CONTEXT ACTIONS ─── */
+.top-bar-action {
+  display: none;
+  align-items: center;
+  gap: 8px;
+}
+.top-bar-action.visible { display: flex; }
+
+@media (max-width: 900px) {
+  #menu-toggle { display: flex !important; }
+}
+@media (max-width: 600px) {
+  .page-title { font-size: 1.15rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; }
+}
+
+/* ─── MBE COVERAGE ROWS ─── */
+.mbe-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid rgba(26,26,46,0.04);
+}
+.mbe-row:last-child { border-bottom: none; }
+.mbe-subject { font-size: 0.82rem; font-weight: 500; flex: 1; min-width: 0; }
+.mbe-bar-wrap { width: 100px; height: 6px; background: var(--mist); border-radius: 3px; flex-shrink: 0; overflow: hidden; }
+.mbe-bar-fill { height: 100%; border-radius: 3px; transition: width 0.7s ease; }
+.mbe-pct { font-size: 0.72rem; font-weight: 600; width: 34px; text-align: right; flex-shrink: 0; }
+.mbe-gap { font-size: 0.62rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 7px; border-radius: 10px; flex-shrink: 0; }
+.mbe-gap.gap { background: rgba(139,38,53,0.1); color: var(--crimson); }
+.mbe-gap.ok  { background: rgba(74,124,89,0.1); color: var(--success); }
+
+/* ─── BAR SCORE RING ─── */
+.bar-score-ring { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1.25rem 0 0.5rem; }
+.ring-wrap { position: relative; width: 100px; height: 100px; margin-bottom: 0.75rem; }
+.ring-wrap svg { transform: rotate(-90deg); }
+.ring-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.ring-score { font-family: var(--font-display); font-size: 1.8rem; font-weight: 600; color: var(--gold-dark); line-height: 1; }
+.ring-label { font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--slate); margin-top: 2px; }
+
+/* ─── CAREER PATH CARDS ─── */
+.career-card {
+  background: var(--warm-white);
+  border: 1px solid rgba(26,26,46,0.07);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+  transition: box-shadow 0.2s;
+}
+.career-card:hover { box-shadow: var(--shadow-md); }
+.career-card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 0.75rem; }
+.career-path-name { font-family: var(--font-display); font-size: 1.1rem; font-weight: 600; }
+.career-path-fit { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; padding: 4px 10px; border-radius: 20px; white-space: nowrap; flex-shrink: 0; }
+.career-path-fit.excellent { background: rgba(74,124,89,0.12); color: var(--success); }
+.career-path-fit.good      { background: rgba(197,165,90,0.15); color: var(--gold-dark); }
+.career-path-fit.fair      { background: rgba(139,38,53,0.1); color: var(--crimson); }
+.career-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 0.75rem; }
+.career-stat-cell { background: rgba(26,26,46,0.03); border-radius: var(--radius); padding: 8px 10px; text-align: center; }
+.career-stat-val { font-size: 0.85rem; font-weight: 600; color: var(--ink); }
+.career-stat-lbl { font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--slate); margin-top: 2px; }
+.stress-pip-row { display: flex; gap: 3px; justify-content: center; margin-top: 3px; }
+.stress-pip { width: 8px; height: 8px; border-radius: 2px; background: var(--mist); }
+.stress-pip.on { background: var(--gold-dark); }
+.stress-pip.hi { background: var(--crimson); }
+.career-summary { font-size: 0.82rem; line-height: 1.7; color: var(--slate); margin-bottom: 0.75rem; }
+.career-steps { font-size: 0.78rem; line-height: 1.6; color: var(--ink); }
+.career-steps strong { color: var(--gold-dark); font-weight: 600; }
+
+/* ─── COMPARE TABLE ─── */
+.compare-table-wrap { overflow-x: auto; margin-top: 1.25rem; }
+.compare-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+.compare-table th { background: var(--navy); color: var(--gold); font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 10px 14px; text-align: left; }
+.compare-table td { padding: 10px 14px; border-bottom: 1px solid rgba(26,26,46,0.05); vertical-align: top; }
+.compare-table tr:last-child td { border-bottom: none; }
+.compare-table tr:hover td { background: rgba(197,165,90,0.03); }
+.compare-table td:first-child { font-weight: 600; color: var(--ink); }
+
+/* ─── RECOMMENDATIONS BLOCK ─── */
+.rec-block { font-size: 0.85rem; line-height: 1.85; color: var(--ink); white-space: pre-wrap; }
+</style>
+</head>
+<body>
+
+<!-- ═══════ SPLASH SCREEN ═══════ -->
+<div id="splash-screen">
+  <div class="splash-inner">
+    <div class="splash-logo">JURIS</div>
+    <div class="splash-tagline">Intelligent Law Student Platform</div>
+    <div class="splash-divider"></div>
+    <div class="splash-label">Gemini API Key</div>
+    <div class="api-input-wrap">
+      <input type="password" id="api-key-input" placeholder="AIza..." autocomplete="off">
+    </div>
+    <button class="btn-enter" id="btn-enter" onclick="enterApp()">Enter Platform</button>
+    <div class="splash-note">
+      Your API key is stored locally in your browser and used exclusively for AI-powered features.
+      <br>Obtain a key from <em>aistudio.google.com</em>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ MAIN APP ═══════ -->
+<div id="app">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-brand">JURIS</div>
+      <div class="sidebar-sub">Law Student Platform</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Academic</div>
+      <div class="nav-item active" data-page="dashboard" onclick="navigateTo('dashboard')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </div>
+      <div class="nav-item" data-page="courses" onclick="navigateTo('courses')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+        Courses
+      </div>
+      <div class="nav-item" data-page="study" onclick="navigateTo('study')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        Study Engine
+      </div>
+      <div class="nav-item" data-page="outlines" onclick="navigateTo('outlines')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8m8 4H8m2-8H8"/></svg>
+        Outlines
+      </div>
+      <div class="nav-item" data-page="calendar" onclick="navigateTo('calendar')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        Calendar
+      </div>
+
+      <div class="nav-section-label">Bar & Career</div>
+      <div class="nav-item" data-page="bar" onclick="navigateTo('bar')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
+        Bar Alignment
+      </div>
+      <div class="nav-item" data-page="career" onclick="navigateTo('career')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+        Career Intel
+      </div>
+
+      <div class="nav-section-label">Tools</div>
+      <div class="nav-item" data-page="bluebook" onclick="navigateTo('bluebook')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        Bluebook Cite
+      </div>
+      <div class="nav-item" data-page="wellness" onclick="navigateTo('wellness')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+        Wellness
+      </div>
+      <div class="nav-item" data-page="ai-chat" onclick="navigateTo('ai-chat')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        AI Assistant
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div style="cursor:pointer;" onclick="showApiKeyModal()">⚙ API Key Settings</div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <div class="top-bar">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button class="btn btn-ghost" id="menu-toggle" onclick="toggleSidebar()" style="padding:8px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+        </button>
+        <div class="page-title" id="page-title">Dashboard</div>
+      </div>
+      <div class="top-actions" id="top-actions">
+        <div class="top-bar-action" id="tba-bar">
+          <button class="btn btn-ghost" id="bar-reanalyze-btn" onclick="analyzeBarReadiness()" style="font-size:0.75rem;padding:7px 14px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+            Re-analyze
+          </button>
+        </div>
+        <div class="top-bar-action" id="tba-career">
+          <button class="btn btn-ghost" onclick="clearCareerResults()" style="font-size:0.75rem;padding:7px 14px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M3 6h18M19 6l-1 14H6L5 6M10 11v6M14 11v6M9 6V4h6v2"/></svg>
+            Clear
+          </button>
+        </div>
+        <div class="top-bar-action visible" id="tba-default">
+          <span style="font-size:0.72rem;color:var(--slate);" id="semester-label-default"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="content-area">
+
+      <!-- ══════ DASHBOARD PAGE ══════ -->
+      <div class="page active" id="page-dashboard">
+        <div class="grid-4" id="dash-stats">
+          <div class="stat-card">
+            <div class="stat-value" id="stat-courses">0</div>
+            <div class="stat-label">Courses</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-assignments">0</div>
+            <div class="stat-label">Assignments</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-study-hrs">0</div>
+            <div class="stat-label">Study Hours</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-bar-score">—</div>
+            <div class="stat-label">Bar Readiness</div>
+          </div>
+        </div>
+
+        <div class="grid-2" style="margin-top:1.25rem;">
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Your Courses</span>
+              <button class="btn btn-primary" onclick="navigateTo('courses')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M12 5v14M5 12h14"/></svg>
+                Add Course
+              </button>
+            </div>
+            <div id="dash-courses-list">
+              <div class="empty-state">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+                <h3>No courses yet</h3>
+                <p>Add your first course to get started</p>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Upcoming Deadlines</span>
+            </div>
+            <div id="dash-deadlines">
+              <div class="empty-state">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                <h3>No upcoming deadlines</h3>
+                <p>Add assignments to your courses</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:1.25rem;">
+          <div class="card-header">
+            <span class="card-title">Quick AI Actions</span>
+            <span class="card-badge">Gemini Powered</span>
+          </div>
+          <div class="grid-3">
+            <button class="btn btn-ghost" style="padding:16px;justify-content:center;" onclick="quickAI('Generate a practice question for my weakest subject')">Practice Question</button>
+            <button class="btn btn-ghost" style="padding:16px;justify-content:center;" onclick="quickAI('Give me a cold-call simulation question')">Cold Call Prep</button>
+            <button class="btn btn-ghost" style="padding:16px;justify-content:center;" onclick="quickAI('Create a study schedule for this week')">Study Schedule</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════ COURSES PAGE ══════ -->
+      <div class="page" id="page-courses">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;">
+          <div>
+            <div style="font-size:0.82rem;color:var(--slate);">Manage your classes, upload materials, and track syllabus progress.</div>
+          </div>
+          <button class="btn btn-primary" onclick="openModal('add-course-modal')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M12 5v14M5 12h14"/></svg>
+            Add Course
+          </button>
+        </div>
+
+        <div class="grid-3" id="courses-grid">
+          <div class="empty-state" style="grid-column:1/-1;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+            <h3>No courses added</h3>
+            <p>Click "Add Course" to create your first class workspace</p>
+          </div>
+        </div>
+
+        <!-- Course Detail (hidden by default) -->
+        <div id="course-detail" style="display:none;">
+          <button class="btn btn-ghost" onclick="closeCourseDetail()" style="margin-bottom:1rem;">← Back to Courses</button>
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title" id="detail-course-name"></span>
+              <button class="btn btn-danger" onclick="deleteCourse()">Delete Course</button>
+            </div>
+            <div id="detail-course-prof" style="font-size:0.82rem;color:var(--slate);margin-bottom:1rem;"></div>
+
+            <div class="tabs">
+              <div class="tab active" data-ctab="materials" onclick="switchCourseTab('materials')">Materials</div>
+              <div class="tab" data-ctab="notes" onclick="switchCourseTab('notes')">Notes</div>
+              <div class="tab" data-ctab="assignments" onclick="switchCourseTab('assignments')">Assignments</div>
+              <div class="tab" data-ctab="ai-tools" onclick="switchCourseTab('ai-tools')">AI Tools</div>
+            </div>
+
+            <div id="ctab-materials">
+              <div class="upload-zone" onclick="document.getElementById('file-upload').click()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                <p>Upload syllabus, readings, notes, or past exams</p>
+                <div class="upload-hint">PDF, DOCX, TXT, PPTX — or drag and drop</div>
+              </div>
+              <input type="file" id="file-upload" style="display:none;" multiple accept=".pdf,.docx,.txt,.pptx,.md" onchange="handleFileUpload(event)">
+              <div id="materials-list" style="margin-top:1rem;"></div>
+            </div>
+
+            <div id="ctab-notes" style="display:none;">
+              <div class="form-group">
+                <label class="form-label">Add Class Note</label>
+                <textarea class="form-textarea" id="note-input" placeholder="Paste or type your class notes here..."></textarea>
+              </div>
+              <button class="btn btn-primary" onclick="saveNote()">Save Note</button>
+              <div id="notes-list" style="margin-top:1rem;"></div>
+            </div>
+
+            <div id="ctab-assignments" style="display:none;">
+              <div class="grid-2">
+                <div class="form-group">
+                  <label class="form-label">Assignment Name</label>
+                  <input class="form-input" id="assign-name" placeholder="e.g., Contracts Midterm">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Due Date</label>
+                  <input class="form-input" id="assign-date" type="date">
+                </div>
+              </div>
+              <button class="btn btn-primary" onclick="addAssignment()">Add Assignment</button>
+              <div id="assignments-list" style="margin-top:1rem;"></div>
+            </div>
+
+            <div id="ctab-ai-tools" style="display:none;">
+              <div class="grid-2">
+                <div class="card" style="cursor:pointer;" onclick="runAITool('practice-q')">
+                  <div class="card-title" style="font-size:0.95rem;">Generate Practice Questions</div>
+                  <div style="font-size:0.75rem;color:var(--slate);margin-top:4px;">MBE-style, short answer, and issue spotters based on your materials</div>
+                </div>
+                <div class="card" style="cursor:pointer;" onclick="runAITool('cold-call')">
+                  <div class="card-title" style="font-size:0.95rem;">Cold Call Simulation</div>
+                  <div style="font-size:0.75rem;color:var(--slate);margin-top:4px;">Prepare for class with Socratic-method style questions</div>
+                </div>
+                <div class="card" style="cursor:pointer;" onclick="runAITool('outline')">
+                  <div class="card-title" style="font-size:0.95rem;">Build Outline</div>
+                  <div style="font-size:0.75rem;color:var(--slate);margin-top:4px;">Extract rules and organize into a doctrinal outline</div>
+                </div>
+                <div class="card" style="cursor:pointer;" onclick="runAITool('exam-hypo')">
+                  <div class="card-title" style="font-size:0.95rem;">Exam Hypothetical</div>
+                  <div style="font-size:0.75rem;color:var(--slate);margin-top:4px;">Full-length exam-style fact pattern with model answer guidance</div>
+                </div>
+              </div>
+              <div id="ai-tool-output" style="margin-top:1.25rem;display:none;">
+                <div class="card">
+                  <div class="card-header">
+                    <span class="card-title" id="ai-tool-title">AI Output</span>
+                    <button class="btn btn-ghost" onclick="document.getElementById('ai-tool-output').style.display='none'">Close</button>
+                  </div>
+                  <div id="ai-tool-content" style="font-size:0.85rem;line-height:1.8;white-space:pre-wrap;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════ STUDY ENGINE PAGE ══════ -->
+      <div class="page" id="page-study">
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Adaptive Quiz</span>
+              <span class="card-badge">AI Powered</span>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Subject</label>
+              <select class="form-select" id="quiz-course-select">
+                <option value="">Select a course...</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Difficulty</label>
+              <select class="form-select" id="quiz-difficulty">
+                <option value="early">Early Semester — Comprehension</option>
+                <option value="mid">Midterm — Reinforcement</option>
+                <option value="final">Final Exam — Complex Analysis</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Question Type</label>
+              <select class="form-select" id="quiz-type">
+                <option value="mbe">Multiple Choice (MBE-style)</option>
+                <option value="short">Short Answer</option>
+                <option value="issue-spot">Issue Spotter</option>
+                <option value="hypo">Full Hypothetical</option>
+              </select>
+            </div>
+            <button class="btn btn-primary" onclick="generateQuiz()" style="width:100%;justify-content:center;">Generate Questions</button>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Performance Profile</span>
+            </div>
+            <div id="performance-profile">
+              <div class="empty-state">
+                <h3>No data yet</h3>
+                <p>Complete quizzes to build your performance profile</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" id="quiz-output-area" style="display:none;">
+          <div class="card-header">
+            <span class="card-title">Quiz</span>
+            <button class="btn btn-ghost" onclick="document.getElementById('quiz-output-area').style.display='none'">Close</button>
+          </div>
+          <div id="quiz-content" style="font-size:0.85rem;line-height:1.8;white-space:pre-wrap;"></div>
+          <div style="margin-top:1rem;">
+            <div class="form-group">
+              <label class="form-label">Your Answer</label>
+              <textarea class="form-textarea" id="quiz-answer" placeholder="Write your answer here..."></textarea>
+            </div>
+            <button class="btn btn-primary" onclick="gradeAnswer()">Grade My Answer</button>
+            <div id="grade-output" style="margin-top:1rem;display:none;">
+              <div class="card" style="background:rgba(74,124,89,0.05);border-color:rgba(74,124,89,0.15);">
+                <div class="card-title" style="color:var(--success);font-size:0.95rem;">Feedback</div>
+                <div id="grade-content" style="font-size:0.85rem;line-height:1.8;white-space:pre-wrap;margin-top:0.5rem;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════ OUTLINES PAGE ══════ -->
+      <div class="page" id="page-outlines">
+        <div class="grid-2" style="margin-bottom:1.25rem;">
+          <div class="form-group" style="margin:0;">
+            <select class="form-select" id="outline-course-select" onchange="loadOutline()">
+              <option value="">Select a course...</option>
+            </select>
+          </div>
+          <div style="display:flex;gap:8px;justify-content:flex-end;">
+            <button class="btn btn-ghost" onclick="generateOutline('full')">Full Outline</button>
+            <button class="btn btn-ghost" onclick="generateOutline('attack')">Attack Outline</button>
+            <button class="btn btn-ghost" onclick="generateOutline('checklist')">Exam Checklist</button>
+            <button class="btn btn-primary" onclick="generateOutline('auto')">Auto-Build</button>
+          </div>
+        </div>
+
+        <div class="card" id="outline-display">
+          <div class="empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8m8 4H8m2-8H8"/></svg>
+            <h3>Select a course to view or build an outline</h3>
+            <p>Upload materials and notes first, then use AI to auto-build your outline</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════ CALENDAR PAGE ══════ -->
+      <div class="page" id="page-calendar">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title" id="cal-month-title"></span>
+            <div style="display:flex;gap:6px;">
+              <button class="btn btn-ghost" onclick="changeMonth(-1)">←</button>
+              <button class="btn btn-ghost" onclick="changeMonth(1)">→</button>
+            </div>
+          </div>
+          <div class="cal-grid">
+            <div class="cal-header-cell">Sun</div>
+            <div class="cal-header-cell">Mon</div>
+            <div class="cal-header-cell">Tue</div>
+            <div class="cal-header-cell">Wed</div>
+            <div class="cal-header-cell">Thu</div>
+            <div class="cal-header-cell">Fri</div>
+            <div class="cal-header-cell">Sat</div>
+          </div>
+          <div class="cal-grid" id="cal-days"></div>
+        </div>
+
+        <div class="card" style="margin-top:1.25rem;">
+          <div class="card-header">
+            <span class="card-title">Smart Reminders</span>
+            <button class="btn btn-primary" onclick="generateStudyPlan()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+              Generate Study Plan
+            </button>
+          </div>
+          <div id="reminders-list" style="font-size:0.82rem;line-height:1.8;">
+            <p style="color:var(--slate);">Add courses and assignments to receive intelligent study reminders.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════ BAR ALIGNMENT PAGE ══════ -->
+      <div class="page" id="page-bar">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Bar Exam Alignment</span>
+            <span class="card-badge">AI Powered</span>
+          </div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Intended Bar Jurisdiction</label>
+              <select class="form-select" id="bar-jurisdiction">
+                <option value="">Select state…</option>
+                <optgroup label="UBE Jurisdictions">
+                  <option value="UBE-AK">Alaska</option>
+                  <option value="UBE-AZ">Arizona</option>
+                  <option value="UBE-CO">Colorado</option>
+                  <option value="UBE-CT">Connecticut</option>
+                  <option value="UBE-DC">District of Columbia</option>
+                  <option value="UBE-ID">Idaho</option>
+                  <option value="UBE-IL">Illinois</option>
+                  <option value="UBE-KS">Kansas</option>
+                  <option value="UBE-MA">Massachusetts</option>
+                  <option value="UBE-MD">Maryland</option>
+                  <option value="UBE-ME">Maine</option>
+                  <option value="UBE-MN">Minnesota</option>
+                  <option value="UBE-MO">Missouri</option>
+                  <option value="UBE-MT">Montana</option>
+                  <option value="UBE-ND">North Dakota</option>
+                  <option value="UBE-NH">New Hampshire</option>
+                  <option value="UBE-NJ">New Jersey</option>
+                  <option value="UBE-NM">New Mexico</option>
+                  <option value="UBE-NY">New York</option>
+                  <option value="UBE-OH">Ohio</option>
+                  <option value="UBE-OK">Oklahoma</option>
+                  <option value="UBE-OR">Oregon</option>
+                  <option value="UBE-SC">South Carolina</option>
+                  <option value="UBE-TN">Tennessee</option>
+                  <option value="UBE-UT">Utah</option>
+                  <option value="UBE-VT">Vermont</option>
+                  <option value="UBE-WA">Washington</option>
+                  <option value="UBE-WV">West Virginia</option>
+                  <option value="UBE-WY">Wyoming</option>
+                </optgroup>
+                <optgroup label="Non-UBE Jurisdictions">
+                  <option value="CA">California</option>
+                  <option value="FL">Florida</option>
+                  <option value="GA">Georgia</option>
+                  <option value="HI">Hawaii</option>
+                  <option value="IA">Iowa</option>
+                  <option value="IN">Indiana</option>
+                  <option value="KY">Kentucky</option>
+                  <option value="LA">Louisiana</option>
+                  <option value="MI">Michigan</option>
+                  <option value="MS">Mississippi</option>
+                  <option value="NE">Nebraska</option>
+                  <option value="NV">Nevada</option>
+                  <option value="PA">Pennsylvania</option>
+                  <option value="PR">Puerto Rico</option>
+                  <option value="RI">Rhode Island</option>
+                  <option value="SD">South Dakota</option>
+                  <option value="TX">Texas</option>
+                  <option value="VA">Virginia</option>
+                  <option value="WI">Wisconsin</option>
+                </optgroup>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Current Year</label>
+              <select class="form-select" id="bar-year">
+                <option value="1L">1L</option>
+                <option value="2L">2L</option>
+                <option value="3L">3L</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn btn-primary" id="bar-analyze-btn" onclick="analyzeBarReadiness()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
+            Analyze Bar Readiness
+          </button>
+        </div>
+
+        <div id="bar-results" style="margin-top:1.25rem;display:none;">
+          <div class="grid-2">
+            <!-- MBE Coverage -->
+            <div class="card">
+              <div class="card-header">
+                <span class="card-title">MBE Subject Coverage</span>
+                <span class="card-badge" id="bar-jurisdiction-label"></span>
+              </div>
+              <div id="mbe-coverage"></div>
+            </div>
+            <!-- Score + Recommendations -->
+            <div class="card">
+              <div class="bar-score-ring">
+                <div class="ring-wrap">
+                  <svg width="100" height="100" viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="40" fill="none" stroke="var(--mist)" stroke-width="8"/>
+                    <circle cx="50" cy="50" r="40" fill="none" stroke="var(--gold)" stroke-width="8"
+                      stroke-dasharray="251.2" id="score-arc" stroke-dashoffset="251.2"
+                      stroke-linecap="round" style="transition:stroke-dashoffset 1s ease;"/>
+                  </svg>
+                  <div class="ring-center">
+                    <div class="ring-score" id="bar-score-display">—</div>
+                    <div class="ring-label">Readiness</div>
+                  </div>
+                </div>
+              </div>
+              <div class="card-title" style="margin-bottom:0.75rem;">Recommendations</div>
+              <div class="rec-block" id="bar-recommendations"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════ CAREER INTEL PAGE ══════ -->
+      <div class="page" id="page-career">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Career Intelligence</span>
+            <span class="card-badge">AI Powered</span>
+          </div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Classes You Enjoy <span style="color:var(--slate);font-weight:400;text-transform:none;letter-spacing:0;">(auto-filled from your courses)</span></label>
+              <input class="form-input" id="career-classes" placeholder="e.g., Con Law, Crim, Corporations">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Work Style</label>
+              <select class="form-select" id="career-style">
+                <option value="litigation">Litigation / Courtroom</option>
+                <option value="transactional">Transactional / Deal-making</option>
+                <option value="policy">Policy / Regulatory</option>
+                <option value="public-interest">Public Interest / Nonprofit</option>
+                <option value="academia">Academia / Teaching</option>
+                <option value="government">Government / JAG</option>
+                <option value="mixed">Mixed / Flexible</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Work-Life Priority</label>
+              <select class="form-select" id="career-wlb">
+                <option value="balanced">Balanced lifestyle</option>
+                <option value="high-pay">High compensation priority</option>
+                <option value="mission">Mission-driven work</option>
+                <option value="flexible">Maximum flexibility</option>
+                <option value="prestige">Prestige / Big Law track</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Geographic Preference</label>
+              <input class="form-input" id="career-geo" placeholder="e.g., NYC, Chicago, remote">
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <button class="btn btn-primary" id="career-analyze-btn" onclick="analyzeCareer()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+              Get Career Matches
+            </button>
+            <span style="font-size:0.72rem;color:var(--slate);" id="career-form-hint"></span>
+          </div>
+        </div>
+
+        <div id="career-results" style="margin-top:1.25rem;display:none;">
+          <!-- Career path cards -->
+          <div id="career-cards"></div>
+          <!-- Comparison table -->
+          <div class="card compare-table-wrap" id="career-compare-wrap" style="display:none;">
+            <div class="card-title" style="margin-bottom:1rem;">Top 3 Paths — Side-by-Side</div>
+            <table class="compare-table" id="career-compare-table"></table>
+          </div>
+          <!-- Next steps -->
+          <div class="card" id="career-nextsteps-wrap" style="display:none;margin-top:1.25rem;">
+            <div class="card-title" style="margin-bottom:0.75rem;">Recommended Next Steps</div>
+            <div class="rec-block" id="career-nextsteps"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════ BLUEBOOK PAGE ══════ -->
+      <div class="page" id="page-bluebook">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Bluebook Citation Assistant</span>
+            <span class="card-badge">AI Powered</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Citation Type</label>
+            <select class="form-select" id="cite-type">
+              <option value="case">Case</option>
+              <option value="statute">Statute</option>
+              <option value="journal">Journal Article</option>
+              <option value="book">Book</option>
+              <option value="website">Website / Online Source</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Source Information</label>
+            <textarea class="form-textarea" id="cite-input" placeholder="Paste the case info, article metadata, URL, etc. The AI will generate proper Bluebook citations."></textarea>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-primary" onclick="generateCitation()">Generate Citation</button>
+            <button class="btn btn-ghost" onclick="fixCitation()">Fix Existing Citation</button>
+          </div>
+        </div>
+
+        <div id="cite-output-area" style="margin-top:1.25rem;display:none;">
+          <div class="card">
+            <div class="card-title" style="margin-bottom:0.75rem;">Generated Citation</div>
+            <div class="citation-output" id="cite-output"></div>
+            <button class="btn btn-ghost" style="margin-top:0.75rem;" onclick="copyCitation()">Copy to Clipboard</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════ WELLNESS PAGE ══════ -->
+      <div class="page" id="page-wellness">
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Study Tracker</span>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Log Study Session</label>
+              <div class="grid-2">
+                <input class="form-input" id="study-hours" type="number" min="0.25" step="0.25" placeholder="Hours">
+                <select class="form-select" id="study-subject-log">
+                  <option value="">Subject...</option>
+                </select>
+              </div>
+            </div>
+            <button class="btn btn-primary" onclick="logStudyHours()" style="width:100%;justify-content:center;">Log Hours</button>
+            <div style="margin-top:1rem;">
+              <div style="font-size:0.72rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--slate);margin-bottom:8px;">This Week</div>
+              <div id="weekly-study-chart" class="heat-map"></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Wellness Settings</span>
+            </div>
+            <div class="toggle-row">
+              <span class="toggle-label">Track study hours</span>
+              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+            </div>
+            <div class="toggle-row">
+              <span class="toggle-label">Break reminders (every 90 min)</span>
+              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+            </div>
+            <div class="toggle-row">
+              <span class="toggle-label">Daily study limit warning (10 hrs)</span>
+              <div class="toggle" onclick="this.classList.toggle('on')"></div>
+            </div>
+            <div class="toggle-row">
+              <span class="toggle-label">Rest day suggestions</span>
+              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:1.25rem;">
+          <div class="card-header">
+            <span class="card-title">Wellness Check-In</span>
+            <span class="card-badge">AI Powered</span>
+          </div>
+          <button class="btn btn-primary" onclick="wellnessCheckIn()">Get Personalized Wellness Tips</button>
+          <div id="wellness-output" style="margin-top:1rem;font-size:0.85rem;line-height:1.8;white-space:pre-wrap;"></div>
+        </div>
+      </div>
+
+      <!-- ══════ AI CHAT PAGE ══════ -->
+      <div class="page" id="page-ai-chat">
+        <div class="ai-panel" style="max-width:800px;">
+          <div class="ai-panel-header">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+            JURIS AI Assistant — Your Law School Companion
+          </div>
+          <div class="ai-messages" id="chat-messages">
+            <div class="ai-msg assistant">Hello! I'm your JURIS AI assistant. I can help you with anything related to law school — studying, outlines, bar prep, career planning, Bluebook citations, and more. What would you like to work on?</div>
+          </div>
+          <div class="ai-input-wrap">
+            <input type="text" id="chat-input" placeholder="Ask anything about law school..." onkeydown="if(event.key==='Enter')sendChat()">
+            <button onclick="sendChat()">Send</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ MODALS ═══════ -->
+<div class="modal-overlay" id="add-course-modal">
+  <div class="modal">
+    <div class="modal-title">Add New Course</div>
+    <div class="form-group">
+      <label class="form-label">Course Name</label>
+      <input class="form-input" id="new-course-name" placeholder="e.g., Constitutional Law I">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Professor</label>
+      <input class="form-input" id="new-course-prof" placeholder="e.g., Prof. Smith">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Credits</label>
+      <input class="form-input" id="new-course-credits" type="number" min="1" max="6" value="3">
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:1.5rem;">
+      <button class="btn btn-ghost" onclick="closeModal('add-course-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="addCourse()">Add Course</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="api-key-modal">
+  <div class="modal">
+    <div class="modal-title">API Key Settings</div>
+    <div class="form-group">
+      <label class="form-label">Gemini API Key</label>
+      <input class="form-input" id="settings-api-key" type="password">
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:1rem;">
+      <button class="btn btn-ghost" onclick="closeModal('api-key-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="updateApiKey()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+// ═══════════════════════════════════════════
+//  STATE MANAGEMENT
+// ═══════════════════════════════════════════
+let API_KEY = '';
+let state = {
+  semester: 'Spring 2026',
+  courses: [],
+  studyLog: [],
+  chatHistory: [],
+  currentCourseId: null,
+  calMonth: new Date().getMonth(),
+  calYear: new Date().getFullYear(),
+};
+
+function saveState() {
+  try { localStorage.setItem('juris_state', JSON.stringify(state)); } catch(e) {}
+}
+function loadState() {
+  try {
+    const s = localStorage.getItem('juris_state');
+    if (s) state = { ...state, ...JSON.parse(s) };
+  } catch(e) {}
+}
+
+// ═══════════════════════════════════════════
+//  INITIALIZATION
+// ═══════════════════════════════════════════
+function enterApp() {
+  const key = document.getElementById('api-key-input').value.trim();
+  if (!key) return;
+  API_KEY = key;
+  try { localStorage.setItem('juris_api_key', key); } catch(e) {}
+  document.getElementById('splash-screen').classList.add('hidden');
+  document.getElementById('app').classList.add('active');
+  loadState();
+  initApp();
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  const savedKey = localStorage.getItem('juris_api_key');
+  if (savedKey) {
+    API_KEY = savedKey;
+    document.getElementById('splash-screen').classList.add('hidden');
+    document.getElementById('app').classList.add('active');
+    loadState();
+    initApp();
+  }
+});
+
+function initApp() {
+  const semLabel = document.getElementById('semester-label');
+  if (semLabel) semLabel.textContent = state.semester;
+  const semLabelDefault = document.getElementById('semester-label-default');
+  if (semLabelDefault) semLabelDefault.textContent = state.semester;
+  refreshDashboard();
+  refreshCourseSelects();
+  renderCalendar();
+  renderWeeklyChart();
+}
+
+// ═══════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════
+function navigateTo(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const pageEl = document.getElementById('page-' + page);
+  if (pageEl) pageEl.classList.add('active');
+  const navItem = document.querySelector(`.nav-item[data-page="${page}"]`);
+  if (navItem) navItem.classList.add('active');
+  const titles = {
+    dashboard: 'Dashboard', courses: 'Courses', study: 'Study Engine',
+    outlines: 'Outline Builder', calendar: 'Calendar & Scheduling',
+    bar: 'Bar Alignment', career: 'Career Intelligence',
+    bluebook: 'Bluebook Citation Assistant', wellness: 'Work-Life Wellness',
+    'ai-chat': 'AI Assistant'
+  };
+  document.getElementById('page-title').textContent = titles[page] || page;
+
+  // Context-sensitive top bar actions
+  document.querySelectorAll('.top-bar-action').forEach(el => el.classList.remove('visible'));
+  const tbaMap = { bar: 'tba-bar', career: 'tba-career' };
+  const tba = document.getElementById(tbaMap[page] || 'tba-default');
+  if (tba) tba.classList.add('visible');
+
+  // Auto-fill career classes from state
+  if (page === 'career' && state.courses.length > 0) {
+    const el = document.getElementById('career-classes');
+    if (el && !el.value) el.value = state.courses.map(c => c.name).join(', ');
+  }
+
+  // Close sidebar on mobile
+  document.getElementById('sidebar').classList.remove('open');
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+// ═══════════════════════════════════════════
+//  MODALS
+// ═══════════════════════════════════════════
+function openModal(id) { document.getElementById(id).classList.add('active'); }
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+function showApiKeyModal() {
+  document.getElementById('settings-api-key').value = API_KEY;
+  openModal('api-key-modal');
+}
+function updateApiKey() {
+  const key = document.getElementById('settings-api-key').value.trim();
+  if (key) {
+    API_KEY = key;
+    localStorage.setItem('juris_api_key', key);
+    toast('API key updated');
+  }
+  closeModal('api-key-modal');
+}
+
+// ═══════════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════════
+function toast(msg) {
+  const c = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  c.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+
+// ═══════════════════════════════════════════
+//  GEMINI API
+// ═══════════════════════════════════════════
+async function callGemini(prompt, systemInstruction) {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
+  const body = {
+    contents: [{ parts: [{ text: prompt }] }],
+  };
+  if (systemInstruction) {
+    body.systemInstruction = { parts: [{ text: systemInstruction }] };
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (!resp.ok) {
+      const err = await resp.json();
+      throw new Error(err.error?.message || 'API error');
+    }
+    const data = await resp.json();
+    return data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response generated.';
+  } catch (e) {
+    console.error('Gemini error:', e);
+    return `Error: ${e.message}`;
+  }
+}
+
+// ═══════════════════════════════════════════
+//  COURSES
+// ═══════════════════════════════════════════
+function addCourse() {
+  const name = document.getElementById('new-course-name').value.trim();
+  const prof = document.getElementById('new-course-prof').value.trim();
+  const credits = parseInt(document.getElementById('new-course-credits').value) || 3;
+  if (!name) return toast('Please enter a course name');
+  state.courses.push({
+    id: Date.now().toString(36),
+    name, prof, credits,
+    materials: [],
+    notes: [],
+    assignments: [],
+    outlineData: null,
+    progress: 0
+  });
+  saveState();
+  closeModal('add-course-modal');
+  document.getElementById('new-course-name').value = '';
+  document.getElementById('new-course-prof').value = '';
+  refreshDashboard();
+  renderCoursesGrid();
+  refreshCourseSelects();
+  toast(`${name} added`);
+}
+
+function deleteCourse() {
+  if (!state.currentCourseId) return;
+  if (!confirm('Delete this course and all its materials?')) return;
+  state.courses = state.courses.filter(c => c.id !== state.currentCourseId);
+  state.currentCourseId = null;
+  saveState();
+  closeCourseDetail();
+  renderCoursesGrid();
+  refreshDashboard();
+  refreshCourseSelects();
+  toast('Course deleted');
+}
+
+function renderCoursesGrid() {
+  const grid = document.getElementById('courses-grid');
+  if (state.courses.length === 0) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+      <h3>No courses added</h3><p>Click "Add Course" to create your first class workspace</p></div>`;
+    return;
+  }
+  grid.innerHTML = state.courses.map(c => `
+    <div class="course-card" onclick="openCourseDetail('${c.id}')">
+      <div class="course-name">${esc(c.name)}</div>
+      <div class="course-prof">${esc(c.prof)} · ${c.credits} credits</div>
+      <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">
+        <span class="tag tag-gold">${c.materials.length} files</span>
+        <span class="tag tag-gold">${c.notes.length} notes</span>
+        <span class="tag tag-crimson">${c.assignments.length} assignments</span>
+      </div>
+      <div class="course-progress">
+        <div class="course-progress-label">
+          <span>Syllabus Progress</span><span>${c.progress}%</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${c.progress}%"></div></div>
+      </div>
+    </div>`).join('');
+}
+
+function openCourseDetail(id) {
+  state.currentCourseId = id;
+  const course = state.courses.find(c => c.id === id);
+  if (!course) return;
+  document.getElementById('courses-grid').style.display = 'none';
+  document.querySelector('#page-courses > div:first-child').style.display = 'none';
+  document.getElementById('course-detail').style.display = 'block';
+  document.getElementById('detail-course-name').textContent = course.name;
+  document.getElementById('detail-course-prof').textContent = `${course.prof} · ${course.credits} credits`;
+  renderMaterials(course);
+  renderNotes(course);
+  renderAssignments(course);
+  switchCourseTab('materials');
+}
+
+function closeCourseDetail() {
+  document.getElementById('course-detail').style.display = 'none';
+  document.getElementById('courses-grid').style.display = '';
+  document.querySelector('#page-courses > div:first-child').style.display = '';
+  state.currentCourseId = null;
+  renderCoursesGrid();
+}
+
+function switchCourseTab(tab) {
+  ['materials', 'notes', 'assignments', 'ai-tools'].forEach(t => {
+    document.getElementById('ctab-' + t).style.display = t === tab ? 'block' : 'none';
+  });
+  document.querySelectorAll('[data-ctab]').forEach(el => {
+    el.classList.toggle('active', el.dataset.ctab === tab);
+  });
+}
+
+// File upload
+function handleFileUpload(event) {
+  const course = state.courses.find(c => c.id === state.currentCourseId);
+  if (!course) return;
+  const files = event.target.files;
+  Array.from(files).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      course.materials.push({
+        id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        content: e.target.result.slice(0, 50000), // limit stored content
+        uploadedAt: new Date().toISOString()
+      });
+      saveState();
+      renderMaterials(course);
+      toast(`${file.name} uploaded`);
+    };
+    reader.readAsText(file);
+  });
+  event.target.value = '';
+}
+
+function renderMaterials(course) {
+  const list = document.getElementById('materials-list');
+  if (course.materials.length === 0) { list.innerHTML = ''; return; }
+  list.innerHTML = course.materials.map(m => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(26,26,46,0.04);">
+      <div>
+        <div style="font-size:0.82rem;font-weight:500;">${esc(m.name)}</div>
+        <div style="font-size:0.68rem;color:var(--slate);">${(m.size / 1024).toFixed(1)} KB · ${new Date(m.uploadedAt).toLocaleDateString()}</div>
+      </div>
+      <button class="btn btn-ghost" style="padding:4px 10px;font-size:0.7rem;" onclick="removeMaterial('${m.id}')">Remove</button>
+    </div>`).join('');
+}
+
+function removeMaterial(mid) {
+  const course = state.courses.find(c => c.id === state.currentCourseId);
+  if (!course) return;
+  course.materials = course.materials.filter(m => m.id !== mid);
+  saveState();
+  renderMaterials(course);
+}
+
+// Notes
+function saveNote() {
+  const course = state.courses.find(c => c.id === state.currentCourseId);
+  if (!course) return;
+  const text = document.getElementById('note-input').value.trim();
+  if (!text) return;
+  course.notes.push({
+    id: Date.now().toString(36),
+    text,
+    createdAt: new Date().toISOString()
+  });
+  saveState();
+  document.getElementById('note-input').value = '';
+  renderNotes(course);
+  toast('Note saved');
+}
+
+function renderNotes(course) {
+  const list = document.getElementById('notes-list');
+  if (course.notes.length === 0) { list.innerHTML = ''; return; }
+  list.innerHTML = course.notes.map(n => `
+    <div class="card" style="margin-bottom:0.75rem;">
+      <div style="font-size:0.68rem;color:var(--slate);margin-bottom:4px;">${new Date(n.createdAt).toLocaleString()}</div>
+      <div style="font-size:0.82rem;line-height:1.6;white-space:pre-wrap;">${esc(n.text).slice(0, 500)}${n.text.length > 500 ? '...' : ''}</div>
+    </div>`).join('');
+}
+
+// Assignments
+function addAssignment() {
+  const course = state.courses.find(c => c.id === state.currentCourseId);
+  if (!course) return;
+  const name = document.getElementById('assign-name').value.trim();
+  const date = document.getElementById('assign-date').value;
+  if (!name || !date) return toast('Fill in assignment name and date');
+  course.assignments.push({ id: Date.now().toString(36), name, date, completed: false });
+  saveState();
+  document.getElementById('assign-name').value = '';
+  document.getElementById('assign-date').value = '';
+  renderAssignments(course);
+  refreshDashboard();
+  toast('Assignment added');
+}
+
+function renderAssignments(course) {
+  const list = document.getElementById('assignments-list');
+  if (course.assignments.length === 0) { list.innerHTML = ''; return; }
+  list.innerHTML = `<table><thead><tr><th>Assignment</th><th>Due Date</th><th>Status</th></tr></thead><tbody>
+    ${course.assignments.sort((a,b) => new Date(a.date) - new Date(b.date)).map(a => `
+      <tr>
+        <td>${esc(a.name)}</td>
+        <td>${new Date(a.date).toLocaleDateString()}</td>
+        <td>
+          <span class="tag ${a.completed ? 'tag-success' : 'tag-crimson'}" style="cursor:pointer;" onclick="toggleAssignment('${a.id}')">
+            ${a.completed ? '✓ Done' : 'Pending'}
+          </span>
+        </td>
+      </tr>`).join('')}
+  </tbody></table>`;
+}
+
+function toggleAssignment(aid) {
+  const course = state.courses.find(c => c.id === state.currentCourseId);
+  if (!course) return;
+  const a = course.assignments.find(x => x.id === aid);
+  if (a) a.completed = !a.completed;
+  saveState();
+  renderAssignments(course);
+}
+
+// ═══════════════════════════════════════════
+//  AI TOOLS (per course)
+// ═══════════════════════════════════════════
+async function runAITool(type) {
+  const course = state.courses.find(c => c.id === state.currentCourseId);
+  if (!course) return;
+  const materialsContext = gatherCourseContext(course);
+  const outputEl = document.getElementById('ai-tool-output');
+  const contentEl = document.getElementById('ai-tool-content');
+  const titleEl = document.getElementById('ai-tool-title');
+  outputEl.style.display = 'block';
+  contentEl.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div> Generating...';
+
+  const prompts = {
+    'practice-q': {
+      title: 'Practice Questions',
+      prompt: `Based on the following course materials for "${course.name}", generate 3 practice questions: 1 MBE-style multiple choice, 1 short answer, and 1 issue spotter. Include answers and explanations.\n\nMaterials:\n${materialsContext}`
+    },
+    'cold-call': {
+      title: 'Cold Call Simulation',
+      prompt: `You are a law professor teaching "${course.name}". Based on the following materials, generate a realistic cold-call simulation with 5 Socratic-method questions that build on each other. Include the "correct" direction of analysis for each.\n\nMaterials:\n${materialsContext}`
+    },
+    'outline': {
+      title: 'Course Outline',
+      prompt: `Based on the following materials for "${course.name}", extract and organize all black-letter rules, case holdings, and key doctrines into a well-structured course outline. Group by topic and subtopic. Include rule statements and brief case references.\n\nMaterials:\n${materialsContext}`
+    },
+    'exam-hypo': {
+      title: 'Exam Hypothetical',
+      prompt: `Create a full-length, exam-quality hypothetical fact pattern for "${course.name}" that tests multiple doctrines from the materials below. After the fact pattern, provide a model answer outline identifying all issues, applicable rules, and analysis framework (IRAC).\n\nMaterials:\n${materialsContext}`
+    }
+  };
+
+  const p = prompts[type];
+  titleEl.textContent = p.title;
+  const system = `You are JURIS, an expert law school AI tutor. You help law students study effectively. Be thorough, accurate, and pedagogically sound. Format your responses clearly with proper structure.`;
+  const result = await callGemini(p.prompt, system);
+  contentEl.textContent = result;
+}
+
+function gatherCourseContext(course) {
+  let ctx = '';
+  course.materials.forEach(m => {
+    ctx += `\n--- File: ${m.name} ---\n${m.content?.slice(0, 8000) || '[binary file]'}\n`;
+  });
+  course.notes.forEach(n => {
+    ctx += `\n--- Note (${n.createdAt}) ---\n${n.text.slice(0, 3000)}\n`;
+  });
+  return ctx.slice(0, 30000) || 'No materials uploaded yet. Generate based on common topics for this type of law course.';
+}
+
+// ═══════════════════════════════════════════
+//  STUDY ENGINE
+// ═══════════════════════════════════════════
+async function generateQuiz() {
+  const courseId = document.getElementById('quiz-course-select').value;
+  const difficulty = document.getElementById('quiz-difficulty').value;
+  const qtype = document.getElementById('quiz-type').value;
+  if (!courseId) return toast('Select a course first');
+  const course = state.courses.find(c => c.id === courseId);
+  if (!course) return;
+
+  const outputArea = document.getElementById('quiz-output-area');
+  const contentEl = document.getElementById('quiz-content');
+  outputArea.style.display = 'block';
+  contentEl.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div> Generating quiz...';
+
+  const materialsContext = gatherCourseContext(course);
+  const diffLabels = { early: 'early-semester comprehension level', mid: 'midterm reinforcement level', final: 'final exam complexity level' };
+  const typeLabels = { mbe: 'MBE-style multiple choice questions with 4 options each', short: 'short answer questions', 'issue-spot': 'issue spotter questions with complex fact patterns', hypo: 'a full exam hypothetical with multiple embedded issues' };
+
+  const prompt = `Generate ${typeLabels[qtype]} at ${diffLabels[difficulty]} for the course "${course.name}". Base questions on these materials:\n\n${materialsContext}\n\nProvide 3 questions. Do NOT include answers yet — the student will answer first.`;
+  const system = 'You are JURIS, an expert law school quiz generator. Create challenging, pedagogically sound questions that test understanding of legal doctrines, rules, and analytical skills.';
+  const result = await callGemini(prompt, system);
+  contentEl.textContent = result;
+  document.getElementById('grade-output').style.display = 'none';
+}
+
+async function gradeAnswer() {
+  const answer = document.getElementById('quiz-answer').value.trim();
+  const question = document.getElementById('quiz-content').textContent;
+  if (!answer) return toast('Write your answer first');
+
+  const gradeEl = document.getElementById('grade-output');
+  const gradeContent = document.getElementById('grade-content');
+  gradeEl.style.display = 'block';
+  gradeContent.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div> Grading...';
+
+  const prompt = `You are grading a law student's answer. Here is the question:\n\n${question}\n\nHere is the student's answer:\n\n${answer}\n\nProvide detailed feedback including:\n1. Score (out of 10)\n2. Issues correctly identified\n3. Missing issues or rules\n4. Quality of rule articulation\n5. IRAC structure assessment\n6. Specific suggestions for improvement`;
+  const system = 'You are JURIS, an expert law professor grading student work. Be constructive, thorough, and specific in your feedback. Praise what was done well and clearly identify areas for improvement.';
+  const result = await callGemini(prompt, system);
+  gradeContent.textContent = result;
+}
+
+// ═══════════════════════════════════════════
+//  OUTLINES
+// ═══════════════════════════════════════════
+function loadOutline() {
+  const courseId = document.getElementById('outline-course-select').value;
+  const display = document.getElementById('outline-display');
+  if (!courseId) {
+    display.innerHTML = '<div class="empty-state"><h3>Select a course</h3></div>';
+    return;
+  }
+  const course = state.courses.find(c => c.id === courseId);
+  if (course?.outlineData) {
+    display.innerHTML = `<div style="font-size:0.85rem;line-height:1.8;white-space:pre-wrap;">${esc(course.outlineData)}</div>`;
+  } else {
+    display.innerHTML = '<div class="empty-state"><h3>No outline yet</h3><p>Click "Auto-Build" to generate one from your materials</p></div>';
+  }
+}
+
+async function generateOutline(type) {
+  const courseId = document.getElementById('outline-course-select').value;
+  if (!courseId) return toast('Select a course first');
+  const course = state.courses.find(c => c.id === courseId);
+  if (!course) return;
+
+  const display = document.getElementById('outline-display');
+  display.innerHTML = '<div style="text-align:center;padding:2rem;"><div class="loading-dots"><span></span><span></span><span></span></div><div style="margin-top:8px;font-size:0.82rem;color:var(--slate);">Building outline...</div></div>';
+
+  const materialsContext = gatherCourseContext(course);
+  const typeInstructions = {
+    full: 'Create a comprehensive, detailed course outline with all black-letter rules, case holdings, policy rationales, and multi-step doctrine flowcharts.',
+    attack: 'Create a concise attack outline — just the key rules, elements, and analysis frameworks needed for quick exam reference.',
+    checklist: 'Create a one-page exam checklist with every issue to spot, organized by topic, with brief rule triggers.',
+    auto: 'Create a well-organized course outline extracting all rules, cases, and doctrines. Include rule statements, case holdings, and policy rationales organized by topic and subtopic.'
+  };
+
+  const prompt = `For the course "${course.name}", ${typeInstructions[type]}\n\nBase this on the following materials:\n${materialsContext}`;
+  const system = 'You are JURIS, an expert law school outline builder. Create clear, well-organized, accurate legal outlines that would help a student prepare for exams.';
+  const result = await callGemini(prompt, system);
+  course.outlineData = result;
+  saveState();
+  display.innerHTML = `<div style="font-size:0.85rem;line-height:1.8;white-space:pre-wrap;">${esc(result)}</div>`;
+}
+
+// ═══════════════════════════════════════════
+//  CALENDAR
+// ═══════════════════════════════════════════
+function renderCalendar() {
+  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('cal-month-title').textContent = `${monthNames[state.calMonth]} ${state.calYear}`;
+
+  const firstDay = new Date(state.calYear, state.calMonth, 1).getDay();
+  const daysInMonth = new Date(state.calYear, state.calMonth + 1, 0).getDate();
+  const today = new Date();
+
+  // Gather all assignment dates
+  const assignDates = new Set();
+  state.courses.forEach(c => {
+    c.assignments.forEach(a => {
+      const d = new Date(a.date);
+      if (d.getMonth() === state.calMonth && d.getFullYear() === state.calYear) {
+        assignDates.add(d.getDate());
+      }
+    });
+  });
+
+  let html = '';
+  for (let i = 0; i < firstDay; i++) html += '<div class="cal-cell empty"></div>';
+  for (let d = 1; d <= daysInMonth; d++) {
+    const isToday = d === today.getDate() && state.calMonth === today.getMonth() && state.calYear === today.getFullYear();
+    const hasEvent = assignDates.has(d);
+    html += `<div class="cal-cell${isToday ? ' today' : ''}${hasEvent ? ' has-event' : ''}">${d}</div>`;
+  }
+  document.getElementById('cal-days').innerHTML = html;
+}
+
+function changeMonth(delta) {
+  state.calMonth += delta;
+  if (state.calMonth > 11) { state.calMonth = 0; state.calYear++; }
+  if (state.calMonth < 0) { state.calMonth = 11; state.calYear--; }
+  renderCalendar();
+}
+
+async function generateStudyPlan() {
+  const courses = state.courses.map(c => ({
+    name: c.name,
+    assignments: c.assignments.filter(a => !a.completed).map(a => ({ name: a.name, date: a.date }))
+  }));
+  if (courses.length === 0) return toast('Add courses and assignments first');
+
+  const el = document.getElementById('reminders-list');
+  el.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div> Generating study plan...';
+
+  const prompt = `Create a detailed weekly study plan based on these courses and upcoming assignments:\n\n${JSON.stringify(courses, null, 2)}\n\nToday is ${new Date().toLocaleDateString()}. Include spaced repetition, break reminders, and prioritize upcoming deadlines.`;
+  const system = 'You are JURIS, a law school study planning assistant. Create practical, time-blocked study plans that incorporate spaced repetition and prevent burnout.';
+  const result = await callGemini(prompt, system);
+  el.innerHTML = `<div style="white-space:pre-wrap;">${esc(result)}</div>`;
+}
+
+// ═══════════════════════════════════════════
+//  BAR ALIGNMENT
+// ═══════════════════════════════════════════
+async function analyzeBarReadiness() {
+  const jurisdiction = document.getElementById('bar-jurisdiction').value;
+  const year = document.getElementById('bar-year').value;
+  if (!jurisdiction) return toast('Select a jurisdiction first');
+
+  const btn = document.getElementById('bar-analyze-btn');
+  const reBtn = document.getElementById('bar-reanalyze-btn');
+  [btn, reBtn].forEach(b => { if (b) { b.disabled = true; b.textContent = 'Analyzing…'; } });
+
+  const resultsEl = document.getElementById('bar-results');
+  resultsEl.style.display = 'block';
+  document.getElementById('mbe-coverage').innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div>';
+  document.getElementById('bar-recommendations').textContent = '';
+  document.getElementById('bar-score-display').textContent = '—';
+  document.getElementById('score-arc').style.strokeDashoffset = '251.2';
+
+  const courseList = state.courses.map(c => c.name).join(', ') || 'No courses added yet';
+  const isUBE = jurisdiction.startsWith('UBE-');
+  const stateName = document.getElementById('bar-jurisdiction').options[document.getElementById('bar-jurisdiction').selectedIndex].text;
+
+  document.getElementById('bar-jurisdiction-label').textContent = stateName;
+
+  const prompt = `You are a bar exam advisor. A ${year} law student is preparing for the bar exam in ${stateName}${isUBE ? ' (UBE state)' : ''}. Their current courses are: ${courseList}.
+
+Return ONLY valid JSON (no markdown, no explanation) with this exact structure:
+{
+  "score": <integer 0-100>,
+  "mbe_subjects": [
+    { "name": "<subject>", "pct": <integer 0-100>, "covered_by": "<course name or 'Not yet covered'>" }
+  ],
+  "recommendations": "<3-5 paragraphs of advice about gaps, elective suggestions, and bar prep timeline>",
+  "score_explanation": "<one sentence explaining the score>"
+}
+
+MBE subjects to include: Civil Procedure, Constitutional Law, Contracts, Criminal Law & Procedure, Evidence, Real Property, Torts${isUBE ? '' : ', plus any state-specific essay subjects'}.
+Rate coverage based on whether the student's courses directly address each subject. Be realistic — a 1L with Contracts gets 40% there, not 100%.`;
+
+  try {
+    const raw = await callGemini(prompt, 'You are a bar exam preparation expert. Return only valid JSON as instructed.');
+    let data;
+    try {
+      const clean = raw.replace(/```json|```/g, '').trim();
+      data = JSON.parse(clean);
+    } catch {
+      // Fallback: display raw text gracefully
+      document.getElementById('mbe-coverage').innerHTML = '<p style="font-size:0.82rem;color:var(--slate);padding:8px 0;">Could not parse structured response. Try again.</p>';
+      document.getElementById('bar-recommendations').textContent = raw;
+      return;
+    }
+
+    // Render MBE coverage rows
+    const mbeEl = document.getElementById('mbe-coverage');
+    mbeEl.innerHTML = data.mbe_subjects.map(s => {
+      const pct = Math.max(0, Math.min(100, s.pct));
+      const barColor = pct >= 70 ? 'var(--success)' : pct >= 40 ? 'var(--gold)' : 'var(--crimson)';
+      const gapClass = pct >= 70 ? 'ok' : 'gap';
+      const gapLabel = pct >= 70 ? 'Covered' : pct >= 40 ? 'Partial' : 'Gap';
+      return `<div class="mbe-row">
+        <div class="mbe-subject">${esc(s.name)}</div>
+        <div class="mbe-bar-wrap"><div class="mbe-bar-fill" style="width:${pct}%;background:${barColor};"></div></div>
+        <div class="mbe-pct" style="color:${barColor};">${pct}%</div>
+        <span class="mbe-gap ${gapClass}">${gapLabel}</span>
+      </div>`;
+    }).join('');
+
+    // Render score ring
+    const score = Math.max(0, Math.min(100, data.score || 0));
+    const circumference = 251.2;
+    const offset = circumference - (score / 100) * circumference;
+    const scoreDisplay = document.getElementById('bar-score-display');
+    const arc = document.getElementById('score-arc');
+    scoreDisplay.textContent = score;
+    arc.style.strokeDashoffset = offset;
+    arc.style.stroke = score >= 70 ? 'var(--success)' : score >= 50 ? 'var(--gold)' : 'var(--crimson)';
+
+    // Update dashboard stat
+    document.getElementById('stat-bar-score').textContent = score + '%';
+
+    // Recommendations
+    document.getElementById('bar-recommendations').textContent = data.recommendations || '';
+
+    // Persist
+    state.barScore = score;
+    state.barJurisdiction = stateName;
+    saveState();
+
+    // Scroll into view
+    resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  } finally {
+    [btn, reBtn].forEach(b => {
+      if (!b) return;
+      b.disabled = false;
+      b.innerHTML = b.id === 'bar-reanalyze-btn'
+        ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg> Re-analyze'
+        : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg> Analyze Bar Readiness';
+    });
+  }
+}
+
+// ═══════════════════════════════════════════
+//  CAREER INTELLIGENCE
+// ═══════════════════════════════════════════
+function clearCareerResults() {
+  document.getElementById('career-results').style.display = 'none';
+  document.getElementById('career-cards').innerHTML = '';
+  document.getElementById('career-compare-wrap').style.display = 'none';
+  document.getElementById('career-nextsteps-wrap').style.display = 'none';
+  document.getElementById('career-classes').value = '';
+  toast('Career results cleared');
+}
+
+async function analyzeCareer() {
+  const classes = document.getElementById('career-classes').value.trim();
+  const style = document.getElementById('career-style').value;
+  const wlb = document.getElementById('career-wlb').value;
+  const geo = document.getElementById('career-geo').value.trim();
+  const hint = document.getElementById('career-form-hint');
+
+  if (!classes && !geo) {
+    hint.textContent = 'Tip: enter at least your preferred classes or location for better results.';
+    hint.style.color = 'var(--warning)';
+    setTimeout(() => { hint.textContent = ''; }, 4000);
+  }
+
+  const btn = document.getElementById('career-analyze-btn');
+  btn.disabled = true;
+  btn.textContent = 'Analyzing…';
+
+  const resultsEl = document.getElementById('career-results');
+  const cardsEl = document.getElementById('career-cards');
+  resultsEl.style.display = 'block';
+  cardsEl.innerHTML = '<div class="card" style="text-align:center;padding:2rem;"><div class="loading-dots"><span></span><span></span><span></span></div><p style="margin-top:1rem;font-size:0.82rem;color:var(--slate);">Matching career paths…</p></div>';
+  document.getElementById('career-compare-wrap').style.display = 'none';
+  document.getElementById('career-nextsteps-wrap').style.display = 'none';
+
+  const prompt = `You are a legal career counselor. Based on this law student profile, return ONLY valid JSON (no markdown, no commentary):
+
+Classes enjoyed: ${classes || 'Not specified'}
+Work style: ${style}
+Work-life priority: ${wlb}
+Geographic preference: ${geo || 'Flexible'}
+
+Return JSON with this exact structure:
+{
+  "paths": [
+    {
+      "name": "<career path name>",
+      "fit": "excellent|good|fair",
+      "salary_entry": "<e.g. $70k–$90k>",
+      "salary_senior": "<e.g. $150k–$250k>",
+      "hours_per_week": "<e.g. 45–55>",
+      "stress": <integer 1-10>,
+      "advancement": "<e.g. 5–8 years to partner>",
+      "summary": "<2-3 sentences on why this fits the student's profile>",
+      "next_steps": "<2-3 concrete actions: internships, clinics, networking>"
+    }
+  ],
+  "top3_compare": [
+    { "metric": "<metric name>", "path1": "<value>", "path2": "<value>", "path3": "<value>" }
+  ],
+  "overall_next_steps": "<3-4 paragraphs on internships, clinics, OCI strategy, networking>"
+}
+
+Include exactly 5 paths and 5 comparison metrics (Salary Range, Hours/Week, Stress Level, Advancement Speed, Work-Life Balance). Be specific about compensation and lifestyle realities.`;
+
+  try {
+    const raw = await callGemini(prompt, 'You are a legal career expert. Return only valid JSON.');
+    let data;
+    try {
+      const clean = raw.replace(/```json|```/g, '').trim();
+      data = JSON.parse(clean);
+    } catch {
+      cardsEl.innerHTML = `<div class="card"><div class="card-title" style="margin-bottom:0.75rem;">Career Analysis</div><div class="rec-block">${esc(raw)}</div></div>`;
+      return;
+    }
+
+    // Render career path cards
+    cardsEl.innerHTML = (data.paths || []).map((p, i) => {
+      const fitClass = p.fit === 'excellent' ? 'excellent' : p.fit === 'good' ? 'good' : 'fair';
+      const fitLabel = p.fit === 'excellent' ? 'Strong Match' : p.fit === 'good' ? 'Good Match' : 'Possible Match';
+      const stress = Math.max(1, Math.min(10, parseInt(p.stress) || 5));
+      const pips = Array.from({length: 10}, (_, idx) => {
+        const on = idx < stress;
+        const hi = on && stress >= 8;
+        return `<div class="stress-pip ${on ? (hi ? 'hi' : 'on') : ''}"></div>`;
+      }).join('');
+      return `<div class="career-card">
+        <div class="career-card-header">
+          <div>
+            <div style="font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--slate);margin-bottom:3px;">Path ${i+1}</div>
+            <div class="career-path-name">${esc(p.name)}</div>
+          </div>
+          <span class="career-path-fit ${fitClass}">${fitLabel}</span>
+        </div>
+        <div class="career-stats">
+          <div class="career-stat-cell">
+            <div class="career-stat-val">${esc(p.salary_entry || '—')}</div>
+            <div class="career-stat-lbl">Entry salary</div>
+          </div>
+          <div class="career-stat-cell">
+            <div class="career-stat-val">${esc(p.hours_per_week || '—')} hrs</div>
+            <div class="career-stat-lbl">Per week</div>
+          </div>
+          <div class="career-stat-cell">
+            <div class="career-stat-val" style="font-size:0.72rem;">${esc(p.advancement || '—')}</div>
+            <div class="career-stat-lbl">Advancement</div>
+            <div class="stress-pip-row">${pips}</div>
+            <div class="career-stat-lbl" style="margin-top:2px;">Stress ${stress}/10</div>
+          </div>
+        </div>
+        <div class="career-summary">${esc(p.summary || '')}</div>
+        <div class="career-steps"><strong>Next steps:</strong> ${esc(p.next_steps || '')}</div>
+        <div style="margin-top:0.75rem;">
+          <button class="btn btn-ghost" style="font-size:0.72rem;padding:6px 12px;" onclick="quickAI('Tell me more about becoming a ${esc(p.name)} — what internships, clinics, and networking strategies should I pursue${geo ? ' in ' + esc(geo) : ''}?')">
+            Explore this path in AI Assistant →
+          </button>
+        </div>
+      </div>`;
+    }).join('');
+
+    // Comparison table
+    const paths = (data.paths || []).slice(0, 3);
+    if (data.top3_compare && paths.length >= 2) {
+      const compareWrap = document.getElementById('career-compare-wrap');
+      const table = document.getElementById('career-compare-table');
+      table.innerHTML = `<thead><tr>
+        <th>Metric</th>
+        ${paths.map(p => `<th>${esc(p.name)}</th>`).join('')}
+      </tr></thead><tbody>
+        ${(data.top3_compare || []).map(row => `<tr>
+          <td>${esc(row.metric)}</td>
+          <td>${esc(row.path1 || '—')}</td>
+          <td>${esc(row.path2 || '—')}</td>
+          ${paths.length >= 3 ? `<td>${esc(row.path3 || '—')}</td>` : ''}
+        </tr>`).join('')}
+      </tbody>`;
+      compareWrap.style.display = 'block';
+    }
+
+    // Next steps
+    if (data.overall_next_steps) {
+      document.getElementById('career-nextsteps').textContent = data.overall_next_steps;
+      document.getElementById('career-nextsteps-wrap').style.display = 'block';
+    }
+
+    // Scroll to results
+    resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg> Get Career Matches';
+  }
+}
+
+// ═══════════════════════════════════════════
+//  BLUEBOOK
+// ═══════════════════════════════════════════
+async function generateCitation() {
+  const type = document.getElementById('cite-type').value;
+  const input = document.getElementById('cite-input').value.trim();
+  if (!input) return toast('Enter source information');
+
+  const outputArea = document.getElementById('cite-output-area');
+  const outputEl = document.getElementById('cite-output');
+  outputArea.style.display = 'block';
+  outputEl.textContent = 'Generating citation...';
+
+  const prompt = `Generate a proper Bluebook citation for the following ${type}:\n\n${input}\n\nProvide:\n1. Full citation\n2. Short form\n3. If a case: proper parenthetical\n4. Explanation of any formatting rules applied`;
+  const system = 'You are JURIS, an expert in Bluebook citation format (21st edition). Generate perfectly formatted legal citations. Be precise about italics (indicated with *asterisks*), small caps, and punctuation.';
+  const result = await callGemini(prompt, system);
+  outputEl.textContent = result;
+}
+
+async function fixCitation() {
+  const input = document.getElementById('cite-input').value.trim();
+  if (!input) return toast('Paste the citation to fix');
+
+  const outputArea = document.getElementById('cite-output-area');
+  const outputEl = document.getElementById('cite-output');
+  outputArea.style.display = 'block';
+  outputEl.textContent = 'Analyzing citation...';
+
+  const prompt = `Analyze and fix this Bluebook citation:\n\n${input}\n\nIdentify all errors, explain the Bluebook rules violated, and provide the corrected citation.`;
+  const system = 'You are JURIS, an expert Bluebook citation checker. Identify errors precisely and explain the relevant Bluebook rules.';
+  const result = await callGemini(prompt, system);
+  outputEl.textContent = result;
+}
+
+function copyCitation() {
+  const text = document.getElementById('cite-output').textContent;
+  navigator.clipboard.writeText(text).then(() => toast('Copied to clipboard'));
+}
+
+// ═══════════════════════════════════════════
+//  WELLNESS
+// ═══════════════════════════════════════════
+function logStudyHours() {
+  const hours = parseFloat(document.getElementById('study-hours').value);
+  const subject = document.getElementById('study-subject-log').value;
+  if (!hours || hours <= 0) return toast('Enter valid hours');
+  state.studyLog.push({
+    hours,
+    subject,
+    date: new Date().toISOString()
+  });
+  saveState();
+  document.getElementById('study-hours').value = '';
+  refreshDashboard();
+  renderWeeklyChart();
+  toast(`${hours} hours logged`);
+}
+
+function renderWeeklyChart() {
+  const chart = document.getElementById('weekly-study-chart');
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const today = new Date();
+  const startOfWeek = new Date(today);
+  startOfWeek.setDate(today.getDate() - today.getDay());
+  startOfWeek.setHours(0,0,0,0);
+
+  let html = '';
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(startOfWeek);
+    d.setDate(d.getDate() + i);
+    const dayStr = d.toDateString();
+    const hrs = state.studyLog
+      .filter(l => new Date(l.date).toDateString() === dayStr)
+      .reduce((sum, l) => sum + l.hours, 0);
+    const level = hrs === 0 ? 0 : hrs <= 2 ? 1 : hrs <= 4 ? 2 : hrs <= 6 ? 3 : 4;
+    html += `<div class="heat-cell" data-level="${level}" title="${days[i]}: ${hrs}h" style="flex:1;height:36px;font-size:0.65rem;">${days[i]}<br>${hrs}h</div>`;
+  }
+  chart.innerHTML = html;
+}
+
+async function wellnessCheckIn() {
+  const el = document.getElementById('wellness-output');
+  el.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div> Checking in...';
+
+  const totalHrs = state.studyLog.reduce((s, l) => s + l.hours, 0);
+  const recentLog = state.studyLog.slice(-14);
+  const courseCt = state.courses.length;
+  const assignCt = state.courses.reduce((s, c) => s + c.assignments.filter(a => !a.completed).length, 0);
+
+  const prompt = `As a wellness advisor for a law student, provide personalized tips based on this data:
+- Total study hours logged: ${totalHrs}
+- Recent 2-week study sessions: ${recentLog.length}
+- Active courses: ${courseCt}
+- Pending assignments: ${assignCt}
+- Study pattern: ${JSON.stringify(recentLog.slice(-7))}
+
+Provide:
+1. Assessment of current study patterns
+2. Risk of burnout (low/medium/high)
+3. 3-5 specific, actionable wellness tips
+4. Suggested adjustments to study schedule
+Be supportive and constructive.`;
+
+  const system = 'You are JURIS wellness advisor. You help law students maintain healthy study habits and prevent burnout. Be warm, supportive, and practical.';
+  const result = await callGemini(prompt, system);
+  el.textContent = result;
+}
+
+// ═══════════════════════════════════════════
+//  AI CHAT
+// ═══════════════════════════════════════════
+async function sendChat() {
+  const input = document.getElementById('chat-input');
+  const msg = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+
+  const msgsEl = document.getElementById('chat-messages');
+  msgsEl.innerHTML += `<div class="ai-msg user">${esc(msg)}</div>`;
+  msgsEl.innerHTML += `<div class="ai-msg assistant" id="chat-loading"><div class="loading-dots"><span></span><span></span><span></span></div></div>`;
+  msgsEl.scrollTop = msgsEl.scrollHeight;
+
+  state.chatHistory.push({ role: 'user', content: msg });
+
+  // Build context
+  const courseSummary = state.courses.map(c => `${c.name} (${c.prof}, ${c.materials.length} files, ${c.notes.length} notes)`).join('; ');
+  const contextPrompt = `Student context: Courses: [${courseSummary || 'none'}]. Semester: ${state.semester}.\n\nConversation so far:\n${state.chatHistory.map(m => `${m.role}: ${m.content}`).join('\n')}\n\nRespond to the student's latest message.`;
+
+  const system = `You are JURIS, an intelligent law school AI assistant. You help with studying, outlines, bar prep, career planning, Bluebook citations, and general law school advice. Be knowledgeable, supportive, and thorough. Reference the student's actual courses and materials when relevant.`;
+  const result = await callGemini(contextPrompt, system);
+
+  state.chatHistory.push({ role: 'assistant', content: result });
+  if (state.chatHistory.length > 20) state.chatHistory = state.chatHistory.slice(-20);
+
+  const loadingEl = document.getElementById('chat-loading');
+  if (loadingEl) loadingEl.remove();
+  msgsEl.innerHTML += `<div class="ai-msg assistant">${esc(result)}</div>`;
+  msgsEl.scrollTop = msgsEl.scrollHeight;
+}
+
+async function quickAI(prompt) {
+  navigateTo('ai-chat');
+  document.getElementById('chat-input').value = prompt;
+  sendChat();
+}
+
+// ═══════════════════════════════════════════
+//  DASHBOARD REFRESH
+// ═══════════════════════════════════════════
+function refreshDashboard() {
+  document.getElementById('stat-courses').textContent = state.courses.length;
+
+  const totalAssign = state.courses.reduce((s, c) => s + c.assignments.length, 0);
+  document.getElementById('stat-assignments').textContent = totalAssign;
+
+  const totalHrs = state.studyLog.reduce((s, l) => s + l.hours, 0);
+  document.getElementById('stat-study-hrs').textContent = totalHrs.toFixed(1);
+
+  // Restore persisted bar score
+  if (state.barScore != null) {
+    document.getElementById('stat-bar-score').textContent = state.barScore + '%';
+  }
+
+  // Dashboard course cards
+  const dashList = document.getElementById('dash-courses-list');
+  if (state.courses.length > 0) {
+    dashList.innerHTML = state.courses.slice(0, 4).map(c => `
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(26,26,46,0.04);cursor:pointer;" onclick="navigateTo('courses');setTimeout(()=>openCourseDetail('${c.id}'),100)">
+        <div>
+          <div style="font-size:0.85rem;font-weight:500;">${esc(c.name)}</div>
+          <div style="font-size:0.7rem;color:var(--slate);">${esc(c.prof)}</div>
+        </div>
+        <span class="tag tag-gold">${c.materials.length + c.notes.length} items</span>
+      </div>`).join('');
+  }
+
+  // Deadlines
+  const allAssigns = [];
+  state.courses.forEach(c => {
+    c.assignments.filter(a => !a.completed).forEach(a => {
+      allAssigns.push({ ...a, course: c.name });
+    });
+  });
+  allAssigns.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+  const deadlinesEl = document.getElementById('dash-deadlines');
+  if (allAssigns.length > 0) {
+    deadlinesEl.innerHTML = allAssigns.slice(0, 5).map(a => {
+      const daysLeft = Math.ceil((new Date(a.date) - new Date()) / 86400000);
+      return `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(26,26,46,0.04);">
+        <div>
+          <div style="font-size:0.85rem;font-weight:500;">${esc(a.name)}</div>
+          <div style="font-size:0.7rem;color:var(--slate);">${esc(a.course)}</div>
+        </div>
+        <span class="tag ${daysLeft <= 3 ? 'tag-crimson' : daysLeft <= 7 ? 'tag-gold' : 'tag-success'}">${daysLeft <= 0 ? 'Overdue' : daysLeft + 'd left'}</span>
+      </div>`;
+    }).join('');
+  }
+
+  renderCoursesGrid();
+}
+
+function refreshCourseSelects() {
+  const selects = ['quiz-course-select', 'outline-course-select', 'study-subject-log'];
+  selects.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const currentVal = el.value;
+    const firstOption = el.options[0];
+    el.innerHTML = '';
+    el.appendChild(firstOption);
+    state.courses.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c.id;
+      opt.textContent = c.name;
+      el.appendChild(opt);
+    });
+    el.value = currentVal;
+  });
+}
+
+// ═══════════════════════════════════════════
+//  UTILITIES
+// ═══════════════════════════════════════════
+function esc(str) {
+  if (!str) return '';
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>
