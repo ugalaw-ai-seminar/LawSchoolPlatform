@@ -1,0 +1,2599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JURIS — Intelligent Law Student Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- PDF.js loaded via bottom script on demand -->
+<style>
+:root {
+  --ink: #1a1a2e;
+  --parchment: #f5f0e8;
+  --gold: #c5a55a;
+  --gold-light: #dbc88e;
+  --gold-dark: #a08840;
+  --crimson: #8b2635;
+  --crimson-light: #b33a4a;
+  --navy: #16213e;
+  --slate: #3a3a5c;
+  --mist: #e8e4dc;
+  --warm-white: #faf8f4;
+  --success: #4a7c59;
+  --success-light: #d4edda;
+  --warning: #c5873a;
+  --warning-light: #fff3cd;
+  --danger-light: #f8d7da;
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-body: 'DM Sans', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --shadow-sm: 0 1px 3px rgba(26,26,46,0.08);
+  --shadow-md: 0 4px 12px rgba(26,26,46,0.1);
+  --shadow-lg: 0 8px 30px rgba(26,26,46,0.12);
+  --shadow-xl: 0 20px 60px rgba(26,26,46,0.15);
+  --radius: 8px;
+  --radius-lg: 14px;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: var(--font-body); background: var(--parchment); color: var(--ink); min-height: 100vh; overflow-x: hidden; }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 3px; }
+
+/* ─── SPLASH ─── */
+#splash-screen {
+  position: fixed; inset: 0; z-index: 9999;
+  background: var(--navy);
+  display: flex; align-items: center; justify-content: center; flex-direction: column;
+  transition: opacity 0.6s, transform 0.6s;
+}
+#splash-screen.hidden { opacity: 0; pointer-events: none; transform: scale(1.02); }
+.splash-inner { text-align: center; max-width: 480px; padding: 3rem; }
+.splash-logo { font-family: var(--font-display); font-size: 4.5rem; font-weight: 300; color: var(--gold); letter-spacing: 0.3em; margin-bottom: 0.25rem; }
+.splash-tagline { font-family: var(--font-display); font-size: 1.1rem; color: rgba(197,165,90,0.6); font-style: italic; letter-spacing: 0.08em; margin-bottom: 3rem; }
+.splash-divider { width: 60px; height: 1px; background: var(--gold); margin: 0 auto 2rem; opacity: 0.4; }
+.splash-label { font-size: 0.75rem; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(245,240,232,0.5); margin-bottom: 0.75rem; }
+.api-input-wrap { position: relative; margin-bottom: 1.5rem; }
+.api-input-wrap input { width: 100%; padding: 14px 18px; background: rgba(245,240,232,0.06); border: 1px solid rgba(197,165,90,0.25); border-radius: var(--radius); color: var(--parchment); font-family: var(--font-mono); font-size: 0.85rem; outline: none; transition: border-color 0.3s; }
+.api-input-wrap input:focus { border-color: var(--gold); }
+.api-input-wrap input::placeholder { color: rgba(245,240,232,0.25); }
+.btn-enter { background: var(--gold); color: var(--navy); border: none; padding: 14px 48px; font-family: var(--font-body); font-weight: 600; font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase; border-radius: var(--radius); cursor: pointer; transition: all 0.3s; }
+.btn-enter:hover { background: var(--gold-light); transform: translateY(-1px); }
+.splash-note { margin-top: 1.5rem; font-size: 0.7rem; color: rgba(245,240,232,0.3); line-height: 1.6; }
+
+/* ─── APP LAYOUT ─── */
+#app { display: none; min-height: 100vh; }
+#app.active { display: flex; }
+
+.sidebar { width: 260px; background: var(--navy); color: var(--parchment); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 100; transition: transform 0.3s; }
+.sidebar-header { padding: 1.5rem 1.25rem; border-bottom: 1px solid rgba(197,165,90,0.15); }
+.sidebar-brand { font-family: var(--font-display); font-size: 1.8rem; font-weight: 300; color: var(--gold); letter-spacing: 0.25em; }
+.sidebar-sub { font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(197,165,90,0.45); margin-top: 2px; }
+.sidebar-nav { flex: 1; padding: 1rem 0; overflow-y: auto; }
+.nav-section-label { font-size: 0.6rem; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(245,240,232,0.3); padding: 1rem 1.25rem 0.4rem; }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 1.25rem; cursor: pointer; font-size: 0.82rem; color: rgba(245,240,232,0.6); transition: all 0.2s; border-left: 2px solid transparent; }
+.nav-item:hover { color: var(--parchment); background: rgba(197,165,90,0.06); }
+.nav-item.active { color: var(--gold); background: rgba(197,165,90,0.1); border-left-color: var(--gold); }
+.nav-item svg { width: 16px; height: 16px; flex-shrink: 0; opacity: 0.7; }
+.nav-item.active svg { opacity: 1; }
+.sidebar-footer { padding: 1rem 1.25rem; border-top: 1px solid rgba(197,165,90,0.15); font-size: 0.65rem; color: rgba(245,240,232,0.25); }
+
+.main-content { margin-left: 260px; flex: 1; min-height: 100vh; }
+.top-bar { display: flex; align-items: center; justify-content: space-between; padding: 1rem 2rem; background: var(--warm-white); border-bottom: 1px solid rgba(26,26,46,0.06); position: sticky; top: 0; z-index: 50; }
+.page-title { font-family: var(--font-display); font-size: 1.5rem; font-weight: 500; color: var(--ink); }
+.top-actions { display: flex; align-items: center; gap: 12px; }
+
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: var(--radius); font-family: var(--font-body); font-size: 0.78rem; font-weight: 500; cursor: pointer; transition: all 0.2s; border: none; }
+.btn-primary { background: var(--gold); color: var(--navy); }
+.btn-primary:hover { background: var(--gold-light); }
+.btn-ghost { background: transparent; color: var(--slate); border: 1px solid rgba(26,26,46,0.12); }
+.btn-ghost:hover { border-color: var(--gold); color: var(--gold-dark); }
+.btn-danger { background: var(--crimson); color: white; }
+.btn-danger:hover { background: var(--crimson-light); }
+.btn-sm { padding: 5px 10px; font-size: 0.72rem; }
+.btn svg { width: 14px; height: 14px; }
+
+.content-area { padding: 2rem; max-width: 1200px; }
+.page { display: none; }
+.page.active { display: block; animation: fadeUp 0.35s ease; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ─── CARDS ─── */
+.card { background: var(--warm-white); border: 1px solid rgba(26,26,46,0.06); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 1.25rem; box-shadow: var(--shadow-sm); transition: box-shadow 0.2s; }
+.card:hover { box-shadow: var(--shadow-md); }
+.card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+.card-title { font-family: var(--font-display); font-size: 1.15rem; font-weight: 600; color: var(--ink); }
+.card-badge { font-size: 0.65rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; padding: 4px 10px; border-radius: 20px; background: rgba(197,165,90,0.12); color: var(--gold-dark); }
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+
+.stat-card { background: var(--warm-white); border: 1px solid rgba(26,26,46,0.06); border-radius: var(--radius-lg); padding: 1.25rem; text-align: center; box-shadow: var(--shadow-sm); }
+.stat-value { font-family: var(--font-display); font-size: 2rem; font-weight: 600; color: var(--gold-dark); }
+.stat-label { font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--slate); margin-top: 4px; }
+
+.progress-bar { width: 100%; height: 6px; background: var(--mist); border-radius: 3px; overflow: hidden; margin-top: 6px; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--gold-dark), var(--gold)); border-radius: 3px; transition: width 0.6s ease; }
+
+.form-group { margin-bottom: 1rem; }
+.form-label { display: block; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--slate); margin-bottom: 6px; }
+.form-input, .form-select, .form-textarea { width: 100%; padding: 10px 14px; border: 1px solid rgba(26,26,46,0.12); border-radius: var(--radius); font-family: var(--font-body); font-size: 0.85rem; color: var(--ink); background: white; outline: none; transition: border-color 0.2s; }
+.form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--gold); }
+.form-textarea { resize: vertical; min-height: 100px; }
+
+.tag { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 20px; font-size: 0.68rem; font-weight: 500; gap: 4px; }
+.tag-gold { background: rgba(197,165,90,0.15); color: var(--gold-dark); }
+.tag-crimson { background: rgba(139,38,53,0.1); color: var(--crimson); }
+.tag-success { background: rgba(74,124,89,0.1); color: var(--success); }
+.tag-warning { background: rgba(197,135,58,0.12); color: var(--warning); }
+
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+th { text-align: left; font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--slate); padding: 10px 12px; border-bottom: 2px solid var(--mist); }
+td { padding: 10px 12px; border-bottom: 1px solid rgba(26,26,46,0.04); color: var(--ink); }
+tr:hover td { background: rgba(197,165,90,0.03); }
+
+.tabs { display: flex; gap: 0; border-bottom: 1px solid rgba(26,26,46,0.08); margin-bottom: 1.5rem; }
+.tab { padding: 10px 20px; font-size: 0.78rem; font-weight: 500; color: var(--slate); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; }
+.tab:hover { color: var(--ink); }
+.tab.active { color: var(--gold-dark); border-bottom-color: var(--gold); }
+
+.upload-zone { border: 2px dashed rgba(197,165,90,0.3); border-radius: var(--radius-lg); padding: 2rem; text-align: center; cursor: pointer; transition: all 0.2s; background: rgba(197,165,90,0.03); }
+.upload-zone:hover, .upload-zone.drag-over { border-color: var(--gold); background: rgba(197,165,90,0.06); }
+.upload-zone svg { width: 32px; height: 32px; color: var(--gold); margin-bottom: 8px; }
+.upload-zone p { font-size: 0.82rem; color: var(--slate); }
+.upload-zone .upload-hint { font-size: 0.7rem; color: rgba(58,58,92,0.5); margin-top: 4px; }
+
+.modal-overlay { position: fixed; inset: 0; background: rgba(26,26,46,0.5); backdrop-filter: blur(4px); z-index: 1000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+.modal-overlay.active { opacity: 1; pointer-events: all; }
+.modal { background: var(--warm-white); border-radius: var(--radius-lg); padding: 2rem; max-width: 560px; width: 90%; max-height: 80vh; overflow-y: auto; box-shadow: var(--shadow-xl); transform: translateY(20px); transition: transform 0.3s; }
+.modal-overlay.active .modal { transform: translateY(0); }
+.modal-title { font-family: var(--font-display); font-size: 1.3rem; font-weight: 600; margin-bottom: 1.25rem; }
+
+.ai-panel { background: var(--warm-white); border: 1px solid rgba(26,26,46,0.06); border-radius: var(--radius-lg); overflow: hidden; }
+.ai-panel-header { display: flex; align-items: center; gap: 8px; padding: 12px 16px; background: var(--navy); color: var(--gold); font-size: 0.78rem; font-weight: 600; letter-spacing: 0.06em; }
+.ai-panel-header svg { width: 16px; height: 16px; }
+.ai-messages { padding: 1rem; max-height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+.ai-msg { padding: 10px 14px; border-radius: var(--radius); font-size: 0.82rem; line-height: 1.6; max-width: 85%; white-space: pre-wrap; }
+.ai-msg.user { background: rgba(197,165,90,0.12); color: var(--ink); align-self: flex-end; border-bottom-right-radius: 2px; }
+.ai-msg.assistant { background: var(--mist); color: var(--ink); align-self: flex-start; border-bottom-left-radius: 2px; }
+.ai-input-wrap { display: flex; gap: 8px; padding: 12px; border-top: 1px solid rgba(26,26,46,0.06); }
+.ai-input-wrap input { flex: 1; padding: 10px 14px; border: 1px solid rgba(26,26,46,0.1); border-radius: var(--radius); font-family: var(--font-body); font-size: 0.82rem; outline: none; }
+.ai-input-wrap input:focus { border-color: var(--gold); }
+.ai-input-wrap button { background: var(--gold); color: var(--navy); border: none; padding: 10px 18px; border-radius: var(--radius); font-weight: 600; font-size: 0.78rem; cursor: pointer; transition: background 0.2s; }
+.ai-input-wrap button:hover { background: var(--gold-light); }
+
+.loading-dots { display: inline-flex; gap: 4px; align-items: center; }
+.loading-dots span { width: 6px; height: 6px; background: var(--gold); border-radius: 50%; animation: dotPulse 1.2s infinite; }
+.loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+.loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes dotPulse { 0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); } 40% { opacity: 1; transform: scale(1); } }
+
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+.cal-header-cell { text-align: center; font-size: 0.65rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--slate); padding: 8px 0; }
+.cal-cell { aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 4px; border-radius: 6px; font-size: 0.75rem; cursor: pointer; transition: background 0.15s; }
+.cal-cell:hover { background: rgba(197,165,90,0.08); }
+.cal-cell.today { background: rgba(197,165,90,0.15); font-weight: 700; }
+.cal-cell.has-event::after { content: ''; width: 4px; height: 4px; border-radius: 50%; background: var(--crimson); margin-top: 2px; }
+.cal-cell.empty { pointer-events: none; }
+
+.heat-map { display: flex; gap: 3px; flex-wrap: wrap; }
+.heat-cell { width: 28px; height: 28px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 0.55rem; font-weight: 600; color: white; cursor: pointer; }
+.heat-cell[data-level="0"] { background: var(--mist); color: var(--slate); }
+.heat-cell[data-level="1"] { background: rgba(197,165,90,0.3); color: var(--gold-dark); }
+.heat-cell[data-level="2"] { background: rgba(197,165,90,0.55); }
+.heat-cell[data-level="3"] { background: var(--gold); }
+.heat-cell[data-level="4"] { background: var(--gold-dark); }
+
+.toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+.toast { background: var(--navy); color: var(--parchment); padding: 12px 20px; border-radius: var(--radius); font-size: 0.8rem; box-shadow: var(--shadow-lg); animation: toastIn 0.3s ease, toastOut 0.3s ease 2.7s forwards; border-left: 3px solid var(--gold); }
+@keyframes toastIn { from { opacity: 0; transform: translateX(40px); } }
+@keyframes toastOut { to { opacity: 0; transform: translateX(40px); } }
+
+.empty-state { text-align: center; padding: 3rem 1rem; color: var(--slate); }
+.empty-state svg { width: 48px; height: 48px; color: var(--mist); margin-bottom: 1rem; }
+.empty-state h3 { font-family: var(--font-display); font-size: 1.2rem; color: var(--ink); margin-bottom: 0.5rem; }
+.empty-state p { font-size: 0.82rem; }
+
+.course-card { background: var(--warm-white); border: 1px solid rgba(26,26,46,0.06); border-radius: var(--radius-lg); padding: 1.25rem; cursor: pointer; transition: all 0.25s; position: relative; overflow: hidden; }
+.course-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--gold); }
+.course-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+.course-name { font-family: var(--font-display); font-size: 1.1rem; font-weight: 600; margin-bottom: 4px; }
+.course-prof { font-size: 0.75rem; color: var(--slate); }
+.course-progress { margin-top: 10px; }
+.course-progress-label { font-size: 0.68rem; color: var(--slate); display: flex; justify-content: space-between; }
+
+.citation-output { font-family: var(--font-mono); font-size: 0.82rem; background: rgba(22,33,62,0.03); border: 1px solid rgba(26,26,46,0.08); border-radius: var(--radius); padding: 1rem; line-height: 1.8; white-space: pre-wrap; }
+
+.toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; }
+.toggle-label { font-size: 0.82rem; color: var(--ink); }
+.toggle { width: 40px; height: 22px; background: var(--mist); border-radius: 11px; position: relative; cursor: pointer; transition: background 0.2s; }
+.toggle.on { background: var(--gold); }
+.toggle::after { content: ''; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; background: white; border-radius: 50%; transition: transform 0.2s; box-shadow: var(--shadow-sm); }
+.toggle.on::after { transform: translateX(18px); }
+
+/* ─── BAR ALIGNMENT SPECIFIC ─── */
+.transcript-drop {
+  border: 2px dashed rgba(197,165,90,0.35);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  background: rgba(197,165,90,0.03);
+  transition: all 0.2s;
+}
+.transcript-drop:hover { border-color: var(--gold); background: rgba(197,165,90,0.06); }
+
+.parsed-course-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-radius: var(--radius);
+  margin-bottom: 6px;
+  font-size: 0.82rem;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+}
+.parsed-course-row.grade-excellent { background: rgba(74,124,89,0.06); border-color: rgba(74,124,89,0.15); }
+.parsed-course-row.grade-good { background: rgba(197,165,90,0.06); border-color: rgba(197,165,90,0.15); }
+.parsed-course-row.grade-fair { background: rgba(197,135,58,0.08); border-color: rgba(197,135,58,0.2); }
+.parsed-course-row.grade-poor { background: rgba(139,38,53,0.07); border-color: rgba(139,38,53,0.18); }
+
+.grade-pill {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 20px;
+  font-family: var(--font-mono);
+  min-width: 36px;
+  text-align: center;
+}
+.gp-excellent { background: rgba(74,124,89,0.15); color: var(--success); }
+.gp-good { background: rgba(197,165,90,0.15); color: var(--gold-dark); }
+.gp-fair { background: rgba(197,135,58,0.15); color: var(--warning); }
+.gp-poor { background: rgba(139,38,53,0.12); color: var(--crimson); }
+
+.importance-badge {
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+.imp-critical { background: rgba(139,38,53,0.12); color: var(--crimson); }
+.imp-high { background: rgba(197,135,58,0.12); color: var(--warning); }
+.imp-medium { background: rgba(197,165,90,0.12); color: var(--gold-dark); }
+.imp-elective { background: rgba(58,58,92,0.08); color: var(--slate); }
+
+.jurisdiction-checker {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px;
+  margin-top: 1rem;
+}
+.jcheck-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  border: 1px solid rgba(26,26,46,0.08);
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.8rem;
+}
+.jcheck-item:hover { border-color: var(--gold); }
+.jcheck-item.covered { border-color: rgba(74,124,89,0.3); background: rgba(74,124,89,0.04); }
+.jcheck-item.partial { border-color: rgba(197,135,58,0.3); background: rgba(197,135,58,0.04); }
+.jcheck-item.missing { border-color: rgba(139,38,53,0.2); background: rgba(139,38,53,0.03); }
+.jcheck-box {
+  width: 18px; height: 18px; border-radius: 4px; border: 2px solid var(--mist);
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s; margin-top: 1px;
+}
+.jcheck-item.covered .jcheck-box { background: var(--success); border-color: var(--success); }
+.jcheck-item.partial .jcheck-box { background: var(--warning); border-color: var(--warning); }
+.jcheck-item.missing .jcheck-box { border-color: rgba(139,38,53,0.4); }
+.jcheck-check { color: white; font-size: 0.7rem; font-weight: 700; }
+.jcheck-half { color: white; font-size: 0.7rem; }
+.jcheck-name { font-weight: 500; color: var(--ink); line-height: 1.3; }
+.jcheck-meta { font-size: 0.68rem; color: var(--slate); margin-top: 2px; }
+
+.bar-score-ring {
+  width: 120px; height: 120px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column;
+  margin: 0 auto 1rem;
+  position: relative;
+}
+.bar-score-ring svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
+.bar-score-inner { position: relative; z-index: 1; text-align: center; }
+.bar-score-value { font-family: var(--font-display); font-size: 2rem; font-weight: 700; color: var(--gold-dark); }
+.bar-score-label { font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--slate); }
+
+.improvement-tip {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  margin-bottom: 8px;
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+.improvement-tip.tip-critical { background: rgba(139,38,53,0.06); border-left: 3px solid var(--crimson); }
+.improvement-tip.tip-warning { background: rgba(197,135,58,0.06); border-left: 3px solid var(--warning); }
+.improvement-tip.tip-info { background: rgba(197,165,90,0.06); border-left: 3px solid var(--gold); }
+.tip-icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+
+.collapsible-header {
+  display: flex; align-items: center; justify-content: space-between;
+  cursor: pointer; padding: 10px 0;
+  border-bottom: 1px solid rgba(26,26,46,0.06);
+  user-select: none;
+}
+.collapsible-header:hover { color: var(--gold-dark); }
+.collapsible-arrow { transition: transform 0.2s; font-size: 0.8rem; }
+.collapsible-arrow.open { transform: rotate(90deg); }
+.collapsible-body { display: none; padding-top: 12px; }
+.collapsible-body.open { display: block; }
+
+.ai-analysis-block {
+  background: linear-gradient(135deg, rgba(22,33,62,0.03), rgba(197,165,90,0.04));
+  border: 1px solid rgba(197,165,90,0.2);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  margin-top: 1.25rem;
+}
+
+/* ─── STUDY PLAN ─── */
+.sp-week-grid {
+  display: grid;
+  grid-template-columns: 80px repeat(7, 1fr);
+  gap: 2px;
+  font-size: 0.72rem;
+}
+.sp-col-header {
+  text-align: center;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--slate);
+  padding: 8px 4px;
+  background: var(--mist);
+  border-radius: 4px;
+}
+.sp-col-header.today-col { background: rgba(197,165,90,0.18); color: var(--gold-dark); }
+.sp-time-label {
+  display: flex; align-items: center; justify-content: flex-end;
+  padding-right: 8px;
+  font-size: 0.62rem;
+  color: rgba(58,58,92,0.45);
+  height: 48px;
+}
+.sp-slot {
+  height: 48px;
+  border-radius: 4px;
+  border: 1px solid rgba(26,26,46,0.06);
+  background: white;
+  cursor: pointer;
+  transition: all 0.15s;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.6rem;
+  font-weight: 600;
+  text-align: center;
+  padding: 2px;
+  line-height: 1.2;
+}
+.sp-slot:hover { border-color: var(--gold); background: rgba(197,165,90,0.05); }
+.sp-slot.blocked { background: var(--mist); cursor: default; border-color: transparent; }
+.sp-slot.has-block {
+  border: none;
+  color: white;
+  font-size: 0.58rem;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+.sp-slot.has-block:hover { opacity: 0.85; }
+
+.sp-course-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.15s;
+  margin: 3px;
+}
+.sp-course-pill.selected { border-color: rgba(0,0,0,0.2); }
+.sp-course-pill:hover { transform: translateY(-1px); box-shadow: var(--shadow-sm); }
+
+.sp-legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+.sp-block-ctx {
+  position: fixed;
+  background: var(--warm-white);
+  border: 1px solid rgba(26,26,46,0.1);
+  border-radius: var(--radius);
+  padding: 8px;
+  box-shadow: var(--shadow-lg);
+  z-index: 500;
+  min-width: 180px;
+  display: none;
+}
+.sp-block-ctx.visible { display: block; }
+.sp-ctx-option {
+  padding: 7px 10px;
+  font-size: 0.75rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.1s;
+  white-space: nowrap;
+}
+.sp-ctx-option:hover { background: rgba(197,165,90,0.1); }
+.sp-ctx-option.danger:hover { background: rgba(139,38,53,0.08); color: var(--crimson); }
+
+.sp-summary-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 12px;
+  border-radius: var(--radius);
+  margin-bottom: 6px;
+  font-size: 0.8rem;
+  border: 1px solid rgba(26,26,46,0.06);
+  background: white;
+}
+.sp-summary-bar-wrap { flex: 1; height: 6px; background: var(--mist); border-radius: 3px; overflow: hidden; }
+.sp-summary-bar { height: 100%; border-radius: 3px; transition: width 0.4s; }
+
+@media (max-width: 900px) {
+  .sp-week-grid { grid-template-columns: 56px repeat(7, 1fr); }
+  .sp-time-label { font-size: 0.55rem; padding-right: 4px; }
+  .sp-slot { height: 40px; font-size: 0.5rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- SPLASH -->
+<div id="splash-screen">
+  <div class="splash-inner">
+    <div class="splash-logo">JURIS</div>
+    <div class="splash-tagline">Intelligent Law Student Platform</div>
+    <div class="splash-divider"></div>
+    <div class="splash-label">Anthropic API Key</div>
+    <div class="api-input-wrap">
+      <input type="password" id="api-key-input" placeholder="sk-ant-..." autocomplete="off">
+    </div>
+    <button class="btn-enter" onclick="enterApp()">Enter Platform</button>
+    <div class="splash-note">Your key is stored locally. Powered by Claude (Anthropic).</div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-brand">JURIS</div>
+      <div class="sidebar-sub">Law Student Platform</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Academic</div>
+      <div class="nav-item active" data-page="dashboard" onclick="navigateTo('dashboard')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </div>
+      <div class="nav-item" data-page="courses" onclick="navigateTo('courses')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+        Courses
+      </div>
+      <div class="nav-item" data-page="study" onclick="navigateTo('study')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        Study Engine
+      </div>
+      <div class="nav-item" data-page="outlines" onclick="navigateTo('outlines')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8m8 4H8m2-8H8"/></svg>
+        Outlines
+      </div>
+      <div class="nav-item" data-page="calendar" onclick="navigateTo('calendar')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        Calendar
+      </div>
+      <div class="nav-section-label">Bar & Career</div>
+      <div class="nav-item" data-page="bar" onclick="navigateTo('bar')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
+        Bar Alignment
+      </div>
+      <div class="nav-item" data-page="career" onclick="navigateTo('career')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+        Career Intel
+      </div>
+      <div class="nav-section-label">Tools</div>
+      <div class="nav-item" data-page="bluebook" onclick="navigateTo('bluebook')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        Bluebook Cite
+      </div>
+      <div class="nav-item" data-page="wellness" onclick="navigateTo('wellness')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+        Wellness
+      </div>
+      <div class="nav-item" data-page="ai-chat" onclick="navigateTo('ai-chat')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        AI Assistant
+      </div>
+      <div class="nav-item" data-page="studyplan" onclick="navigateTo('studyplan')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg>
+        Study Plan
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div style="cursor:pointer;" onclick="showApiKeyModal()">⚙ API Key Settings</div>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <div class="top-bar">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button class="btn btn-ghost" style="display:none;padding:8px;" id="menu-toggle" onclick="toggleSidebar()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+        </button>
+        <div class="page-title" id="page-title">Dashboard</div>
+      </div>
+      <div class="top-actions">
+        <span style="font-size:0.7rem;color:var(--slate);" id="semester-label"></span>
+      </div>
+    </div>
+
+    <div class="content-area">
+
+      <!-- ══ DASHBOARD ══ -->
+      <div class="page active" id="page-dashboard">
+        <div class="grid-4" id="dash-stats">
+          <div class="stat-card"><div class="stat-value" id="stat-courses">0</div><div class="stat-label">Courses</div></div>
+          <div class="stat-card"><div class="stat-value" id="stat-assignments">0</div><div class="stat-label">Assignments</div></div>
+          <div class="stat-card"><div class="stat-value" id="stat-study-hrs">0</div><div class="stat-label">Study Hours</div></div>
+          <div class="stat-card"><div class="stat-value" id="stat-bar-score">—</div><div class="stat-label">Bar Readiness</div></div>
+        </div>
+        <div class="grid-2" style="margin-top:1.25rem;">
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Your Courses</span>
+              <button class="btn btn-primary" onclick="navigateTo('courses')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M12 5v14M5 12h14"/></svg>
+                Add Course
+              </button>
+            </div>
+            <div id="dash-courses-list"><div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg><h3>No courses yet</h3><p>Add your first course to get started</p></div></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><span class="card-title">Upcoming Deadlines</span></div>
+            <div id="dash-deadlines"><div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><h3>No upcoming deadlines</h3><p>Add assignments to your courses</p></div></div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:1.25rem;">
+          <div class="card-header"><span class="card-title">Quick AI Actions</span><span class="card-badge">Claude Powered</span></div>
+          <div class="grid-3">
+            <button class="btn btn-ghost" style="padding:16px;justify-content:center;" onclick="quickAI('Generate a practice question for my weakest subject')">Practice Question</button>
+            <button class="btn btn-ghost" style="padding:16px;justify-content:center;" onclick="quickAI('Give me a cold-call simulation question')">Cold Call Prep</button>
+            <button class="btn btn-ghost" style="padding:16px;justify-content:center;" onclick="quickAI('Create a study schedule for this week')">Study Schedule</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ COURSES ══ -->
+      <div class="page" id="page-courses">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;">
+          <div style="font-size:0.82rem;color:var(--slate);">Manage your classes, upload materials, and track syllabus progress.</div>
+          <button class="btn btn-primary" onclick="openModal('add-course-modal')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M12 5v14M5 12h14"/></svg>
+            Add Course
+          </button>
+        </div>
+        <div class="grid-3" id="courses-grid">
+          <div class="empty-state" style="grid-column:1/-1;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg><h3>No courses added</h3><p>Click "Add Course" to create your first class workspace</p></div>
+        </div>
+        <div id="course-detail" style="display:none;">
+          <button class="btn btn-ghost" onclick="closeCourseDetail()" style="margin-bottom:1rem;">← Back to Courses</button>
+          <div class="card">
+            <div class="card-header"><span class="card-title" id="detail-course-name"></span><button class="btn btn-danger" onclick="deleteCourse()">Delete Course</button></div>
+            <div id="detail-course-prof" style="font-size:0.82rem;color:var(--slate);margin-bottom:1rem;"></div>
+            <div class="tabs">
+              <div class="tab active" data-ctab="materials" onclick="switchCourseTab('materials')">Materials</div>
+              <div class="tab" data-ctab="notes" onclick="switchCourseTab('notes')">Notes</div>
+              <div class="tab" data-ctab="assignments" onclick="switchCourseTab('assignments')">Assignments</div>
+              <div class="tab" data-ctab="ai-tools" onclick="switchCourseTab('ai-tools')">AI Tools</div>
+            </div>
+            <div id="ctab-materials">
+              <div class="upload-zone" onclick="document.getElementById('file-upload').click()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                <p>Upload syllabus, readings, notes, or past exams</p>
+                <div class="upload-hint">PDF, DOCX, TXT, PPTX — or drag and drop</div>
+              </div>
+              <input type="file" id="file-upload" style="display:none;" multiple accept=".pdf,.docx,.txt,.pptx,.md" onchange="handleFileUpload(event)">
+              <div id="materials-list" style="margin-top:1rem;"></div>
+            </div>
+            <div id="ctab-notes" style="display:none;">
+              <div class="form-group"><label class="form-label">Add Class Note</label><textarea class="form-textarea" id="note-input" placeholder="Paste or type your class notes here..."></textarea></div>
+              <button class="btn btn-primary" onclick="saveNote()">Save Note</button>
+              <div id="notes-list" style="margin-top:1rem;"></div>
+            </div>
+            <div id="ctab-assignments" style="display:none;">
+              <div class="grid-2">
+                <div class="form-group"><label class="form-label">Assignment Name</label><input class="form-input" id="assign-name" placeholder="e.g., Contracts Midterm"></div>
+                <div class="form-group"><label class="form-label">Due Date</label><input class="form-input" id="assign-date" type="date"></div>
+              </div>
+              <button class="btn btn-primary" onclick="addAssignment()">Add Assignment</button>
+              <div id="assignments-list" style="margin-top:1rem;"></div>
+            </div>
+            <div id="ctab-ai-tools" style="display:none;">
+              <div class="grid-2">
+                <div class="card" style="cursor:pointer;" onclick="runAITool('practice-q')"><div class="card-title" style="font-size:0.95rem;">Generate Practice Questions</div><div style="font-size:0.75rem;color:var(--slate);margin-top:4px;">MBE-style, short answer, and issue spotters</div></div>
+                <div class="card" style="cursor:pointer;" onclick="runAITool('cold-call')"><div class="card-title" style="font-size:0.95rem;">Cold Call Simulation</div><div style="font-size:0.75rem;color:var(--slate);margin-top:4px;">Socratic-method style questions</div></div>
+                <div class="card" style="cursor:pointer;" onclick="runAITool('outline')"><div class="card-title" style="font-size:0.95rem;">Build Outline</div><div style="font-size:0.75rem;color:var(--slate);margin-top:4px;">Extract rules into a doctrinal outline</div></div>
+                <div class="card" style="cursor:pointer;" onclick="runAITool('exam-hypo')"><div class="card-title" style="font-size:0.95rem;">Exam Hypothetical</div><div style="font-size:0.75rem;color:var(--slate);margin-top:4px;">Full-length exam fact pattern + model answer</div></div>
+              </div>
+              <div id="ai-tool-output" style="margin-top:1.25rem;display:none;">
+                <div class="card"><div class="card-header"><span class="card-title" id="ai-tool-title">AI Output</span><button class="btn btn-ghost" onclick="document.getElementById('ai-tool-output').style.display='none'">Close</button></div><div id="ai-tool-content" style="font-size:0.85rem;line-height:1.8;white-space:pre-wrap;"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ STUDY ENGINE ══ -->
+      <div class="page" id="page-study">
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header"><span class="card-title">Adaptive Quiz</span><span class="card-badge">AI Powered</span></div>
+            <div class="form-group"><label class="form-label">Subject</label><select class="form-select" id="quiz-course-select"><option value="">Select a course...</option></select></div>
+            <div class="form-group"><label class="form-label">Difficulty</label><select class="form-select" id="quiz-difficulty"><option value="early">Early Semester — Comprehension</option><option value="mid">Midterm — Reinforcement</option><option value="final">Final Exam — Complex Analysis</option></select></div>
+            <div class="form-group"><label class="form-label">Question Type</label><select class="form-select" id="quiz-type"><option value="mbe">Multiple Choice (MBE-style)</option><option value="short">Short Answer</option><option value="issue-spot">Issue Spotter</option><option value="hypo">Full Hypothetical</option></select></div>
+            <button class="btn btn-primary" onclick="generateQuiz()" style="width:100%;justify-content:center;">Generate Questions</button>
+          </div>
+          <div class="card"><div class="card-header"><span class="card-title">Performance Profile</span></div><div id="performance-profile"><div class="empty-state"><h3>No data yet</h3><p>Complete quizzes to build your performance profile</p></div></div></div>
+        </div>
+        <div class="card" id="quiz-output-area" style="display:none;">
+          <div class="card-header"><span class="card-title">Quiz</span><button class="btn btn-ghost" onclick="document.getElementById('quiz-output-area').style.display='none'">Close</button></div>
+          <div id="quiz-content" style="font-size:0.85rem;line-height:1.8;white-space:pre-wrap;"></div>
+          <div style="margin-top:1rem;">
+            <div class="form-group"><label class="form-label">Your Answer</label><textarea class="form-textarea" id="quiz-answer" placeholder="Write your answer here..."></textarea></div>
+            <button class="btn btn-primary" onclick="gradeAnswer()">Grade My Answer</button>
+            <div id="grade-output" style="margin-top:1rem;display:none;">
+              <div class="card" style="background:rgba(74,124,89,0.05);border-color:rgba(74,124,89,0.15);">
+                <div class="card-title" style="color:var(--success);font-size:0.95rem;">Feedback</div>
+                <div id="grade-content" style="font-size:0.85rem;line-height:1.8;white-space:pre-wrap;margin-top:0.5rem;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ OUTLINES ══ -->
+      <div class="page" id="page-outlines">
+        <div class="grid-2" style="margin-bottom:1.25rem;">
+          <div class="form-group" style="margin:0;"><select class="form-select" id="outline-course-select" onchange="loadOutline()"><option value="">Select a course...</option></select></div>
+          <div style="display:flex;gap:8px;justify-content:flex-end;">
+            <button class="btn btn-ghost" onclick="generateOutline('full')">Full Outline</button>
+            <button class="btn btn-ghost" onclick="generateOutline('attack')">Attack Outline</button>
+            <button class="btn btn-ghost" onclick="generateOutline('checklist')">Exam Checklist</button>
+            <button class="btn btn-primary" onclick="generateOutline('auto')">Auto-Build</button>
+          </div>
+        </div>
+        <div class="card" id="outline-display"><div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8m8 4H8m2-8H8"/></svg><h3>Select a course to view or build an outline</h3><p>Upload materials and notes first, then use AI to auto-build your outline</p></div></div>
+      </div>
+
+      <!-- ══ CALENDAR ══ -->
+      <div class="page" id="page-calendar">
+        <div class="card">
+          <div class="card-header"><span class="card-title" id="cal-month-title"></span><div style="display:flex;gap:6px;"><button class="btn btn-ghost" onclick="changeMonth(-1)">←</button><button class="btn btn-ghost" onclick="changeMonth(1)">→</button></div></div>
+          <div class="cal-grid"><div class="cal-header-cell">Sun</div><div class="cal-header-cell">Mon</div><div class="cal-header-cell">Tue</div><div class="cal-header-cell">Wed</div><div class="cal-header-cell">Thu</div><div class="cal-header-cell">Fri</div><div class="cal-header-cell">Sat</div></div>
+          <div class="cal-grid" id="cal-days"></div>
+        </div>
+        <div class="card" style="margin-top:1.25rem;">
+          <div class="card-header"><span class="card-title">Smart Reminders</span><button class="btn btn-primary" onclick="generateStudyPlan()">Generate Study Plan</button></div>
+          <div id="reminders-list" style="font-size:0.82rem;line-height:1.8;"><p style="color:var(--slate);">Add courses and assignments to receive intelligent study reminders.</p></div>
+        </div>
+      </div>
+
+      <!-- ══ BAR ALIGNMENT ══ (fully rebuilt) -->
+      <div class="page" id="page-bar">
+
+        <!-- Step 1: Transcript Upload -->
+        <div class="card" id="bar-transcript-card">
+          <div class="card-header">
+            <span class="card-title">📄 Step 1: Upload Your Transcript</span>
+            <span class="card-badge">Auto-Parsed</span>
+          </div>
+          <p style="font-size:0.82rem;color:var(--slate);margin-bottom:1rem;">Paste your transcript text or type your courses and grades. JURIS will automatically extract your course history and grades to power the bar readiness analysis.</p>
+          
+          <div class="tabs">
+            <div class="tab active" data-ttab="pdf" onclick="switchTranscriptTab('pdf')">Upload PDF</div>
+            <div class="tab" data-ttab="paste" onclick="switchTranscriptTab('paste')">Paste Text</div>
+            <div class="tab" data-ttab="manual" onclick="switchTranscriptTab('manual')">Manual Entry</div>
+          </div>
+
+          <!-- PDF UPLOAD TAB -->
+          <div id="ttab-pdf">
+            <div class="upload-zone" id="pdf-drop-zone" style="margin-bottom:1rem;cursor:pointer;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                <path d="M14 2v6h6"/>
+                <path d="M16 13H8m8 4H8m2-8H8"/>
+              </svg>
+              <p style="font-weight:500;">Drop your transcript PDF here, or click to browse</p>
+              <div class="upload-hint">Supports standard law school transcript PDFs — text is extracted automatically</div>
+            </div>
+            <input type="file" id="transcript-pdf-input" accept=".pdf" style="display:none;">
+
+            <!-- PDF status / preview -->
+            <div id="pdf-status" style="display:none;">
+              <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(74,124,89,0.06);border:1px solid rgba(74,124,89,0.2);border-radius:var(--radius);margin-bottom:0.75rem;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
+                <div style="flex:1;">
+                  <div id="pdf-filename" style="font-size:0.82rem;font-weight:600;color:var(--ink);"></div>
+                  <div id="pdf-page-count" style="font-size:0.68rem;color:var(--slate);"></div>
+                </div>
+                <button class="btn btn-ghost btn-sm" onclick="clearPDF()">✕ Remove</button>
+              </div>
+              <div style="margin-bottom:0.75rem;">
+                <label class="form-label">Extracted Text Preview</label>
+                <textarea class="form-textarea" id="pdf-extracted-text" style="min-height:120px;font-family:var(--font-mono);font-size:0.72rem;background:rgba(26,26,46,0.02);" placeholder="Extracted text will appear here…" readonly></textarea>
+              </div>
+              <div style="display:flex;gap:8px;align-items:center;">
+                <button class="btn btn-primary" onclick="parsePDFTranscript()">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
+                  Parse Transcript
+                </button>
+                <span style="font-size:0.72rem;color:var(--slate);">Text can be edited above before parsing</span>
+              </div>
+            </div>
+
+            <div id="pdf-loading" style="display:none;text-align:center;padding:1.5rem;">
+              <div class="loading-dots"><span></span><span></span><span></span></div>
+              <div style="margin-top:8px;font-size:0.78rem;color:var(--slate);" id="pdf-loading-msg">Loading PDF.js…</div>
+            </div>
+          </div>
+
+          <div id="ttab-paste" style="display:none;">
+            <div class="form-group">
+              <label class="form-label">Paste Transcript Text</label>
+              <textarea class="form-textarea" id="transcript-text" style="min-height:160px;font-family:var(--font-mono);font-size:0.78rem;" placeholder="Paste your transcript here. JURIS will extract course names and grades automatically.&#10;&#10;Example format:&#10;LAW 101  Contracts I          A   3 credits&#10;LAW 103  Civil Procedure       A-  4 credits&#10;LAW 105  Torts                 B+  3 credits&#10;&#10;Any format works — tabular, comma-separated, or plain text."></textarea>
+            </div>
+            <button class="btn btn-primary" onclick="parseTranscript()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg>
+              Parse Transcript
+            </button>
+          </div>
+
+          <div id="ttab-manual" style="display:none;">
+            <div id="manual-courses-list"></div>
+            <div class="grid-2" style="margin-top:0.75rem;">
+              <input class="form-input" id="manual-course-name" placeholder="Course name (e.g., Contracts)">
+              <div style="display:flex;gap:8px;">
+                <select class="form-select" id="manual-course-grade" style="max-width:100px;">
+                  <option>A</option><option>A-</option><option>B+</option><option>B</option><option>B-</option><option>C+</option><option>C</option><option>C-</option><option>D</option><option>F</option><option>CR</option><option>NC</option>
+                </select>
+                <input class="form-input" id="manual-course-credits" type="number" min="1" max="6" value="3" placeholder="Cr" style="max-width:70px;">
+                <button class="btn btn-primary" onclick="addManualCourse()">Add</button>
+              </div>
+            </div>
+            <button class="btn btn-ghost" style="margin-top:0.75rem;" onclick="loadFromManual()">Use These Courses →</button>
+          </div>
+        </div>
+
+        <!-- Parsed Courses Display -->
+        <div class="card" id="bar-parsed-card" style="display:none;">
+          <div class="card-header">
+            <span class="card-title">📚 Parsed Course History</span>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <span id="parsed-count" class="card-badge">0 courses</span>
+              <button class="btn btn-ghost btn-sm" onclick="clearTranscript()">Clear</button>
+            </div>
+          </div>
+          <div style="display:flex;gap:16px;font-size:0.72rem;color:var(--slate);margin-bottom:1rem;flex-wrap:wrap;">
+            <span>Legend:</span>
+            <span style="display:flex;align-items:center;gap:4px;"><span class="grade-pill gp-excellent">A</span> A / A+ — Excellent</span>
+            <span style="display:flex;align-items:center;gap:4px;"><span class="grade-pill gp-good">B+</span> A- / B+ — Good</span>
+            <span style="display:flex;align-items:center;gap:4px;"><span class="grade-pill gp-fair">B</span> B / B- — Review Recommended</span>
+            <span style="display:flex;align-items:center;gap:4px;"><span class="grade-pill gp-poor">C</span> C or below — Needs Focus</span>
+          </div>
+          <div id="parsed-courses-list"></div>
+        </div>
+
+        <!-- Step 2: Jurisdiction & Analysis -->
+        <div class="card" id="bar-config-card">
+          <div class="card-header">
+            <span class="card-title">⚖️ Step 2: Jurisdiction & Analysis</span>
+          </div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Bar Jurisdiction</label>
+              <select class="form-select" id="bar-jurisdiction" onchange="renderJurisdictionChecklist()">
+                <option value="">Select state...</option>
+                <option value="NY">New York</option>
+                <option value="CA">California</option>
+                <option value="TX">Texas</option>
+                <option value="FL">Florida</option>
+                <option value="IL">Illinois</option>
+                <option value="PA">Pennsylvania</option>
+                <option value="OH">Ohio</option>
+                <option value="GA">Georgia</option>
+                <option value="DC">District of Columbia</option>
+                <option value="MA">Massachusetts</option>
+                <option value="VA">Virginia</option>
+                <option value="NJ">New Jersey</option>
+                <option value="UBE">Uniform Bar Exam (UBE)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Current Year</label>
+              <select class="form-select" id="bar-year">
+                <option value="1L">1L</option>
+                <option value="2L">2L</option>
+                <option value="3L">3L</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Required Subjects Checklist -->
+        <div class="card" id="bar-checklist-card" style="display:none;">
+          <div class="card-header">
+            <span class="card-title">✅ Required Subjects Checklist</span>
+            <div id="checklist-summary" style="font-size:0.78rem;color:var(--slate);"></div>
+          </div>
+          <p style="font-size:0.78rem;color:var(--slate);margin-bottom:0.75rem;">Subjects are automatically matched against your transcript. Click any subject to toggle manually.</p>
+          <div class="jurisdiction-checker" id="jurisdiction-checker"></div>
+        </div>
+
+        <!-- Improvement Tips -->
+        <div class="card" id="bar-improvements-card" style="display:none;">
+          <div class="card-header">
+            <span class="card-title">📈 Grade-Based Improvement Areas</span>
+            <span class="card-badge">From Your Transcript</span>
+          </div>
+          <p style="font-size:0.78rem;color:var(--slate);margin-bottom:1rem;">Based on your grades, here are areas where additional study could significantly improve your bar readiness.</p>
+          <div id="improvement-tips-list"></div>
+        </div>
+
+        <!-- AI Analysis -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">🤖 AI Bar Readiness Analysis</span>
+            <span class="card-badge">Claude Powered</span>
+          </div>
+          <button class="btn btn-primary" onclick="analyzeBarReadiness()" id="bar-analyze-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
+            Run Full AI Analysis
+          </button>
+          <div id="bar-ai-output" style="display:none;margin-top:1.25rem;"></div>
+        </div>
+
+      </div>
+
+      <!-- ══ CAREER INTEL ══ -->
+      <div class="page" id="page-career">
+        <div class="card">
+          <div class="card-header"><span class="card-title">Career Intelligence</span><span class="card-badge">AI Powered</span></div>
+          <div class="grid-2">
+            <div class="form-group"><label class="form-label">Classes You Enjoy</label><input class="form-input" id="career-classes" placeholder="e.g., Con Law, Crim, Corporations"></div>
+            <div class="form-group"><label class="form-label">Work Style</label><select class="form-select" id="career-style"><option value="litigation">Litigation / Courtroom</option><option value="transactional">Transactional / Deal-making</option><option value="policy">Policy / Regulatory</option><option value="mixed">Mixed / Flexible</option></select></div>
+            <div class="form-group"><label class="form-label">Work-Life Priority</label><select class="form-select" id="career-wlb"><option value="balanced">Balanced lifestyle</option><option value="high-pay">High compensation priority</option><option value="mission">Mission-driven work</option><option value="flexible">Maximum flexibility</option></select></div>
+            <div class="form-group"><label class="form-label">Geographic Preference</label><input class="form-input" id="career-geo" placeholder="e.g., NYC, Chicago, remote"></div>
+          </div>
+          <button class="btn btn-primary" onclick="analyzeCareer()">Get Career Matches</button>
+        </div>
+        <div id="career-results" style="margin-top:1.25rem;display:none;">
+          <div class="card"><div class="card-title" style="margin-bottom:1rem;">Career Matches & Analysis</div><div id="career-output" style="font-size:0.85rem;line-height:1.8;white-space:pre-wrap;"></div></div>
+        </div>
+      </div>
+
+      <!-- ══ BLUEBOOK ══ -->
+      <div class="page" id="page-bluebook">
+        <div class="card">
+          <div class="card-header"><span class="card-title">Bluebook Citation Assistant</span><span class="card-badge">AI Powered</span></div>
+          <div class="form-group"><label class="form-label">Citation Type</label><select class="form-select" id="cite-type"><option value="case">Case</option><option value="statute">Statute</option><option value="journal">Journal Article</option><option value="book">Book</option><option value="website">Website / Online Source</option></select></div>
+          <div class="form-group"><label class="form-label">Source Information</label><textarea class="form-textarea" id="cite-input" placeholder="Paste case info, article metadata, URL, etc."></textarea></div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-primary" onclick="generateCitation()">Generate Citation</button>
+            <button class="btn btn-ghost" onclick="fixCitation()">Fix Existing Citation</button>
+          </div>
+        </div>
+        <div id="cite-output-area" style="margin-top:1.25rem;display:none;">
+          <div class="card"><div class="card-title" style="margin-bottom:0.75rem;">Generated Citation</div><div class="citation-output" id="cite-output"></div><button class="btn btn-ghost" style="margin-top:0.75rem;" onclick="copyCitation()">Copy to Clipboard</button></div>
+        </div>
+      </div>
+
+      <!-- ══ WELLNESS ══ -->
+      <div class="page" id="page-wellness">
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header"><span class="card-title">Study Tracker</span></div>
+            <div class="form-group"><label class="form-label">Log Study Session</label><div class="grid-2"><input class="form-input" id="study-hours" type="number" min="0.25" step="0.25" placeholder="Hours"><select class="form-select" id="study-subject-log"><option value="">Subject...</option></select></div></div>
+            <button class="btn btn-primary" onclick="logStudyHours()" style="width:100%;justify-content:center;">Log Hours</button>
+            <div style="margin-top:1rem;"><div style="font-size:0.72rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--slate);margin-bottom:8px;">This Week</div><div id="weekly-study-chart" class="heat-map"></div></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><span class="card-title">Wellness Settings</span></div>
+            <div class="toggle-row"><span class="toggle-label">Track study hours</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+            <div class="toggle-row"><span class="toggle-label">Break reminders (every 90 min)</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+            <div class="toggle-row"><span class="toggle-label">Daily study limit warning (10 hrs)</span><div class="toggle" onclick="this.classList.toggle('on')"></div></div>
+            <div class="toggle-row"><span class="toggle-label">Rest day suggestions</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:1.25rem;">
+          <div class="card-header"><span class="card-title">Wellness Check-In</span><span class="card-badge">AI Powered</span></div>
+          <button class="btn btn-primary" onclick="wellnessCheckIn()">Get Personalized Wellness Tips</button>
+          <div id="wellness-output" style="margin-top:1rem;font-size:0.85rem;line-height:1.8;white-space:pre-wrap;"></div>
+        </div>
+      </div>
+
+      <!-- ══ AI CHAT ══ -->
+      <div class="page" id="page-ai-chat">
+        <div class="ai-panel" style="max-width:800px;">
+          <div class="ai-panel-header">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+            JURIS AI Assistant — Your Law School Companion
+          </div>
+          <div class="ai-messages" id="chat-messages">
+            <div class="ai-msg assistant">Hello! I'm your JURIS AI assistant powered by Claude. I can help you with studying, outlines, bar prep, career planning, Bluebook citations, and more. What would you like to work on?</div>
+          </div>
+          <div class="ai-input-wrap">
+            <input type="text" id="chat-input" placeholder="Ask anything about law school..." onkeydown="if(event.key==='Enter')sendChat()">
+            <button onclick="sendChat()">Send</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ STUDY PLAN ══ -->
+      <div class="page" id="page-studyplan">
+
+        <!-- Configuration row -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">📅 Weekly Study Plan</span>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+              <span class="card-badge" id="sp-week-label"></span>
+              <button class="btn btn-ghost" onclick="spChangeWeek(-1)">← Prev</button>
+              <button class="btn btn-ghost" onclick="spChangeWeek(0)">Today</button>
+              <button class="btn btn-ghost" onclick="spChangeWeek(1)">Next →</button>
+            </div>
+          </div>
+
+          <div class="grid-2" style="margin-bottom:1rem;">
+            <div>
+              <div class="form-label" style="margin-bottom:6px;">Daily Study Window</div>
+              <div style="display:flex;gap:8px;align-items:center;">
+                <select class="form-select" id="sp-start-hour" style="max-width:110px;">
+                  <option value="6">6:00 AM</option><option value="7">7:00 AM</option>
+                  <option value="8" selected>8:00 AM</option><option value="9">9:00 AM</option>
+                  <option value="10">10:00 AM</option>
+                </select>
+                <span style="font-size:0.8rem;color:var(--slate);">to</span>
+                <select class="form-select" id="sp-end-hour" style="max-width:110px;">
+                  <option value="18">6:00 PM</option><option value="19">7:00 PM</option>
+                  <option value="20">8:00 PM</option><option value="21" selected>9:00 PM</option>
+                  <option value="22">10:00 PM</option><option value="23">11:00 PM</option>
+                </select>
+                <button class="btn btn-ghost btn-sm" onclick="spRebuildGrid()">Apply</button>
+              </div>
+            </div>
+            <div>
+              <div class="form-label" style="margin-bottom:6px;">Block Duration</div>
+              <select class="form-select" id="sp-block-size" style="max-width:140px;">
+                <option value="1">1 hour blocks</option>
+                <option value="2" selected>2 hour blocks</option>
+                <option value="3">3 hour blocks</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Course color pickers -->
+          <div class="form-label" style="margin-bottom:8px;">Courses to Schedule</div>
+          <div id="sp-course-pills" style="margin-bottom:1rem;">
+            <div style="font-size:0.78rem;color:var(--slate);">Add courses first, then they'll appear here for scheduling.</div>
+          </div>
+
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn btn-primary" onclick="spGenerateAI()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+              AI Auto-Schedule
+            </button>
+            <button class="btn btn-ghost" onclick="spClearAll()">Clear All Blocks</button>
+            <button class="btn btn-ghost" onclick="spCopyPlan()">📋 Copy Plan</button>
+          </div>
+        </div>
+
+        <!-- Weekly grid -->
+        <div class="card" style="overflow-x:auto;">
+          <div id="sp-week-grid" class="sp-week-grid"></div>
+        </div>
+
+        <!-- Hours summary -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Weekly Hours Summary</span>
+            <span id="sp-total-badge" class="card-badge">0 hrs planned</span>
+          </div>
+          <div id="sp-summary-list"></div>
+        </div>
+
+        <!-- AI Plan output -->
+        <div class="card" id="sp-ai-output-card" style="display:none;">
+          <div class="card-header">
+            <span class="card-title">AI Study Recommendations</span>
+            <button class="btn btn-ghost btn-sm" onclick="document.getElementById('sp-ai-output-card').style.display='none'">Close</button>
+          </div>
+          <div id="sp-ai-output" style="font-size:0.85rem;line-height:1.9;white-space:pre-wrap;"></div>
+        </div>
+
+      </div>
+
+      <!-- Context menu (outside page flow, fixed position) -->
+      <div class="sp-block-ctx" id="sp-ctx-menu">
+        <div id="sp-ctx-course-list"></div>
+        <div class="sp-ctx-option danger" onclick="spRemoveBlock()">✕ Clear slot</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="add-course-modal">
+  <div class="modal">
+    <div class="modal-title">Add New Course</div>
+    <div class="form-group"><label class="form-label">Course Name</label><input class="form-input" id="new-course-name" placeholder="e.g., Constitutional Law I"></div>
+    <div class="form-group"><label class="form-label">Professor</label><input class="form-input" id="new-course-prof" placeholder="e.g., Prof. Smith"></div>
+    <div class="form-group"><label class="form-label">Credits</label><input class="form-input" id="new-course-credits" type="number" min="1" max="6" value="3"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:1.5rem;">
+      <button class="btn btn-ghost" onclick="closeModal('add-course-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="addCourse()">Add Course</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="api-key-modal">
+  <div class="modal">
+    <div class="modal-title">API Key Settings</div>
+    <div class="form-group"><label class="form-label">Anthropic API Key</label><input class="form-input" id="settings-api-key" type="password"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:1rem;">
+      <button class="btn btn-ghost" onclick="closeModal('api-key-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="updateApiKey()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+// ═══════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════
+let API_KEY = '';
+let state = {
+  semester: 'Spring 2026',
+  courses: [],
+  studyLog: [],
+  chatHistory: [],
+  currentCourseId: null,
+  calMonth: new Date().getMonth(),
+  calYear: new Date().getFullYear(),
+  transcript: { raw: '', parsed: [] },
+  manualCourses: [],
+  barChecklistOverrides: {},
+  studyPlan: {
+    weekOffset: 0,       // 0 = current week
+    blocks: {},          // key: "dayIndex-slotIndex", value: courseId
+    startHour: 8,
+    endHour: 21,
+    blockSize: 2,
+  },
+};
+
+function saveState() { try { localStorage.setItem('juris_state_v2', JSON.stringify(state)); } catch(e) {} }
+function loadState() { try { const s = localStorage.getItem('juris_state_v2'); if (s) state = { ...state, ...JSON.parse(s) }; } catch(e) {} }
+
+// ═══════════════════════════════════════════
+//  BAR ALIGNMENT DATA
+// ═══════════════════════════════════════════
+
+// MBE subjects required for each jurisdiction
+const JURISDICTION_SUBJECTS = {
+  UBE: [
+    { id: 'contracts', name: 'Contracts & Sales', importance: 'critical', barWeight: '12-13%', keywords: ['contract','contracts','sales','ucc','agreement','offer','acceptance'] },
+    { id: 'torts', name: 'Torts', importance: 'critical', barWeight: '12-13%', keywords: ['torts','tort','negligence','liability','damages'] },
+    { id: 'civpro', name: 'Civil Procedure', importance: 'critical', barWeight: '12-13%', keywords: ['civil procedure','civ pro','civpro','procedure','jurisdiction','pleading'] },
+    { id: 'conlaw', name: 'Constitutional Law', importance: 'critical', barWeight: '12-13%', keywords: ['constitutional','con law','constitution','first amendment','due process','equal protection'] },
+    { id: 'crimlaw', name: 'Criminal Law & Procedure', importance: 'critical', barWeight: '12-13%', keywords: ['criminal','crim law','crime','criminal procedure','crim pro','evidence criminal'] },
+    { id: 'evidence', name: 'Evidence', importance: 'critical', barWeight: '12-13%', keywords: ['evidence','hearsay','relevance','privilege'] },
+    { id: 'property', name: 'Real Property', importance: 'critical', barWeight: '12-13%', keywords: ['property','real property','real estate','land','conveyance','landlord tenant'] },
+    { id: 'bizorg', name: 'Business Organizations', importance: 'high', barWeight: 'MEE topic', keywords: ['corporations','business org','business organizations','llc','partnership','agency'] },
+    { id: 'family', name: 'Family Law', importance: 'high', barWeight: 'MEE topic', keywords: ['family law','domestic','divorce','marriage','custody','adoption'] },
+    { id: 'conflict', name: 'Conflict of Laws', importance: 'high', barWeight: 'MEE topic', keywords: ['conflict of laws','choice of law','conflicts','private international'] },
+    { id: 'secured', name: 'Secured Transactions', importance: 'high', barWeight: 'MEE topic', keywords: ['secured transactions','article 9','collateral','security interest','ucc 9'] },
+    { id: 'trusts', name: 'Trusts & Estates', importance: 'high', barWeight: 'MEE topic', keywords: ['trusts','estates','wills','probate','trust','decedent'] },
+    { id: 'adminlaw', name: 'Administrative Law', importance: 'medium', barWeight: 'Helpful', keywords: ['administrative','admin law','regulatory','agency','chevron'] },
+    { id: 'profres', name: 'Professional Responsibility', importance: 'critical', barWeight: 'MPRE Required', keywords: ['professional responsibility','prof res','ethics','legal ethics','mpre','conduct'] },
+  ],
+  NY: [
+    { id: 'contracts', name: 'Contracts & Sales', importance: 'critical', barWeight: '12-13%', keywords: ['contract','contracts','sales','ucc','agreement'] },
+    { id: 'torts', name: 'Torts', importance: 'critical', barWeight: '12-13%', keywords: ['torts','tort','negligence','liability','damages'] },
+    { id: 'civpro', name: 'Civil Procedure', importance: 'critical', barWeight: '12-13%', keywords: ['civil procedure','civ pro','civpro','procedure','jurisdiction','pleading'] },
+    { id: 'conlaw', name: 'Constitutional Law', importance: 'critical', barWeight: '12-13%', keywords: ['constitutional','con law','constitution','amendment','due process'] },
+    { id: 'crimlaw', name: 'Criminal Law & Procedure', importance: 'critical', barWeight: '12-13%', keywords: ['criminal','crim law','crime','criminal procedure'] },
+    { id: 'evidence', name: 'Evidence', importance: 'critical', barWeight: '12-13%', keywords: ['evidence','hearsay','privilege'] },
+    { id: 'property', name: 'Real Property', importance: 'critical', barWeight: '12-13%', keywords: ['property','real property','real estate','land'] },
+    { id: 'nylaw', name: 'New York Practice', importance: 'critical', barWeight: 'NY-Specific', keywords: ['new york practice','ny practice','cplr','new york civil practice'] },
+    { id: 'profres', name: 'Professional Responsibility', importance: 'critical', barWeight: 'MPRE Required', keywords: ['professional responsibility','prof res','ethics','legal ethics'] },
+    { id: 'bizorg', name: 'Business Organizations', importance: 'high', barWeight: 'MEE topic', keywords: ['corporations','business org','llc','partnership'] },
+    { id: 'trusts', name: 'Trusts & Estates', importance: 'high', barWeight: 'MEE topic', keywords: ['trusts','estates','wills','probate'] },
+    { id: 'secured', name: 'Secured Transactions', importance: 'high', barWeight: 'MEE topic', keywords: ['secured transactions','article 9','collateral'] },
+    { id: 'family', name: 'Family Law', importance: 'medium', barWeight: 'MEE topic', keywords: ['family law','domestic','divorce','marriage','custody'] },
+    { id: 'adminlaw', name: 'Administrative Law', importance: 'medium', barWeight: 'Helpful', keywords: ['administrative','admin law','regulatory','agency'] },
+  ],
+  CA: [
+    { id: 'contracts', name: 'Contracts & Sales', importance: 'critical', barWeight: 'CA Bar Topic', keywords: ['contract','contracts','sales','ucc','agreement'] },
+    { id: 'torts', name: 'Torts', importance: 'critical', barWeight: 'CA Bar Topic', keywords: ['torts','tort','negligence','liability'] },
+    { id: 'civpro', name: 'Civil Procedure', importance: 'critical', barWeight: 'CA Bar Topic', keywords: ['civil procedure','civ pro','civpro','procedure'] },
+    { id: 'conlaw', name: 'Constitutional Law', importance: 'critical', barWeight: 'CA Bar Topic', keywords: ['constitutional','con law','constitution'] },
+    { id: 'crimlaw', name: 'Criminal Law & Procedure', importance: 'critical', barWeight: 'CA Bar Topic', keywords: ['criminal','crim law','crime','criminal procedure'] },
+    { id: 'evidence', name: 'Evidence', importance: 'critical', barWeight: 'CA Bar Topic', keywords: ['evidence','hearsay','privilege'] },
+    { id: 'property', name: 'Real Property', importance: 'critical', barWeight: 'CA Bar Topic', keywords: ['property','real property','real estate','land'] },
+    { id: 'wills', name: 'Wills & Succession', importance: 'critical', barWeight: 'CA Bar Topic', keywords: ['wills','succession','probate','testate','intestate'] },
+    { id: 'profres', name: 'Professional Responsibility', importance: 'critical', barWeight: 'MPRE Required', keywords: ['professional responsibility','prof res','ethics','legal ethics'] },
+    { id: 'commprop', name: 'Community Property', importance: 'critical', barWeight: 'CA-Specific', keywords: ['community property','marital property','family property'] },
+    { id: 'bizorg', name: 'Business Organizations', importance: 'high', barWeight: 'CA Bar Topic', keywords: ['corporations','business org','llc','partnership'] },
+    { id: 'remedies', name: 'Remedies', importance: 'high', barWeight: 'CA Bar Topic', keywords: ['remedies','injunction','damages','restitution','specific performance'] },
+    { id: 'trusts', name: 'Trusts', importance: 'high', barWeight: 'CA Bar Topic', keywords: ['trusts','trust','fiduciary','beneficiary'] },
+    { id: 'secured', name: 'Secured Transactions', importance: 'medium', barWeight: 'CA Bar Topic', keywords: ['secured transactions','article 9','collateral'] },
+  ],
+};
+
+// For other states, default to UBE
+['TX','FL','IL','PA','OH','GA','DC','MA','VA','NJ'].forEach(s => {
+  if (!JURISDICTION_SUBJECTS[s]) JURISDICTION_SUBJECTS[s] = JURISDICTION_SUBJECTS.UBE;
+});
+
+// GPA point scale for grades
+const GRADE_POINTS = { 'A+':4.0,'A':4.0,'A-':3.67,'B+':3.33,'B':3.0,'B-':2.67,'C+':2.33,'C':2.0,'C-':1.67,'D+':1.33,'D':1.0,'D-':0.67,'F':0,'CR':null,'NC':null,'P':null,'IP':null };
+
+function gradeClass(g) {
+  const pts = GRADE_POINTS[g];
+  if (pts === null || pts === undefined) return 'grade-good';
+  if (pts >= 3.67) return 'grade-excellent';
+  if (pts >= 3.0) return 'grade-good';
+  if (pts >= 2.0) return 'grade-fair';
+  return 'grade-poor';
+}
+function gradePillClass(g) {
+  const pts = GRADE_POINTS[g];
+  if (pts === null || pts === undefined) return 'gp-good';
+  if (pts >= 3.67) return 'gp-excellent';
+  if (pts >= 3.0) return 'gp-good';
+  if (pts >= 2.0) return 'gp-fair';
+  return 'gp-poor';
+}
+function importanceBadge(imp) {
+  const map = { critical:'imp-critical', high:'imp-high', medium:'imp-medium', elective:'imp-elective' };
+  const labels = { critical:'Critical', high:'High', medium:'Medium', elective:'Elective' };
+  return `<span class="importance-badge ${map[imp]||'imp-elective'}">${labels[imp]||imp}</span>`;
+}
+
+// ─── TRANSCRIPT PARSING ───
+function parseTranscript() {
+  const text = document.getElementById('transcript-text').value.trim();
+  if (!text) return toast('Please paste your transcript text first');
+  parseTranscriptFromText(text);
+}
+
+function parseTranscriptFromText(text) {
+  if (!text) return toast('No transcript text to parse');
+
+  const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 3);
+  const parsed = [];
+  const gradeRegex = /\b(A[+-]?|B[+-]?|C[+-]?|D[+-]?|F|CR|NC|P|IP)\b/;
+  const creditRegex = /\b([1-6])\s*cr(?:edit)?s?/i;
+
+  lines.forEach(line => {
+    const gradeMatch = line.match(gradeRegex);
+    if (!gradeMatch) return;
+    const grade = gradeMatch[1].toUpperCase();
+
+    // Extract credits
+    let credits = 3;
+    const creditMatch = line.match(creditRegex);
+    if (creditMatch) credits = parseInt(creditMatch[1]);
+    else { const nums = line.match(/\b([1-6])\b/g); if (nums) credits = parseInt(nums[nums.length-1]); }
+
+    // Extract course name: remove grade, credits, course codes
+    let name = line
+      .replace(gradeRegex, '')
+      .replace(/\b[A-Z]{2,4}\s?\d{3,4}\b/g, '')
+      .replace(/\b[1-6]\s*cr(?:edit)?s?\b/gi, '')
+      .replace(/\b[1-6]\b/g, '')
+      .replace(/[|·—–\t]+/g, ' ')
+      .replace(/\s{2,}/g, ' ')
+      .trim()
+      .replace(/^[^a-zA-Z]+/, '')
+      .replace(/[^a-zA-Z]+$/, '')
+      .trim();
+
+    if (name.length < 3) return;
+    parsed.push({ name, grade, credits, id: Date.now().toString(36) + Math.random().toString(36).slice(2,5) });
+  });
+
+  if (parsed.length === 0) {
+    toast('No courses found. Try the Manual Entry tab or check your format.');
+    return;
+  }
+
+  state.transcript.raw = text;
+  state.transcript.parsed = parsed;
+  saveState();
+  renderParsedCourses();
+  renderJurisdictionChecklist();
+  renderImprovementTips();
+  toast(`✓ Parsed ${parsed.length} courses from transcript`);
+}
+
+function renderParsedCourses() {
+  const courses = state.transcript.parsed;
+  const card = document.getElementById('bar-parsed-card');
+  const list = document.getElementById('parsed-courses-list');
+  const count = document.getElementById('parsed-count');
+
+  if (courses.length === 0) { card.style.display = 'none'; return; }
+  card.style.display = 'block';
+  count.textContent = `${courses.length} courses`;
+
+  list.innerHTML = courses.map(c => `
+    <div class="parsed-course-row ${gradeClass(c.grade)}">
+      <div style="flex:1;">
+        <span style="font-weight:500;font-size:0.85rem;">${esc(c.name)}</span>
+        <span style="font-size:0.7rem;color:var(--slate);margin-left:8px;">${c.credits} cr</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        ${getSubjectImportanceBadge(c.name)}
+        <span class="grade-pill ${gradePillClass(c.grade)}">${c.grade}</span>
+        <button class="btn btn-ghost" style="padding:3px 8px;font-size:0.65rem;" onclick="removeTranscriptCourse('${c.id}')">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+function getSubjectImportanceBadge(courseName) {
+  const juris = document.getElementById('bar-jurisdiction').value || 'UBE';
+  const subjects = JURISDICTION_SUBJECTS[juris] || JURISDICTION_SUBJECTS.UBE;
+  const lower = courseName.toLowerCase();
+  const match = subjects.find(s => s.keywords.some(k => lower.includes(k)));
+  if (!match) return `<span class="importance-badge imp-elective">Elective</span>`;
+  return importanceBadge(match.importance);
+}
+
+function removeTranscriptCourse(id) {
+  state.transcript.parsed = state.transcript.parsed.filter(c => c.id !== id);
+  saveState();
+  renderParsedCourses();
+  renderJurisdictionChecklist();
+  renderImprovementTips();
+}
+
+function clearTranscript() {
+  state.transcript = { raw:'', parsed:[] };
+  state.barChecklistOverrides = {};
+  document.getElementById('transcript-text').value = '';
+  document.getElementById('bar-parsed-card').style.display = 'none';
+  document.getElementById('bar-checklist-card').style.display = 'none';
+  document.getElementById('bar-improvements-card').style.display = 'none';
+  document.getElementById('bar-ai-output').style.display = 'none';
+  saveState();
+  toast('Transcript cleared');
+}
+
+// Manual entry
+let manualCourseList = [];
+function addManualCourse() {
+  const name = document.getElementById('manual-course-name').value.trim();
+  const grade = document.getElementById('manual-course-grade').value;
+  const credits = parseInt(document.getElementById('manual-course-credits').value) || 3;
+  if (!name) return;
+  manualCourseList.push({ name, grade, credits, id: Date.now().toString(36) });
+  document.getElementById('manual-course-name').value = '';
+  renderManualList();
+}
+function renderManualList() {
+  const el = document.getElementById('manual-courses-list');
+  el.innerHTML = manualCourseList.map(c => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(26,26,46,0.06);font-size:0.82rem;">
+      <span>${esc(c.name)}</span>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <span class="grade-pill ${gradePillClass(c.grade)}">${c.grade}</span>
+        <span style="color:var(--slate);font-size:0.7rem;">${c.credits}cr</span>
+        <button onclick="removeManualCourse('${c.id}')" style="background:none;border:none;cursor:pointer;color:var(--slate);font-size:0.8rem;">✕</button>
+      </div>
+    </div>`).join('');
+}
+function removeManualCourse(id) { manualCourseList = manualCourseList.filter(c => c.id !== id); renderManualList(); }
+function loadFromManual() {
+  if (!manualCourseList.length) return toast('Add at least one course first');
+  state.transcript.parsed = manualCourseList.map(c => ({...c, id: Date.now().toString(36)+Math.random().toString(36).slice(2,5)}));
+  saveState();
+  renderParsedCourses();
+  renderJurisdictionChecklist();
+  renderImprovementTips();
+  toast(`✓ Loaded ${manualCourseList.length} courses`);
+}
+
+// ─── JURISDICTION CHECKLIST ───
+function renderJurisdictionChecklist() {
+  const juris = document.getElementById('bar-jurisdiction').value;
+  if (!juris) return;
+
+  const subjects = JURISDICTION_SUBJECTS[juris] || JURISDICTION_SUBJECTS.UBE;
+  const card = document.getElementById('bar-checklist-card');
+  const checker = document.getElementById('jurisdiction-checker');
+  card.style.display = 'block';
+
+  const transcriptCourses = state.transcript.parsed;
+
+  let covered = 0, partial = 0;
+
+  const items = subjects.map(subj => {
+    const override = state.barChecklistOverrides[subj.id];
+    let status;
+    if (override !== undefined) {
+      status = override;
+    } else {
+      // Auto-match from transcript
+      const matches = transcriptCourses.filter(c =>
+        subj.keywords.some(k => c.name.toLowerCase().includes(k))
+      );
+      if (matches.length === 0) {
+        status = 'missing';
+      } else {
+        // Check if any match has a poor grade
+        const bestGrade = matches.reduce((best, m) => {
+          const pts = GRADE_POINTS[m.grade];
+          const bestPts = GRADE_POINTS[best.grade];
+          if (pts === null) return best;
+          if (bestPts === null) return m;
+          return pts > bestPts ? m : best;
+        });
+        const pts = GRADE_POINTS[bestGrade.grade];
+        if (pts === null || pts >= 2.67) status = 'covered';
+        else status = 'partial';
+      }
+    }
+
+    if (status === 'covered') covered++;
+    else if (status === 'partial') partial++;
+
+    const iconMap = {
+      covered: '<span class="jcheck-check">✓</span>',
+      partial: '<span class="jcheck-half">~</span>',
+      missing: ''
+    };
+
+    return `
+      <div class="jcheck-item ${status}" onclick="toggleChecklistItem('${subj.id}')">
+        <div class="jcheck-box">${iconMap[status]}</div>
+        <div>
+          <div class="jcheck-name">${esc(subj.name)}</div>
+          <div class="jcheck-meta">${subj.barWeight} ${importanceBadge(subj.importance)}</div>
+        </div>
+      </div>`;
+  });
+
+  checker.innerHTML = items.join('');
+
+  const missing = subjects.length - covered - partial;
+  document.getElementById('checklist-summary').innerHTML =
+    `<span class="tag tag-success">${covered} covered</span>
+     <span class="tag tag-warning" style="margin-left:4px;">${partial} partial</span>
+     <span class="tag tag-crimson" style="margin-left:4px;">${missing} missing</span>`;
+
+  // Update bar score stat
+  const score = Math.round((covered + partial * 0.5) / subjects.length * 100);
+  document.getElementById('stat-bar-score').textContent = score + '%';
+}
+
+function toggleChecklistItem(subjId) {
+  const juris = document.getElementById('bar-jurisdiction').value;
+  const subjects = JURISDICTION_SUBJECTS[juris] || JURISDICTION_SUBJECTS.UBE;
+  const subj = subjects.find(s => s.id === subjId);
+  if (!subj) return;
+
+  const current = state.barChecklistOverrides[subjId];
+  const cycle = { covered: 'partial', partial: 'missing', missing: 'covered' };
+
+  // Determine current auto status first
+  let autoStatus = 'missing';
+  const matches = state.transcript.parsed.filter(c => subj.keywords.some(k => c.name.toLowerCase().includes(k)));
+  if (matches.length > 0) autoStatus = 'covered';
+
+  const cur = current !== undefined ? current : autoStatus;
+  state.barChecklistOverrides[subjId] = cycle[cur];
+  saveState();
+  renderJurisdictionChecklist();
+}
+
+// ─── IMPROVEMENT TIPS ───
+function renderImprovementTips() {
+  const courses = state.transcript.parsed;
+  if (!courses.length) return;
+
+  const juris = document.getElementById('bar-jurisdiction').value || 'UBE';
+  const subjects = JURISDICTION_SUBJECTS[juris] || JURISDICTION_SUBJECTS.UBE;
+  const card = document.getElementById('bar-improvements-card');
+  const list = document.getElementById('improvement-tips-list');
+  card.style.display = 'block';
+
+  const tips = [];
+
+  // Find courses with poor grades that match bar subjects
+  courses.forEach(course => {
+    const pts = GRADE_POINTS[course.grade];
+    if (pts === null || pts === undefined) return; // skip CR/NC
+
+    const matchedSubj = subjects.find(s =>
+      s.keywords.some(k => course.name.toLowerCase().includes(k))
+    );
+
+    if (matchedSubj) {
+      if (pts < 2.0) {
+        tips.push({ level: 'critical', icon: '🚨', text: `<strong>${esc(course.name)}</strong> (Grade: ${course.grade}) — This is a <em>${matchedSubj.importance} bar topic</em> (${matchedSubj.barWeight}). A grade of ${course.grade} suggests foundational gaps. Prioritize a bar prep course and supplemental outlines before the exam.` });
+      } else if (pts < 2.67) {
+        tips.push({ level: 'warning', icon: '⚠️', text: `<strong>${esc(course.name)}</strong> (Grade: ${course.grade}) — This ${matchedSubj.importance}-importance bar topic could use reinforcement. Consider reviewing the key rules and practicing MBE questions in this area.` });
+      } else if (pts < 3.0 && matchedSubj.importance === 'critical') {
+        tips.push({ level: 'info', icon: '📖', text: `<strong>${esc(course.name)}</strong> (Grade: ${course.grade}) — A critical MBE subject with moderate performance. Regular MBE practice questions and a condensed outline will help solidify your foundation.` });
+      }
+    }
+  });
+
+  // Find missing critical subjects
+  subjects.filter(s => s.importance === 'critical').forEach(subj => {
+    const hasIt = courses.some(c => subj.keywords.some(k => c.name.toLowerCase().includes(k)));
+    if (!hasIt) {
+      tips.push({ level: 'critical', icon: '❗', text: `<strong>${subj.name}</strong> not found in your transcript — This is a <em>critical</em> bar subject (${subj.barWeight}). You may still need to take this course, or plan to self-study extensively during bar prep.` });
+    }
+  });
+
+  if (tips.length === 0) {
+    list.innerHTML = `<div class="improvement-tip tip-info"><span class="tip-icon">✨</span><span>Your transcript looks strong for bar coverage! No major gaps or grade concerns identified in bar-tested subjects.</span></div>`;
+  } else {
+    list.innerHTML = tips.map(t => `
+      <div class="improvement-tip tip-${t.level}">
+        <span class="tip-icon">${t.icon}</span>
+        <span style="font-size:0.82rem;line-height:1.5;">${t.text}</span>
+      </div>`).join('');
+  }
+}
+
+// ─── AI BAR ANALYSIS ───
+async function analyzeBarReadiness() {
+  const jurisdiction = document.getElementById('bar-jurisdiction').value;
+  const year = document.getElementById('bar-year').value;
+  if (!jurisdiction) return toast('Select a jurisdiction first');
+
+  const outputEl = document.getElementById('bar-ai-output');
+  outputEl.style.display = 'block';
+  outputEl.innerHTML = `<div style="text-align:center;padding:2rem;"><div class="loading-dots"><span></span><span></span><span></span></div><div style="margin-top:12px;font-size:0.82rem;color:var(--slate);">Analyzing your transcript against ${jurisdiction} bar requirements...</div></div>`;
+
+  const transcriptSummary = state.transcript.parsed.length > 0
+    ? state.transcript.parsed.map(c => `${c.name}: ${c.grade} (${c.credits}cr)`).join(', ')
+    : state.courses.map(c => c.name).join(', ') || 'No courses provided';
+
+  const subjects = JURISDICTION_SUBJECTS[jurisdiction] || JURISDICTION_SUBJECTS.UBE;
+  const subjectList = subjects.map(s => `${s.name} (${s.importance}, ${s.barWeight})`).join('; ');
+
+  const prompt = `You are an expert bar exam advisor. Analyze this ${year} law student's bar readiness for the ${jurisdiction} bar exam.
+
+STUDENT'S TRANSCRIPT:
+${transcriptSummary}
+
+${jurisdiction} BAR REQUIRED SUBJECTS:
+${subjectList}
+
+Provide a structured analysis with these EXACT sections:
+
+## Overall Bar Readiness Score
+Assign a score out of 100 and explain it in 2-3 sentences.
+
+## Subject-by-Subject Analysis
+For each required subject, note:
+- Coverage status (Completed / Partial / Missing)
+- Grade achieved (if visible from transcript)  
+- Specific recommendation (1 sentence)
+
+## Strongest Areas
+List 3 subjects where the student appears well-prepared, with brief reasoning.
+
+## Priority Improvement Areas
+List up to 5 specific subjects or skills needing attention, ranked by urgency, with a concrete action step for each.
+
+## Semester Recommendations
+Based on current year (${year}), what courses should be prioritized in remaining semesters? Be specific.
+
+## Bar Prep Timeline
+Suggest a realistic bar prep timeline and approach given the student's current profile.
+
+Be direct, specific, and actionable. Reference the student's actual grades where visible.`;
+
+  const result = await callClaude(prompt, 'You are JURIS, an expert bar exam preparation advisor for law students. Be specific, accurate, and practical.');
+
+  // Format the output
+  outputEl.innerHTML = `
+    <div class="ai-analysis-block">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--gold-dark)" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        <span style="font-family:var(--font-display);font-size:1.1rem;font-weight:600;color:var(--ink);">AI Analysis — ${jurisdiction} Bar</span>
+        <span class="card-badge">${year}</span>
+      </div>
+      <div style="font-size:0.85rem;line-height:1.9;white-space:pre-wrap;color:var(--ink);">${esc(result)}</div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════
+//  CLAUDE API
+// ═══════════════════════════════════════════
+async function callClaude(userMessage, systemPrompt) {
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': API_KEY,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1500,
+        system: systemPrompt || 'You are JURIS, an expert law school AI assistant.',
+        messages: [{ role: 'user', content: userMessage }]
+      })
+    });
+    if (!resp.ok) { const err = await resp.json(); throw new Error(err.error?.message || 'API error'); }
+    const data = await resp.json();
+    return data.content?.[0]?.text || 'No response generated.';
+  } catch(e) {
+    console.error('Claude error:', e);
+    return `Error: ${e.message}. Please check your API key.`;
+  }
+}
+
+// ═══════════════════════════════════════════
+//  INITIALIZATION
+// ═══════════════════════════════════════════
+function enterApp() {
+  const key = document.getElementById('api-key-input').value.trim();
+  if (!key) { toast('Please enter your API key'); return; }
+  API_KEY = key;
+  try { localStorage.setItem('juris_api_key', key); } catch(e) {}
+  document.getElementById('splash-screen').classList.add('hidden');
+  document.getElementById('app').classList.add('active');
+  loadState();
+  initApp();
+}
+
+window.addEventListener('DOMContentLoaded', function() {
+  // ── Auto-login if key stored ──
+  var savedKey = localStorage.getItem('juris_api_key');
+  if (savedKey) {
+    API_KEY = savedKey;
+    document.getElementById('splash-screen').classList.add('hidden');
+    document.getElementById('app').classList.add('active');
+    loadState();
+    initApp();
+  }
+
+  // ── Responsive sidebar ──
+  var mql    = window.matchMedia('(max-width: 900px)');
+  var toggle = document.getElementById('menu-toggle');
+  function checkMobile(e) { if (toggle) toggle.style.display = e.matches ? 'flex' : 'none'; }
+  mql.addEventListener('change', checkMobile);
+  checkMobile(mql);
+
+  // ── PDF file input (wired here, not inline) ──
+  var pdfInput = document.getElementById('transcript-pdf-input');
+  if (pdfInput) {
+    pdfInput.addEventListener('change', function(e) {
+      var file = e.target.files[0];
+      if (file) processPDFFile(file);
+      // Reset so same file can be chosen again
+      e.target.value = '';
+    });
+  }
+
+  // ── PDF drop zone ──
+  var zone = document.getElementById('pdf-drop-zone');
+  if (zone) {
+    ['dragenter','dragover','dragleave','drop'].forEach(function(evt) {
+      zone.addEventListener(evt, function(e) { e.preventDefault(); e.stopPropagation(); });
+    });
+    zone.addEventListener('dragenter', function() { zone.classList.add('drag-over'); });
+    zone.addEventListener('dragover',  function() { zone.classList.add('drag-over'); });
+    zone.addEventListener('dragleave', function(e) {
+      if (!zone.contains(e.relatedTarget)) zone.classList.remove('drag-over');
+    });
+    zone.addEventListener('drop', function(e) {
+      zone.classList.remove('drag-over');
+      var file = e.dataTransfer.files[0];
+      if (file) processPDFFile(file);
+    });
+
+    // Click zone → trigger file picker (zone has onclick already, but belt-and-suspenders)
+    zone.addEventListener('click', function(e) {
+      // Only if the click wasn't on a child button
+      if (e.target === zone || e.target.tagName === 'svg' ||
+          e.target.tagName === 'path' || e.target.tagName === 'P' ||
+          e.target.classList.contains('upload-hint')) {
+        var inp = document.getElementById('transcript-pdf-input');
+        if (inp) inp.click();
+      }
+    });
+  }
+});
+
+function initApp() {
+  document.getElementById('semester-label').textContent = state.semester;
+  refreshDashboard();
+  refreshCourseSelects();
+  renderCalendar();
+  renderWeeklyChart();
+  // Restore transcript state
+  if (state.transcript.parsed.length > 0) {
+    renderParsedCourses();
+    const jurisEl = document.getElementById('bar-jurisdiction');
+    if (jurisEl.value) { renderJurisdictionChecklist(); renderImprovementTips(); }
+  }
+  // Init study plan (restore settings from state)
+  spInit();
+}
+
+// ═══════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════
+function navigateTo(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const pageEl = document.getElementById('page-' + page);
+  if (pageEl) pageEl.classList.add('active');
+  const navItem = document.querySelector(`.nav-item[data-page="${page}"]`);
+  if (navItem) navItem.classList.add('active');
+  const titles = { dashboard:'Dashboard', courses:'Courses', study:'Study Engine', outlines:'Outline Builder', calendar:'Calendar & Scheduling', bar:'Bar Alignment', career:'Career Intelligence', bluebook:'Bluebook Citation Assistant', wellness:'Work-Life Wellness', 'ai-chat':'AI Assistant', studyplan:'Study Plan' };
+  document.getElementById('page-title').textContent = titles[page] || page;
+  document.getElementById('sidebar').classList.remove('open');
+  if (page === 'studyplan') spRebuildGrid();
+}
+function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+
+// ═══════════════════════════════════════════
+//  MODALS & TOAST
+// ═══════════════════════════════════════════
+function openModal(id) { document.getElementById(id).classList.add('active'); }
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+function showApiKeyModal() { document.getElementById('settings-api-key').value = API_KEY; openModal('api-key-modal'); }
+function updateApiKey() { const key = document.getElementById('settings-api-key').value.trim(); if (key) { API_KEY = key; localStorage.setItem('juris_api_key', key); toast('API key updated'); } closeModal('api-key-modal'); }
+function toast(msg) {
+  const c = document.getElementById('toast-container');
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+  c.appendChild(t); setTimeout(() => t.remove(), 3000);
+}
+
+// ═══════════════════════════════════════════
+//  COURSES
+// ═══════════════════════════════════════════
+function addCourse() {
+  const name = document.getElementById('new-course-name').value.trim();
+  const prof = document.getElementById('new-course-prof').value.trim();
+  const credits = parseInt(document.getElementById('new-course-credits').value) || 3;
+  if (!name) return toast('Please enter a course name');
+  state.courses.push({ id: Date.now().toString(36), name, prof, credits, materials:[], notes:[], assignments:[], outlineData:null, progress:0 });
+  saveState(); closeModal('add-course-modal');
+  document.getElementById('new-course-name').value = '';
+  document.getElementById('new-course-prof').value = '';
+  refreshDashboard(); renderCoursesGrid(); refreshCourseSelects();
+  toast(`${name} added`);
+}
+function deleteCourse() {
+  if (!state.currentCourseId) return;
+  if (!confirm('Delete this course and all its materials?')) return;
+  state.courses = state.courses.filter(c => c.id !== state.currentCourseId);
+  state.currentCourseId = null; saveState(); closeCourseDetail(); renderCoursesGrid(); refreshDashboard(); refreshCourseSelects();
+  toast('Course deleted');
+}
+function renderCoursesGrid() {
+  const grid = document.getElementById('courses-grid');
+  if (state.courses.length === 0) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg><h3>No courses added</h3><p>Click "Add Course" to create your first class workspace</p></div>`;
+    return;
+  }
+  grid.innerHTML = state.courses.map(c => `
+    <div class="course-card" onclick="openCourseDetail('${c.id}')">
+      <div class="course-name">${esc(c.name)}</div>
+      <div class="course-prof">${esc(c.prof)} · ${c.credits} credits</div>
+      <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">
+        <span class="tag tag-gold">${c.materials.length} files</span>
+        <span class="tag tag-gold">${c.notes.length} notes</span>
+        <span class="tag tag-crimson">${c.assignments.length} assignments</span>
+      </div>
+      <div class="course-progress">
+        <div class="course-progress-label"><span>Syllabus Progress</span><span>${c.progress}%</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${c.progress}%"></div></div>
+      </div>
+    </div>`).join('');
+}
+function openCourseDetail(id) {
+  state.currentCourseId = id;
+  const course = state.courses.find(c => c.id === id);
+  if (!course) return;
+  document.getElementById('courses-grid').style.display = 'none';
+  document.querySelector('#page-courses > div:first-child').style.display = 'none';
+  document.getElementById('course-detail').style.display = 'block';
+  document.getElementById('detail-course-name').textContent = course.name;
+  document.getElementById('detail-course-prof').textContent = `${course.prof} · ${course.credits} credits`;
+  renderMaterials(course); renderNotes(course); renderAssignments(course);
+  switchCourseTab('materials');
+}
+function closeCourseDetail() {
+  document.getElementById('course-detail').style.display = 'none';
+  document.getElementById('courses-grid').style.display = '';
+  document.querySelector('#page-courses > div:first-child').style.display = '';
+  state.currentCourseId = null; renderCoursesGrid();
+}
+function switchCourseTab(tab) {
+  ['materials','notes','assignments','ai-tools'].forEach(t => { document.getElementById('ctab-'+t).style.display = t===tab?'block':'none'; });
+  document.querySelectorAll('[data-ctab]').forEach(el => el.classList.toggle('active', el.dataset.ctab===tab));
+}
+function handleFileUpload(event) {
+  const course = state.courses.find(c => c.id === state.currentCourseId);
+  if (!course) return;
+  Array.from(event.target.files).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      course.materials.push({ id: Date.now().toString(36)+Math.random().toString(36).slice(2,6), name:file.name, type:file.type, size:file.size, content:e.target.result.slice(0,50000), uploadedAt:new Date().toISOString() });
+      saveState(); renderMaterials(course); toast(`${file.name} uploaded`);
+    };
+    reader.readAsText(file);
+  });
+  event.target.value = '';
+}
+function renderMaterials(course) {
+  const list = document.getElementById('materials-list');
+  if (!course.materials.length) { list.innerHTML = ''; return; }
+  list.innerHTML = course.materials.map(m => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(26,26,46,0.04);">
+      <div><div style="font-size:0.82rem;font-weight:500;">${esc(m.name)}</div><div style="font-size:0.68rem;color:var(--slate);">${(m.size/1024).toFixed(1)} KB · ${new Date(m.uploadedAt).toLocaleDateString()}</div></div>
+      <button class="btn btn-ghost" style="padding:4px 10px;font-size:0.7rem;" onclick="removeMaterial('${m.id}')">Remove</button>
+    </div>`).join('');
+}
+function removeMaterial(mid) {
+  const course = state.courses.find(c => c.id === state.currentCourseId);
+  if (!course) return;
+  course.materials = course.materials.filter(m => m.id !== mid);
+  saveState(); renderMaterials(course);
+}
+function saveNote() {
+  const course = state.courses.find(c => c.id === state.currentCourseId);
+  if (!course) return;
+  const text = document.getElementById('note-input').value.trim();
+  if (!text) return;
+  course.notes.push({ id: Date.now().toString(36), text, createdAt: new Date().toISOString() });
+  saveState(); document.getElementById('note-input').value = '';
+  renderNotes(course); toast('Note saved');
+}
+function renderNotes(course) {
+  const list = document.getElementById('notes-list');
+  if (!course.notes.length) { list.innerHTML = ''; return; }
+  list.innerHTML = course.notes.map(n => `<div class="card" style="margin-bottom:0.75rem;"><div style="font-size:0.68rem;color:var(--slate);margin-bottom:4px;">${new Date(n.createdAt).toLocaleString()}</div><div style="font-size:0.82rem;line-height:1.6;white-space:pre-wrap;">${esc(n.text).slice(0,500)}${n.text.length>500?'...':''}</div></div>`).join('');
+}
+function addAssignment() {
+  const course = state.courses.find(c => c.id === state.currentCourseId);
+  if (!course) return;
+  const name = document.getElementById('assign-name').value.trim();
+  const date = document.getElementById('assign-date').value;
+  if (!name || !date) return toast('Fill in assignment name and date');
+  course.assignments.push({ id: Date.now().toString(36), name, date, completed:false });
+  saveState(); document.getElementById('assign-name').value = ''; document.getElementById('assign-date').value = '';
+  renderAssignments(course); refreshDashboard(); toast('Assignment added');
+}
+function renderAssignments(course) {
+  const list = document.getElementById('assignments-list');
+  if (!course.assignments.length) { list.innerHTML = ''; return; }
+  list.innerHTML = `<table><thead><tr><th>Assignment</th><th>Due Date</th><th>Status</th></tr></thead><tbody>${
+    course.assignments.sort((a,b)=>new Date(a.date)-new Date(b.date)).map(a=>`<tr><td>${esc(a.name)}</td><td>${new Date(a.date).toLocaleDateString()}</td><td><span class="tag ${a.completed?'tag-success':'tag-crimson'}" style="cursor:pointer;" onclick="toggleAssignment('${a.id}')">${a.completed?'✓ Done':'Pending'}</span></td></tr>`).join('')
+  }</tbody></table>`;
+}
+function toggleAssignment(aid) {
+  const course = state.courses.find(c => c.id === state.currentCourseId);
+  if (!course) return;
+  const a = course.assignments.find(x => x.id === aid);
+  if (a) a.completed = !a.completed;
+  saveState(); renderAssignments(course);
+}
+
+// ═══════════════════════════════════════════
+//  AI COURSE TOOLS
+// ═══════════════════════════════════════════
+async function runAITool(type) {
+  const course = state.courses.find(c => c.id === state.currentCourseId);
+  if (!course) return;
+  const ctx = gatherCourseContext(course);
+  const outputEl = document.getElementById('ai-tool-output');
+  const contentEl = document.getElementById('ai-tool-content');
+  const titleEl = document.getElementById('ai-tool-title');
+  outputEl.style.display = 'block';
+  contentEl.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div> Generating...';
+  const prompts = {
+    'practice-q': { title:'Practice Questions', prompt:`Based on course materials for "${course.name}", generate 3 practice questions: 1 MBE-style multiple choice, 1 short answer, and 1 issue spotter. Include answers and explanations.\n\nMaterials:\n${ctx}` },
+    'cold-call': { title:'Cold Call Simulation', prompt:`You are a law professor teaching "${course.name}". Based on these materials, generate a realistic cold-call simulation with 5 Socratic questions that build on each other.\n\nMaterials:\n${ctx}` },
+    'outline': { title:'Course Outline', prompt:`Based on materials for "${course.name}", extract and organize all black-letter rules, case holdings, and key doctrines into a structured course outline.\n\nMaterials:\n${ctx}` },
+    'exam-hypo': { title:'Exam Hypothetical', prompt:`Create a full-length exam-quality hypothetical for "${course.name}" testing multiple doctrines. After the fact pattern, provide a model answer outline (IRAC).\n\nMaterials:\n${ctx}` }
+  };
+  const p = prompts[type];
+  titleEl.textContent = p.title;
+  const result = await callClaude(p.prompt, 'You are JURIS, an expert law school AI tutor. Be thorough, accurate, and pedagogically sound.');
+  contentEl.textContent = result;
+}
+function gatherCourseContext(course) {
+  let ctx = '';
+  course.materials.forEach(m => ctx += `\n--- ${m.name} ---\n${(m.content||'').slice(0,8000)}\n`);
+  course.notes.forEach(n => ctx += `\n--- Note ---\n${n.text.slice(0,3000)}\n`);
+  return ctx.slice(0,30000) || 'No materials uploaded. Generate based on common topics for this type of law course.';
+}
+
+// ═══════════════════════════════════════════
+//  STUDY ENGINE
+// ═══════════════════════════════════════════
+async function generateQuiz() {
+  const courseId = document.getElementById('quiz-course-select').value;
+  const difficulty = document.getElementById('quiz-difficulty').value;
+  const qtype = document.getElementById('quiz-type').value;
+  if (!courseId) return toast('Select a course first');
+  const course = state.courses.find(c => c.id === courseId);
+  if (!course) return;
+  const outputArea = document.getElementById('quiz-output-area');
+  const contentEl = document.getElementById('quiz-content');
+  outputArea.style.display = 'block';
+  contentEl.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div> Generating quiz...';
+  const ctx = gatherCourseContext(course);
+  const diffLabels = {early:'early-semester comprehension',mid:'midterm reinforcement',final:'final exam complexity'};
+  const typeLabels = {mbe:'MBE-style multiple choice (4 options each)',short:'short answer',['issue-spot']:'issue spotter with complex fact patterns',hypo:'a full exam hypothetical'};
+  const prompt = `Generate ${typeLabels[qtype]} at ${diffLabels[difficulty]} level for "${course.name}". Based on:\n\n${ctx}\n\nProvide 3 questions. Do NOT include answers yet.`;
+  const result = await callClaude(prompt, 'You are JURIS, an expert law school quiz generator.');
+  contentEl.textContent = result;
+  document.getElementById('grade-output').style.display = 'none';
+}
+async function gradeAnswer() {
+  const answer = document.getElementById('quiz-answer').value.trim();
+  const question = document.getElementById('quiz-content').textContent;
+  if (!answer) return toast('Write your answer first');
+  const gradeEl = document.getElementById('grade-output');
+  const gradeContent = document.getElementById('grade-content');
+  gradeEl.style.display = 'block';
+  gradeContent.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div> Grading...';
+  const prompt = `Grade this law student answer:\n\nQuestion:\n${question}\n\nStudent Answer:\n${answer}\n\nProvide: 1) Score /10, 2) Issues correctly identified, 3) Missing issues, 4) Rule quality, 5) IRAC structure, 6) Improvement suggestions.`;
+  const result = await callClaude(prompt, 'You are JURIS, an expert law professor grader. Be constructive and specific.');
+  gradeContent.textContent = result;
+}
+
+// ═══════════════════════════════════════════
+//  OUTLINES
+// ═══════════════════════════════════════════
+function loadOutline() {
+  const courseId = document.getElementById('outline-course-select').value;
+  const display = document.getElementById('outline-display');
+  if (!courseId) { display.innerHTML = '<div class="empty-state"><h3>Select a course</h3></div>'; return; }
+  const course = state.courses.find(c => c.id === courseId);
+  if (course?.outlineData) { display.innerHTML = `<div style="font-size:0.85rem;line-height:1.8;white-space:pre-wrap;">${esc(course.outlineData)}</div>`; }
+  else { display.innerHTML = '<div class="empty-state"><h3>No outline yet</h3><p>Click "Auto-Build" to generate one from your materials</p></div>'; }
+}
+async function generateOutline(type) {
+  const courseId = document.getElementById('outline-course-select').value;
+  if (!courseId) return toast('Select a course first');
+  const course = state.courses.find(c => c.id === courseId);
+  if (!course) return;
+  const display = document.getElementById('outline-display');
+  display.innerHTML = '<div style="text-align:center;padding:2rem;"><div class="loading-dots"><span></span><span></span><span></span></div><div style="margin-top:8px;font-size:0.82rem;color:var(--slate);">Building outline...</div></div>';
+  const ctx = gatherCourseContext(course);
+  const typeInstructions = { full:'Create a comprehensive outline with all black-letter rules, case holdings, policy rationales.', attack:'Create a concise attack outline — key rules, elements, analysis frameworks for quick exam reference.', checklist:'Create an exam checklist with every issue to spot, organized by topic with brief rule triggers.', auto:'Create a well-organized course outline extracting all rules, cases, and doctrines.' };
+  const prompt = `For "${course.name}", ${typeInstructions[type]}\n\nBased on:\n${ctx}`;
+  const result = await callClaude(prompt, 'You are JURIS, an expert law school outline builder.');
+  course.outlineData = result; saveState();
+  display.innerHTML = `<div style="font-size:0.85rem;line-height:1.8;white-space:pre-wrap;">${esc(result)}</div>`;
+}
+
+// ═══════════════════════════════════════════
+//  CALENDAR
+// ═══════════════════════════════════════════
+function renderCalendar() {
+  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('cal-month-title').textContent = `${monthNames[state.calMonth]} ${state.calYear}`;
+  const firstDay = new Date(state.calYear, state.calMonth, 1).getDay();
+  const daysInMonth = new Date(state.calYear, state.calMonth+1, 0).getDate();
+  const today = new Date();
+  const assignDates = new Set();
+  state.courses.forEach(c => c.assignments.forEach(a => { const d = new Date(a.date); if (d.getMonth()===state.calMonth && d.getFullYear()===state.calYear) assignDates.add(d.getDate()); }));
+  let html = '';
+  for (let i=0; i<firstDay; i++) html += '<div class="cal-cell empty"></div>';
+  for (let d=1; d<=daysInMonth; d++) {
+    const isToday = d===today.getDate() && state.calMonth===today.getMonth() && state.calYear===today.getFullYear();
+    html += `<div class="cal-cell${isToday?' today':''}${assignDates.has(d)?' has-event':''}">${d}</div>`;
+  }
+  document.getElementById('cal-days').innerHTML = html;
+}
+function changeMonth(delta) {
+  state.calMonth += delta;
+  if (state.calMonth > 11) { state.calMonth = 0; state.calYear++; }
+  if (state.calMonth < 0) { state.calMonth = 11; state.calYear--; }
+  renderCalendar();
+}
+async function generateStudyPlan() {
+  const courses = state.courses.map(c => ({ name:c.name, assignments:c.assignments.filter(a=>!a.completed).map(a=>({name:a.name,date:a.date})) }));
+  if (!courses.length) return toast('Add courses and assignments first');
+  const el = document.getElementById('reminders-list');
+  el.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div> Generating study plan...';
+  const prompt = `Create a detailed weekly study plan for these courses and assignments:\n\n${JSON.stringify(courses,null,2)}\n\nToday is ${new Date().toLocaleDateString()}. Include spaced repetition, break reminders, and prioritize upcoming deadlines.`;
+  const result = await callClaude(prompt, 'You are JURIS, a law school study planning assistant. Create practical, time-blocked study plans.');
+  el.innerHTML = `<div style="white-space:pre-wrap;">${esc(result)}</div>`;
+}
+
+// ═══════════════════════════════════════════
+//  CAREER & BLUEBOOK & WELLNESS
+// ═══════════════════════════════════════════
+async function analyzeCareer() {
+  const classes = document.getElementById('career-classes').value;
+  const style = document.getElementById('career-style').value;
+  const wlb = document.getElementById('career-wlb').value;
+  const geo = document.getElementById('career-geo').value;
+  const resultsEl = document.getElementById('career-results');
+  const outputEl = document.getElementById('career-output');
+  resultsEl.style.display = 'block';
+  outputEl.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div> Analyzing career matches...';
+  const prompt = `Law student profile — Classes enjoyed: ${classes||'Not specified'}, Work style: ${style}, Work-life priority: ${wlb}, Location: ${geo||'Flexible'}\n\nProvide: 1) Top 5 career path matches with explanations, 2) For each: daily schedule, hours/week, compensation range, stress level, advancement timeline, 3) Top 3 comparison table, 4) Recommended next steps.`;
+  const result = await callClaude(prompt, 'You are JURIS, an expert legal career counselor. Be specific about compensation and lifestyle.');
+  outputEl.textContent = result;
+}
+async function generateCitation() {
+  const type = document.getElementById('cite-type').value;
+  const input = document.getElementById('cite-input').value.trim();
+  if (!input) return toast('Enter source information');
+  const outputArea = document.getElementById('cite-output-area');
+  const outputEl = document.getElementById('cite-output');
+  outputArea.style.display = 'block'; outputEl.textContent = 'Generating citation...';
+  const prompt = `Generate a proper Bluebook citation for this ${type}:\n\n${input}\n\nProvide: 1) Full citation, 2) Short form, 3) If a case: proper parenthetical, 4) Formatting rules applied.`;
+  const result = await callClaude(prompt, 'You are JURIS, an expert in Bluebook citation format (21st edition). Be precise about formatting.');
+  outputEl.textContent = result;
+}
+async function fixCitation() {
+  const input = document.getElementById('cite-input').value.trim();
+  if (!input) return toast('Paste the citation to fix');
+  const outputArea = document.getElementById('cite-output-area');
+  const outputEl = document.getElementById('cite-output');
+  outputArea.style.display = 'block'; outputEl.textContent = 'Analyzing citation...';
+  const prompt = `Analyze and fix this Bluebook citation:\n\n${input}\n\nIdentify all errors, explain the Bluebook rules violated, and provide the corrected citation.`;
+  const result = await callClaude(prompt, 'You are JURIS, an expert Bluebook citation checker.');
+  outputEl.textContent = result;
+}
+function copyCitation() { navigator.clipboard.writeText(document.getElementById('cite-output').textContent).then(() => toast('Copied to clipboard')); }
+function logStudyHours() {
+  const hours = parseFloat(document.getElementById('study-hours').value);
+  const subject = document.getElementById('study-subject-log').value;
+  if (!hours || hours <= 0) return toast('Enter valid hours');
+  state.studyLog.push({ hours, subject, date: new Date().toISOString() });
+  saveState(); document.getElementById('study-hours').value = '';
+  refreshDashboard(); renderWeeklyChart(); toast(`${hours} hours logged`);
+}
+function renderWeeklyChart() {
+  const chart = document.getElementById('weekly-study-chart');
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const today = new Date();
+  const startOfWeek = new Date(today); startOfWeek.setDate(today.getDate()-today.getDay()); startOfWeek.setHours(0,0,0,0);
+  let html = '';
+  for (let i=0; i<7; i++) {
+    const d = new Date(startOfWeek); d.setDate(d.getDate()+i);
+    const hrs = state.studyLog.filter(l=>new Date(l.date).toDateString()===d.toDateString()).reduce((sum,l)=>sum+l.hours,0);
+    const level = hrs===0?0:hrs<=2?1:hrs<=4?2:hrs<=6?3:4;
+    html += `<div class="heat-cell" data-level="${level}" title="${days[i]}: ${hrs}h" style="flex:1;height:36px;font-size:0.65rem;">${days[i]}<br>${hrs}h</div>`;
+  }
+  chart.innerHTML = html;
+}
+async function wellnessCheckIn() {
+  const el = document.getElementById('wellness-output');
+  el.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div>';
+  const totalHrs = state.studyLog.reduce((s,l)=>s+l.hours,0);
+  const prompt = `Law student wellness check — Total study hours: ${totalHrs}, Recent sessions: ${state.studyLog.slice(-14).length}, Active courses: ${state.courses.length}, Pending assignments: ${state.courses.reduce((s,c)=>s+c.assignments.filter(a=>!a.completed).length,0)}.\n\nProvide: 1) Study pattern assessment, 2) Burnout risk level, 3) 3-5 actionable wellness tips, 4) Schedule adjustment suggestions.`;
+  const result = await callClaude(prompt, 'You are JURIS wellness advisor. Be warm, supportive, and practical for law students.');
+  el.textContent = result;
+}
+
+// ═══════════════════════════════════════════
+//  AI CHAT
+// ═══════════════════════════════════════════
+async function sendChat() {
+  const input = document.getElementById('chat-input');
+  const msg = input.value.trim(); if (!msg) return;
+  input.value = '';
+  const msgsEl = document.getElementById('chat-messages');
+  msgsEl.innerHTML += `<div class="ai-msg user">${esc(msg)}</div>`;
+  msgsEl.innerHTML += `<div class="ai-msg assistant" id="chat-loading"><div class="loading-dots"><span></span><span></span><span></span></div></div>`;
+  msgsEl.scrollTop = msgsEl.scrollHeight;
+  state.chatHistory.push({ role:'user', content:msg });
+  const courseSummary = state.courses.map(c => `${c.name} (${c.prof})`).join('; ');
+  const transcriptSummary = state.transcript.parsed.length > 0 ? state.transcript.parsed.map(c=>`${c.name}: ${c.grade}`).join(', ') : '';
+  const contextPrompt = `Student context: Courses: [${courseSummary||'none'}]. Semester: ${state.semester}. Transcript: [${transcriptSummary||'none provided'}].\n\nConversation:\n${state.chatHistory.map(m=>`${m.role}: ${m.content}`).join('\n')}\n\nRespond to the latest message.`;
+  const result = await callClaude(contextPrompt, 'You are JURIS, an intelligent law school AI assistant. Be knowledgeable, supportive, and thorough.');
+  state.chatHistory.push({ role:'assistant', content:result });
+  if (state.chatHistory.length > 20) state.chatHistory = state.chatHistory.slice(-20);
+  const loadingEl = document.getElementById('chat-loading');
+  if (loadingEl) loadingEl.remove();
+  msgsEl.innerHTML += `<div class="ai-msg assistant">${esc(result)}</div>`;
+  msgsEl.scrollTop = msgsEl.scrollHeight;
+}
+async function quickAI(prompt) { navigateTo('ai-chat'); document.getElementById('chat-input').value = prompt; sendChat(); }
+
+// ═══════════════════════════════════════════
+//  DASHBOARD
+// ═══════════════════════════════════════════
+function refreshDashboard() {
+  document.getElementById('stat-courses').textContent = state.courses.length;
+  document.getElementById('stat-assignments').textContent = state.courses.reduce((s,c)=>s+c.assignments.length,0);
+  document.getElementById('stat-study-hrs').textContent = state.studyLog.reduce((s,l)=>s+l.hours,0).toFixed(1);
+  const dashList = document.getElementById('dash-courses-list');
+  if (state.courses.length > 0) {
+    dashList.innerHTML = state.courses.slice(0,4).map(c => `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(26,26,46,0.04);cursor:pointer;" onclick="navigateTo('courses');setTimeout(()=>openCourseDetail('${c.id}'),100)"><div><div style="font-size:0.85rem;font-weight:500;">${esc(c.name)}</div><div style="font-size:0.7rem;color:var(--slate);">${esc(c.prof)}</div></div><span class="tag tag-gold">${c.materials.length+c.notes.length} items</span></div>`).join('');
+  }
+  const allAssigns = [];
+  state.courses.forEach(c => c.assignments.filter(a=>!a.completed).forEach(a => allAssigns.push({...a,course:c.name})));
+  allAssigns.sort((a,b) => new Date(a.date)-new Date(b.date));
+  const deadlinesEl = document.getElementById('dash-deadlines');
+  if (allAssigns.length > 0) {
+    deadlinesEl.innerHTML = allAssigns.slice(0,5).map(a => { const daysLeft = Math.ceil((new Date(a.date)-new Date())/86400000); return `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(26,26,46,0.04);"><div><div style="font-size:0.85rem;font-weight:500;">${esc(a.name)}</div><div style="font-size:0.7rem;color:var(--slate);">${esc(a.course)}</div></div><span class="tag ${daysLeft<=3?'tag-crimson':daysLeft<=7?'tag-gold':'tag-success'}">${daysLeft<=0?'Overdue':daysLeft+'d left'}</span></div>`; }).join('');
+  }
+  renderCoursesGrid();
+}
+function refreshCourseSelects() {
+  ['quiz-course-select','outline-course-select','study-subject-log'].forEach(id => {
+    const el = document.getElementById(id); if (!el) return;
+    const firstOption = el.options[0]; el.innerHTML = ''; el.appendChild(firstOption);
+    state.courses.forEach(c => { const opt = document.createElement('option'); opt.value = c.id; opt.textContent = c.name; el.appendChild(opt); });
+  });
+}
+
+// ═══════════════════════════════════════════
+//  PDF TRANSCRIPT UPLOAD
+// ═══════════════════════════════════════════
+
+// Load PDF.js on-demand (single promise, cached)
+let _pdfjsPromise = null;
+function loadPDFJS() {
+  if (_pdfjsPromise) return _pdfjsPromise;
+  _pdfjsPromise = new Promise(function(resolve, reject) {
+    if (window.pdfjsLib) {
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+        'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      resolve(window.pdfjsLib);
+      return;
+    }
+    var s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+    s.onload = function() {
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+        'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      resolve(window.pdfjsLib);
+    };
+    s.onerror = function() {
+      _pdfjsPromise = null; // allow retry
+      reject(new Error('Failed to load PDF.js from CDN. Check your internet connection.'));
+    };
+    document.body.appendChild(s);
+  });
+  return _pdfjsPromise;
+}
+
+function switchTranscriptTab(tab) {
+  ['pdf','paste','manual'].forEach(function(t) {
+    var el = document.getElementById('ttab-' + t);
+    if (el) el.style.display = (t === tab) ? 'block' : 'none';
+  });
+  document.querySelectorAll('[data-ttab]').forEach(function(el) {
+    el.classList.toggle('active', el.dataset.ttab === tab);
+  });
+}
+
+function parsePDFTranscript() {
+  var text = document.getElementById('pdf-extracted-text').value.trim();
+  if (!text) { toast('No extracted text found — please upload a PDF first'); return; }
+  parseTranscriptFromText(text);
+}
+
+function clearPDF() {
+  document.getElementById('pdf-status').style.display = 'none';
+  document.getElementById('pdf-loading').style.display = 'none';
+  var ta = document.getElementById('pdf-extracted-text');
+  if (ta) ta.value = '';
+  var inp = document.getElementById('transcript-pdf-input');
+  if (inp) inp.value = '';
+}
+
+async function processPDFFile(file) {
+  if (!file) return;
+  if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+    toast('Please select a PDF file (.pdf)');
+    return;
+  }
+
+  var loadingEl = document.getElementById('pdf-loading');
+  var statusEl  = document.getElementById('pdf-status');
+  var msgEl     = document.getElementById('pdf-loading-msg');
+
+  loadingEl.style.display = 'block';
+  statusEl.style.display  = 'none';
+  if (msgEl) msgEl.textContent = 'Loading PDF reader…';
+
+  try {
+    var pdfjs = await loadPDFJS();
+    if (msgEl) msgEl.textContent = 'Reading PDF pages…';
+
+    var arrayBuffer = await file.arrayBuffer();
+    var loadingTask = pdfjs.getDocument({ data: arrayBuffer });
+    var pdf = await loadingTask.promise;
+
+    if (msgEl) msgEl.textContent = 'Extracting text from ' + pdf.numPages + ' page(s)…';
+
+    var fullText = '';
+    for (var p = 1; p <= pdf.numPages; p++) {
+      var page    = await pdf.getPage(p);
+      var content = await page.getTextContent();
+
+      // Group text items by Y position to reconstruct visual lines
+      var itemsByY = {};
+      content.items.forEach(function(item) {
+        if (!item.str || item.str.trim() === '') return;
+        // Round Y to nearest 2px to group items on the same line
+        var y = Math.round(item.transform[5] / 2) * 2;
+        if (!itemsByY[y]) itemsByY[y] = [];
+        itemsByY[y].push({ x: item.transform[4], str: item.str });
+      });
+
+      // Sort lines: larger Y = higher on page in PDF coordinate space
+      var sortedYs = Object.keys(itemsByY).map(Number).sort(function(a, b) { return b - a; });
+      sortedYs.forEach(function(y) {
+        var lineItems = itemsByY[y].sort(function(a, b) { return a.x - b.x; });
+        var line = lineItems.map(function(i) { return i.str; }).join(' ').trim();
+        if (line) fullText += line + '\n';
+      });
+      fullText += '\n'; // blank line between pages
+    }
+
+    // Clean up excess whitespace
+    fullText = fullText
+      .replace(/[ \t]+/g, ' ')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
+
+    if (!fullText) {
+      throw new Error('No text could be extracted. This PDF may be a scanned image — try the Paste Text tab instead.');
+    }
+
+    // Show results
+    loadingEl.style.display = 'none';
+    statusEl.style.display  = 'block';
+
+    var fnEl = document.getElementById('pdf-filename');
+    var pcEl = document.getElementById('pdf-page-count');
+    var taEl = document.getElementById('pdf-extracted-text');
+
+    if (fnEl) fnEl.textContent = file.name;
+    if (pcEl) pcEl.textContent = pdf.numPages + ' page' + (pdf.numPages !== 1 ? 's' : '') +
+      ' · ' + fullText.length.toLocaleString() + ' characters extracted';
+    if (taEl) {
+      taEl.value = fullText;
+      taEl.removeAttribute('readonly');
+    }
+
+    toast('✓ PDF extracted — ' + pdf.numPages + ' page(s) ready to parse');
+
+  } catch (err) {
+    loadingEl.style.display = 'none';
+    console.error('PDF extraction error:', err);
+    toast('PDF error: ' + err.message);
+  }
+}
+
+// ═══════════════════════════════════════════
+//  STUDY PLAN
+// ═══════════════════════════════════════════
+
+// Course palette — consistent colors per course
+const SP_PALETTE = [
+  '#16213e','#8b2635','#4a7c59','#a08840','#2d5a87','#7b4a8b','#c5873a','#3a6b5c',
+  '#6b3a3a','#3a4a6b','#5c6b3a','#6b5c3a',
+];
+
+function spCourseColor(idx) { return SP_PALETTE[idx % SP_PALETTE.length]; }
+
+// Context menu state
+let _spCtx = { dayIdx: null, slotIdx: null };
+
+function spInit() {
+  // Restore settings from state
+  const sp = state.studyPlan;
+  const startSel = document.getElementById('sp-start-hour');
+  const endSel   = document.getElementById('sp-end-hour');
+  const blockSel = document.getElementById('sp-block-size');
+  if (startSel) startSel.value = String(sp.startHour);
+  if (endSel)   endSel.value   = String(sp.endHour);
+  if (blockSel) blockSel.value = String(sp.blockSize);
+  spRebuildGrid();
+}
+
+function spGetWeekDates() {
+  // Returns array of 7 Date objects (Sun-Sat) for the week at weekOffset
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  const sunday = new Date(today);
+  sunday.setDate(today.getDate() - today.getDay() + state.studyPlan.weekOffset * 7);
+  return Array.from({ length: 7 }, function(_, i) {
+    const d = new Date(sunday);
+    d.setDate(sunday.getDate() + i);
+    return d;
+  });
+}
+
+function spChangeWeek(dir) {
+  if (dir === 0) state.studyPlan.weekOffset = 0;
+  else state.studyPlan.weekOffset += dir;
+  saveState();
+  spRebuildGrid();
+}
+
+function spRebuildGrid() {
+  // Read current settings from UI (may differ from saved state)
+  const startSel = document.getElementById('sp-start-hour');
+  const endSel   = document.getElementById('sp-end-hour');
+  const blockSel = document.getElementById('sp-block-size');
+  if (!startSel) return; // page not in DOM yet
+
+  const startHour = parseInt(startSel.value);
+  const endHour   = parseInt(endSel.value);
+  const blockSize = parseInt(blockSel.value);
+
+  // Validate
+  if (endHour <= startHour) { toast('End hour must be after start hour'); return; }
+
+  state.studyPlan.startHour = startHour;
+  state.studyPlan.endHour   = endHour;
+  state.studyPlan.blockSize = blockSize;
+  saveState();
+
+  const days    = spGetWeekDates();
+  const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const months   = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const todayStr = new Date().toDateString();
+
+  // Build time slots
+  const slots = [];
+  for (let h = startHour; h < endHour; h += blockSize) {
+    const endH = Math.min(h + blockSize, endHour);
+    const fmt = function(hr) {
+      const period = hr >= 12 ? 'PM' : 'AM';
+      const disp   = hr > 12 ? hr - 12 : hr === 0 ? 12 : hr;
+      return disp + period;
+    };
+    slots.push({ label: fmt(h) + '–' + fmt(endH), startH: h });
+  }
+
+  // Update week label
+  const weekLabel = document.getElementById('sp-week-label');
+  if (weekLabel) {
+    const first = days[0], last = days[6];
+    weekLabel.textContent = months[first.getMonth()] + ' ' + first.getDate() +
+      ' – ' + months[last.getMonth()] + ' ' + last.getDate() + ', ' + last.getFullYear();
+  }
+
+  // Render course pills
+  spRenderCoursePills();
+
+  // Build grid HTML
+  let html = '';
+
+  // Header row: empty corner + 7 day headers
+  html += '<div class="sp-col-header" style="background:transparent;"></div>';
+  days.forEach(function(d, i) {
+    const isToday = d.toDateString() === todayStr;
+    html += '<div class="sp-col-header' + (isToday ? ' today-col' : '') + '">' +
+      dayNames[i] + '<br>' +
+      '<span style="font-size:0.7rem;font-weight:400;">' + d.getDate() + '</span>' +
+      '</div>';
+  });
+
+  // Slot rows
+  slots.forEach(function(slot, si) {
+    html += '<div class="sp-time-label">' + slot.label + '</div>';
+    days.forEach(function(d, di) {
+      const key    = di + '-' + si;
+      const courseId = state.studyPlan.blocks[key];
+      const course   = courseId ? state.courses.find(function(c) { return c.id === courseId; }) : null;
+      const courseIdx = course ? state.courses.indexOf(course) : -1;
+      const isPast   = d < new Date(new Date().setHours(0,0,0,0));
+
+      if (course) {
+        const color = spCourseColor(courseIdx);
+        html += '<div class="sp-slot has-block" data-day="' + di + '" data-slot="' + si + '"' +
+          ' style="background:' + color + ';" title="' + esc(course.name) + '" onclick="spSlotClick(event,' + di + ',' + si + ')">' +
+          esc(course.name.length > 16 ? course.name.slice(0,14) + '…' : course.name) +
+          '</div>';
+      } else if (isPast) {
+        html += '<div class="sp-slot blocked" data-day="' + di + '" data-slot="' + si + '"></div>';
+      } else {
+        html += '<div class="sp-slot" data-day="' + di + '" data-slot="' + si + '"' +
+          ' onclick="spSlotClick(event,' + di + ',' + si + ')" title="Click to assign">+</div>';
+      }
+    });
+  });
+
+  const grid = document.getElementById('sp-week-grid');
+  if (grid) grid.innerHTML = html;
+
+  spRenderSummary(slots);
+
+  // Close any open context menu
+  spCloseCtx();
+}
+
+function spRenderCoursePills() {
+  const el = document.getElementById('sp-course-pills');
+  if (!el) return;
+  if (state.courses.length === 0) {
+    el.innerHTML = '<div style="font-size:0.78rem;color:var(--slate);">Add courses first, then they\'ll appear here.</div>';
+    return;
+  }
+  el.innerHTML = state.courses.map(function(c, i) {
+    const color = spCourseColor(i);
+    return '<span class="sp-course-pill" style="background:' + color + ';color:white;" title="Click slot to assign ' + esc(c.name) + '">' +
+      '<span class="sp-legend-dot" style="background:rgba(255,255,255,0.4);"></span>' +
+      esc(c.name) +
+      '</span>';
+  }).join('');
+}
+
+function spRenderSummary(slots) {
+  const totalEl = document.getElementById('sp-total-badge');
+  const listEl  = document.getElementById('sp-summary-list');
+  if (!listEl) return;
+
+  // Count blocks per course
+  const counts = {};
+  Object.keys(state.studyPlan.blocks).forEach(function(key) {
+    const cid = state.studyPlan.blocks[key];
+    if (!cid) return;
+    counts[cid] = (counts[cid] || 0) + 1;
+  });
+
+  const hoursPerBlock = state.studyPlan.blockSize;
+  const totalBlocks   = Object.values(counts).reduce(function(a, b) { return a + b; }, 0);
+  const totalHours    = totalBlocks * hoursPerBlock;
+
+  if (totalEl) totalEl.textContent = totalHours + ' hrs planned';
+
+  if (Object.keys(counts).length === 0) {
+    listEl.innerHTML = '<div style="font-size:0.78rem;color:var(--slate);padding:8px 0;">No blocks scheduled yet. Click any slot in the grid to assign a course.</div>';
+    return;
+  }
+
+  const maxBlocks = Math.max.apply(null, Object.values(counts));
+
+  listEl.innerHTML = state.courses.map(function(c, i) {
+    const n = counts[c.id] || 0;
+    if (n === 0) return '';
+    const hrs   = n * hoursPerBlock;
+    const color = spCourseColor(i);
+    const pct   = Math.round(n / maxBlocks * 100);
+    return '<div class="sp-summary-row">' +
+      '<div style="width:10px;height:10px;border-radius:50%;background:' + color + ';flex-shrink:0;"></div>' +
+      '<div style="flex:1;min-width:0;">' +
+        '<div style="font-size:0.8rem;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + esc(c.name) + '</div>' +
+      '</div>' +
+      '<div class="sp-summary-bar-wrap"><div class="sp-summary-bar" style="width:' + pct + '%;background:' + color + ';"></div></div>' +
+      '<div style="font-size:0.75rem;font-weight:600;color:var(--ink);min-width:44px;text-align:right;">' + hrs + ' hr' + (hrs !== 1 ? 's' : '') + '</div>' +
+      '</div>';
+  }).filter(Boolean).join('');
+}
+
+// ── Context menu for slot clicks ──
+function spSlotClick(e, dayIdx, slotIdx) {
+  e.stopPropagation();
+  _spCtx.dayIdx  = dayIdx;
+  _spCtx.slotIdx = slotIdx;
+
+  if (state.courses.length === 0) { toast('Add courses first'); return; }
+
+  const menu = document.getElementById('sp-ctx-menu');
+  if (!menu) return;
+
+  // Build course options
+  const listEl = document.getElementById('sp-ctx-course-list');
+  listEl.innerHTML = state.courses.map(function(c, i) {
+    const color = spCourseColor(i);
+    return '<div class="sp-ctx-option" onclick="spAssignBlock(\'' + c.id + '\')" style="display:flex;align-items:center;gap:8px;">' +
+      '<span style="width:8px;height:8px;border-radius:50%;background:' + color + ';flex-shrink:0;display:inline-block;"></span>' +
+      esc(c.name) +
+      '</div>';
+  }).join('');
+
+  // Position menu near click, keeping it in viewport
+  const rect = (e.currentTarget || e.target).getBoundingClientRect();
+  let top  = rect.bottom + window.scrollY + 4;
+  let left = rect.left + window.scrollX;
+
+  menu.classList.add('visible');
+  // Adjust if off right edge
+  const menuW = 200;
+  if (left + menuW > window.innerWidth) left = window.innerWidth - menuW - 12;
+  menu.style.top  = top + 'px';
+  menu.style.left = left + 'px';
+}
+
+function spAssignBlock(courseId) {
+  if (_spCtx.dayIdx === null) return;
+  const key = _spCtx.dayIdx + '-' + _spCtx.slotIdx;
+  state.studyPlan.blocks[key] = courseId;
+  saveState();
+  spCloseCtx();
+  spRebuildGrid();
+}
+
+function spRemoveBlock() {
+  if (_spCtx.dayIdx === null) return;
+  const key = _spCtx.dayIdx + '-' + _spCtx.slotIdx;
+  delete state.studyPlan.blocks[key];
+  saveState();
+  spCloseCtx();
+  spRebuildGrid();
+}
+
+function spCloseCtx() {
+  const menu = document.getElementById('sp-ctx-menu');
+  if (menu) menu.classList.remove('visible');
+  _spCtx.dayIdx  = null;
+  _spCtx.slotIdx = null;
+}
+
+function spClearAll() {
+  if (!confirm('Clear all scheduled blocks for this plan?')) return;
+  state.studyPlan.blocks = {};
+  saveState();
+  spRebuildGrid();
+  toast('All blocks cleared');
+}
+
+function spCopyPlan() {
+  const days = spGetWeekDates();
+  const dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const sp = state.studyPlan;
+  const hoursPerBlock = sp.blockSize;
+
+  // Build slot labels
+  const slots = [];
+  for (let h = sp.startHour; h < sp.endHour; h += hoursPerBlock) {
+    const endH = Math.min(h + hoursPerBlock, sp.endHour);
+    const fmt = function(hr) {
+      const p = hr >= 12 ? 'PM' : 'AM';
+      const d = hr > 12 ? hr - 12 : hr === 0 ? 12 : hr;
+      return d + ':00 ' + p;
+    };
+    slots.push(fmt(h) + ' – ' + fmt(endH));
+  }
+
+  let text = 'JURIS Weekly Study Plan\n';
+  text += '========================\n\n';
+
+  days.forEach(function(d, di) {
+    const dayBlocks = [];
+    slots.forEach(function(slotLabel, si) {
+      const key = di + '-' + si;
+      const cid = state.studyPlan.blocks[key];
+      if (cid) {
+        const c = state.courses.find(function(x) { return x.id === cid; });
+        if (c) dayBlocks.push('  ' + slotLabel + '  →  ' + c.name);
+      }
+    });
+    if (dayBlocks.length > 0) {
+      text += dayNames[di] + ', ' + d.toLocaleDateString() + '\n';
+      text += dayBlocks.join('\n') + '\n\n';
+    }
+  });
+
+  if (text.trim().endsWith('========================')) {
+    text += '(No blocks scheduled)\n';
+  }
+
+  navigator.clipboard.writeText(text).then(function() {
+    toast('✓ Study plan copied to clipboard');
+  }).catch(function() {
+    toast('Copy failed — try again');
+  });
+}
+
+async function spGenerateAI() {
+  if (state.courses.length === 0) return toast('Add courses first');
+
+  const card = document.getElementById('sp-ai-output-card');
+  const out  = document.getElementById('sp-ai-output');
+  card.style.display = 'block';
+  out.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div> Building your personalized plan…';
+
+  // Gather context
+  const sp      = state.studyPlan;
+  const days    = spGetWeekDates();
+  const dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const slotsPerDay = Math.floor((sp.endHour - sp.startHour) / sp.blockSize);
+  const totalHrsAvailable = slotsPerDay * sp.blockSize * 7;
+
+  const courseInfo = state.courses.map(function(c) {
+    const pendingAssigns = c.assignments
+      .filter(function(a) { return !a.completed; })
+      .sort(function(a, b) { return new Date(a.date) - new Date(b.date); })
+      .slice(0, 3)
+      .map(function(a) { return a.name + ' (due ' + new Date(a.date).toLocaleDateString() + ')'; });
+    return c.name + ' [' + c.credits + ' cr]' +
+      (pendingAssigns.length ? ' — pending: ' + pendingAssigns.join(', ') : '');
+  }).join('\n');
+
+  const transcriptContext = state.transcript.parsed.length > 0
+    ? state.transcript.parsed.map(function(c) { return c.name + ': ' + c.grade; }).join(', ')
+    : 'No transcript uploaded';
+
+  // Already-scheduled blocks summary
+  const alreadyScheduled = Object.keys(state.studyPlan.blocks).length;
+
+  const prompt =
+    'You are an expert law school study planner. Create a detailed, personalized weekly study plan.\n\n' +
+    'STUDENT COURSES THIS SEMESTER:\n' + courseInfo + '\n\n' +
+    'TRANSCRIPT GRADES (prior courses):\n' + transcriptContext + '\n\n' +
+    'SCHEDULE PARAMETERS:\n' +
+    '- Study window: ' + sp.startHour + ':00 – ' + sp.endHour + ':00 each day\n' +
+    '- Block size: ' + sp.blockSize + ' hour(s)\n' +
+    '- Slots per day: ' + slotsPerDay + '\n' +
+    '- Total available study hours: ' + totalHrsAvailable + ' hrs/week\n' +
+    '- Week of: ' + days[0].toLocaleDateString() + ' – ' + days[6].toLocaleDateString() + '\n\n' +
+    'Provide:\n' +
+    '1. RECOMMENDED WEEKLY SCHEDULE: Day-by-day breakdown with specific course assignments per time block\n' +
+    '2. CREDIT-WEIGHTED ALLOCATION: How many hours per course per week, explaining the weighting rationale\n' +
+    '3. PRIORITY ALERTS: Any courses with upcoming deadlines that need extra attention this week\n' +
+    '4. STUDY STRATEGY TIPS: 3-5 specific techniques for each of their 2 highest-credit courses\n' +
+    '5. SPACED REPETITION ADVICE: How to spread review of older material vs. new content\n\n' +
+    'Be specific, actionable, and reference their actual course names and deadlines.';
+
+  const result = await callClaude(prompt, 'You are JURIS, an expert law school study planner. Be specific, structured, and practical. Reference the student\'s actual courses.');
+
+  out.textContent = result;
+  card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// Close context menu when clicking elsewhere
+document.addEventListener('click', function(e) {
+  var menu = document.getElementById('sp-ctx-menu');
+  if (menu && !menu.contains(e.target)) spCloseCtx();
+});
+
+// ═══════════════════════════════════════════
+//  UTILS
+// ═══════════════════════════════════════════
+function esc(str) {
+  if (!str) return '';
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>
