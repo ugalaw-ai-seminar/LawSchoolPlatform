@@ -2540,6 +2540,61 @@ function handleFileUpload(event) {
   event.target.value = '';
 }
 
+// Drag and drop support
+(function initDragDrop() {
+  document.addEventListener('DOMContentLoaded', () => {
+    const zone = document.querySelector('.upload-zone');
+    if (!zone) return;
+    setupDropZone(zone);
+  });
+
+  // Re-setup after dynamic renders (MutationObserver)
+  const obs = new MutationObserver(() => {
+    const zone = document.querySelector('.upload-zone');
+    if (zone && !zone._dropReady) setupDropZone(zone);
+  });
+  obs.observe(document.documentElement, { childList: true, subtree: true });
+
+  function setupDropZone(zone) {
+    zone._dropReady = true;
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(evt =>
+      zone.addEventListener(evt, e => { e.preventDefault(); e.stopPropagation(); })
+    );
+    zone.addEventListener('dragenter', () => zone.classList.add('drag-over'));
+    zone.addEventListener('dragover', () => zone.classList.add('drag-over'));
+    zone.addEventListener('dragleave', (e) => {
+      if (!zone.contains(e.relatedTarget)) zone.classList.remove('drag-over');
+    });
+    zone.addEventListener('drop', (e) => {
+      zone.classList.remove('drag-over');
+      const files = e.dataTransfer.files;
+      if (!files.length) return;
+      const course = state.courses.find(c => c.id === state.currentCourseId);
+      if (!course) { toast('Open a course first'); return; }
+      Array.from(files).forEach(file => {
+        const allowed = ['.pdf','.docx','.txt','.pptx','.md'];
+        const ext = '.' + file.name.split('.').pop().toLowerCase();
+        if (!allowed.includes(ext)) { toast(`${file.name}: unsupported file type`); return; }
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          course.materials.push({
+            id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+            name: file.name,
+            type: file.type,
+            size: file.size,
+            content: ev.target.result.slice(0, 50000),
+            uploadedAt: new Date().toISOString()
+          });
+          saveState();
+          renderMaterials(course);
+          toast(`${file.name} uploaded`);
+        };
+        reader.readAsText(file);
+      });
+    });
+  }
+})();
+
 function renderMaterials(course) {
   const list = document.getElementById('materials-list');
   if (course.materials.length === 0) { list.innerHTML = ''; return; }
