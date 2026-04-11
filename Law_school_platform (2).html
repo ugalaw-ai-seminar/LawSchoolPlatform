@@ -3,48 +3,34 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LAW DAWG — UGA Law AI Platform</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<title>JURIS — Intelligent Law Student Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <style>
 :root {
-  --ink: #1c1917;
-  --parchment: #f7f4f0;
-  --red: #BA0C2F;
-  --red-light: #d41636;
-  --red-dark: #8f0922;
-  --gold: #BA0C2F;
-  --gold-light: #d41636;
-  --gold-dark: #8f0922;
-  --crimson: #BA0C2F;
-  --crimson-light: #d41636;
-  --teal: #2a7f7f;
-  --teal-light: #3a9f9f;
-  --teal-soft: rgba(42,127,127,0.1);
-  --amber: #b5651d;
-  --amber-soft: rgba(181,101,29,0.1);
-  --sage: #4a7c5f;
-  --sage-soft: rgba(74,124,95,0.1);
-  --navy: #1e2a3a;
-  --slate: #5a6070;
-  --mist: #ddd8cf;
-  --card-bg: #f7f3ec;
-  --card-bg-alt: #eef2f0;
-  --warm-white: #faf7f2;
-  --surface-2: #e8e2d8;
-  --success: var(--sage);
-  --warning: var(--amber);
-  --font-display: 'Playfair Display', Georgia, serif;
-  --font-body: 'Outfit', sans-serif;
+  --ink: #1a1a2e;
+  --parchment: #f5f0e8;
+  --gold: #c5a55a;
+  --gold-light: #dbc88e;
+  --gold-dark: #a08840;
+  --crimson: #8b2635;
+  --crimson-light: #b33a4a;
+  --navy: #16213e;
+  --slate: #3a3a5c;
+  --mist: #e8e4dc;
+  --warm-white: #faf8f4;
+  --success: #4a7c59;
+  --warning: #c5873a;
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-body: 'DM Sans', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
-  --shadow-sm: 0 1px 4px rgba(0,0,0,0.07);
-  --shadow-md: 0 4px 16px rgba(0,0,0,0.1);
-  --shadow-lg: 0 8px 32px rgba(0,0,0,0.13);
-  --shadow-xl: 0 20px 60px rgba(0,0,0,0.18);
-  --radius: 10px;
-  --radius-lg: 16px;
-  --header-h: 96px;
+  --shadow-sm: 0 1px 3px rgba(26,26,46,0.08);
+  --shadow-md: 0 4px 12px rgba(26,26,46,0.1);
+  --shadow-lg: 0 8px 30px rgba(26,26,46,0.12);
+  --shadow-xl: 0 20px 60px rgba(26,26,46,0.15);
+  --radius: 8px;
+  --radius-lg: 14px;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -55,26 +41,17 @@ body {
   color: var(--ink);
   min-height: 100vh;
   overflow-x: hidden;
-  background-image:
-    radial-gradient(ellipse at 10% 30%, rgba(42,127,127,0.06) 0%, transparent 45%),
-    radial-gradient(ellipse at 85% 75%, rgba(186,12,47,0.05) 0%, transparent 40%),
-    radial-gradient(ellipse at 55% 10%, rgba(181,101,29,0.04) 0%, transparent 35%);
 }
 
 /* Scrollbar */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 3px; opacity: 0.5; }
+::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 3px; }
 
 /* ─── SPLASH / API KEY SCREEN ─── */
 #splash-screen {
   position: fixed; inset: 0; z-index: 9999;
   background: var(--navy);
-  background-image: 
-    radial-gradient(ellipse at 15% 70%, rgba(42,127,127,0.4) 0%, transparent 50%),
-    radial-gradient(ellipse at 85% 15%, rgba(181,101,29,0.3) 0%, transparent 45%),
-    radial-gradient(ellipse at 55% 90%, rgba(74,124,95,0.2) 0%, transparent 40%),
-    radial-gradient(ellipse at 90% 80%, rgba(186,12,47,0.2) 0%, transparent 35%);
   display: flex; align-items: center; justify-content: center;
   flex-direction: column;
   transition: opacity 0.6s, transform 0.6s;
@@ -85,48 +62,39 @@ body {
   text-align: center;
   max-width: 480px;
   padding: 3rem;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 24px;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 24px 80px rgba(0,0,0,0.4);
 }
 
 .splash-logo {
   font-family: var(--font-display);
   font-size: 4.5rem;
-  font-weight: 900;
-  color: #ffffff;
-  letter-spacing: 0.05em;
-  margin-bottom: 0.1rem;
-  line-height: 1;
+  font-weight: 300;
+  color: var(--gold);
+  letter-spacing: 0.3em;
+  margin-bottom: 0.25rem;
 }
-.splash-logo span { color: var(--teal-light); }
 .splash-tagline {
-  font-family: var(--font-body);
-  font-size: 0.82rem;
-  color: rgba(255,255,255,0.45);
-  font-weight: 500;
-  letter-spacing: 0.25em;
-  text-transform: uppercase;
-  margin-bottom: 2.5rem;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  color: rgba(197,165,90,0.6);
+  font-style: italic;
+  letter-spacing: 0.08em;
+  margin-bottom: 3rem;
 }
 
 .splash-divider {
   width: 60px;
-  height: 3px;
-  background: linear-gradient(90deg, var(--teal), var(--amber));
+  height: 1px;
+  background: var(--gold);
   margin: 0 auto 2rem;
-  border-radius: 2px;
+  opacity: 0.4;
 }
 
 .splash-label {
-  font-size: 0.72rem;
-  letter-spacing: 0.18em;
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.4);
+  color: rgba(245,240,232,0.5);
   margin-bottom: 0.75rem;
-  font-weight: 600;
 }
 
 .api-input-wrap {
@@ -136,43 +104,43 @@ body {
 .api-input-wrap input {
   width: 100%;
   padding: 14px 18px;
-  background: rgba(255,255,255,0.07);
-  border: 1.5px solid rgba(42,127,127,0.4);
+  background: rgba(245,240,232,0.06);
+  border: 1px solid rgba(197,165,90,0.25);
   border-radius: var(--radius);
-  color: white;
+  color: var(--parchment);
   font-family: var(--font-mono);
   font-size: 0.85rem;
   outline: none;
-  transition: border-color 0.3s, box-shadow 0.3s;
+  transition: border-color 0.3s;
 }
 .api-input-wrap input:focus {
-  border-color: var(--teal-light);
-  box-shadow: 0 0 0 3px rgba(42,127,127,0.2);
+  border-color: var(--gold);
 }
-.api-input-wrap input::placeholder { color: rgba(255,255,255,0.2); }
+.api-input-wrap input::placeholder {
+  color: rgba(245,240,232,0.25);
+}
 
 .btn-enter {
-  background: linear-gradient(135deg, var(--teal) 0%, var(--teal-light) 100%);
-  color: white;
+  background: var(--gold);
+  color: var(--navy);
   border: none;
-  padding: 15px 48px;
+  padding: 14px 48px;
   font-family: var(--font-body);
-  font-weight: 700;
+  font-weight: 600;
   font-size: 0.85rem;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   border-radius: var(--radius);
   cursor: pointer;
   transition: all 0.3s;
-  box-shadow: 0 4px 20px rgba(42,127,127,0.45);
 }
-.btn-enter:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(42,127,127,0.55); filter: brightness(1.08); }
+.btn-enter:hover { background: var(--gold-light); transform: translateY(-1px); }
 .btn-enter:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
 
 .splash-note {
   margin-top: 1.5rem;
   font-size: 0.7rem;
-  color: rgba(255,255,255,0.22);
+  color: rgba(245,240,232,0.3);
   line-height: 1.6;
 }
 
@@ -183,45 +151,33 @@ body {
 /* Sidebar */
 .sidebar {
   width: 260px;
-  background: var(--teal);
-  color: white;
+  background: var(--navy);
+  color: var(--parchment);
   display: flex;
   flex-direction: column;
   position: fixed;
   top: 0; left: 0; bottom: 0;
   z-index: 100;
   transition: transform 0.3s;
-  box-shadow: 4px 0 24px rgba(0,0,0,0.2);
-  background-image: linear-gradient(180deg, #2a7f7f 0%, #236868 60%, #1c5555 100%);
 }
 
 .sidebar-header {
-  height: var(--header-h);
-  padding: 0 1.25rem;
-  border-bottom: 1px solid rgba(0,0,0,0.15);
-  background: var(--red);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  flex-shrink: 0;
+  padding: 1.5rem 1.25rem;
+  border-bottom: 1px solid rgba(197,165,90,0.15);
 }
 .sidebar-brand {
   font-family: var(--font-display);
-  font-size: 1.7rem;
-  font-weight: 900;
-  color: white;
-  letter-spacing: 0.04em;
-}
-.sidebar-brand .paw {
-  color: white;
+  font-size: 1.8rem;
+  font-weight: 300;
+  color: var(--gold);
+  letter-spacing: 0.25em;
 }
 .sidebar-sub {
   font-size: 0.6rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.7);
-  margin-top: 3px;
-  font-weight: 700;
+  color: rgba(197,165,90,0.45);
+  margin-top: 2px;
 }
 
 .sidebar-nav { flex: 1; padding: 1rem 0; overflow-y: auto; }
@@ -230,9 +186,8 @@ body {
   font-size: 0.6rem;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.35);
+  color: rgba(245,240,232,0.3);
   padding: 1rem 1.25rem 0.4rem;
-  font-weight: 700;
 }
 
 .nav-item {
@@ -241,44 +196,54 @@ body {
   gap: 10px;
   padding: 10px 1.25rem;
   cursor: pointer;
-  font-size: 0.84rem;
-  font-weight: 500;
-  color: rgba(255,255,255,0.6);
+  font-size: 0.82rem;
+  color: rgba(245,240,232,0.6);
   transition: all 0.2s;
-  border-left: 3px solid transparent;
+  border-left: 2px solid transparent;
 }
 .nav-item:hover {
-  color: white;
-  background: rgba(255,255,255,0.07);
+  color: var(--parchment);
+  background: rgba(197,165,90,0.06);
 }
 .nav-item.active {
-  color: white;
-  background: rgba(30,42,58,0.5);
-  border-left-color: var(--navy);
-  font-weight: 700;
+  color: var(--gold);
+  background: rgba(197,165,90,0.1);
+  border-left-color: var(--gold);
 }
 .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; opacity: 0.7; }
 .nav-item.active svg { opacity: 1; }
 
 .sidebar-footer {
   padding: 1rem 1.25rem;
-  border-top: 1px solid rgba(255,255,255,0.12);
+  border-top: 1px solid rgba(197,165,90,0.15);
   font-size: 0.65rem;
-  color: rgba(255,255,255,0.4);
-  background: rgba(0,0,0,0.12);
+  color: rgba(245,240,232,0.25);
 }
 
 /* Main Content */
+.main-content {
+  margin-left: 260px;
+  flex: 1;
+  min-height: 100vh;
+}
 
-.top-bar { display: none; }
+/* Top Bar */
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 2rem;
+  background: var(--warm-white);
+  border-bottom: 1px solid rgba(26,26,46,0.06);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
 .page-title {
-  font-family: var(--font-body);
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: var(--slate);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  opacity: 0.7;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: var(--ink);
 }
 .top-actions { display: flex; align-items: center; gap: 12px; }
 
@@ -297,16 +262,15 @@ body {
 }
 .btn-primary {
   background: var(--gold);
-  color: white;
-  font-weight: 600;
+  color: var(--navy);
 }
-.btn-primary:hover { background: var(--gold-light); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(186,12,47,0.3); }
+.btn-primary:hover { background: var(--gold-light); }
 .btn-ghost {
   background: transparent;
   color: var(--slate);
-  border: 1px solid rgba(0,0,0,0.12);
+  border: 1px solid rgba(26,26,46,0.12);
 }
-.btn-ghost:hover { border-color: var(--teal); color: var(--teal); }
+.btn-ghost:hover { border-color: var(--gold); color: var(--gold-dark); }
 .btn-danger { background: var(--crimson); color: white; }
 .btn-danger:hover { background: var(--crimson-light); }
 
@@ -318,236 +282,47 @@ body {
   max-width: 1200px;
 }
 
-/* Give the whole main content a slightly richer base */
-.main-content {
-  margin-left: 260px;
-  flex: 1;
-  min-height: 100vh;
-  background: #f5f1ec;
-  background-image:
-    radial-gradient(ellipse at 10% 30%, rgba(42,127,127,0.07) 0%, transparent 45%),
-    radial-gradient(ellipse at 85% 75%, rgba(186,12,47,0.05) 0%, transparent 40%),
-    radial-gradient(ellipse at 55% 10%, rgba(181,101,29,0.05) 0%, transparent 35%);
-}
-
 /* Page sections */
-.page-section-placeholder { display: none; }
+.page { display: none; }
+.page.active { display: block; animation: fadeUp 0.35s ease; }
 
-/* ─── PAGE TRANSITIONS ─── */
-.page { display: none; opacity: 0; }
-.page.active {
-  display: block;
-  animation: pageEnter 0.42s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
-@keyframes pageEnter {
-  from { opacity: 0; transform: translateY(18px) scale(0.993); }
-  to   { opacity: 1; transform: translateY(0)   scale(1); }
-}
-
-/* Stagger child cards on entry */
-.page.active .card,
-.page.active .stat-card {
-  animation: cardReveal 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-.page.active .card:nth-child(1), .page.active .stat-card:nth-child(1) { animation-delay: 0.05s; }
-.page.active .card:nth-child(2), .page.active .stat-card:nth-child(2) { animation-delay: 0.10s; }
-.page.active .card:nth-child(3), .page.active .stat-card:nth-child(3) { animation-delay: 0.15s; }
-.page.active .card:nth-child(4), .page.active .stat-card:nth-child(4) { animation-delay: 0.20s; }
-@keyframes cardReveal {
-  from { opacity: 0; transform: translateY(14px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-/* Nav item click ripple */
-.nav-item { position: relative; overflow: hidden; }
-.nav-item::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: rgba(255,255,255,0.15);
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-.nav-item:active::after { opacity: 1; }
-
-/* ─── PAGE HERO HEADER ─── */
-#page-hero {
-  margin: -2rem -2rem 2rem -2rem;
-  height: var(--header-h);
-  padding: 0 2.5rem;
-  position: relative;
-  overflow: hidden;
-  border-bottom: 1px solid rgba(0,0,0,0.07);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-#page-hero::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: inherit;
-  z-index: 0;
-}
-#page-hero .hero-icon {
-  width: 2.2rem;
-  height: 2.2rem;
-  margin-bottom: 0.3rem;
-  position: relative;
-  z-index: 1;
-  display: block;
-  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.15));
-}
-#page-hero .hero-title {
-  font-family: var(--font-display);
-  font-size: 2rem;
-  font-weight: 900;
-  font-style: italic;
-  line-height: 1.05;
-  position: relative;
-  z-index: 1;
-  letter-spacing: -0.01em;
-}
-#page-hero .hero-subtitle {
-  font-size: 0.72rem;
-  font-weight: 500;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  opacity: 0.65;
-  margin-top: 0.25rem;
-  position: relative;
-  z-index: 1;
-}
-#page-hero .hero-deco {
-  position: absolute;
-  right: 2.5rem;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 6rem;
-  height: 6rem;
-  opacity: 0.12;
-  pointer-events: none;
-  z-index: 0;
-}
-#page-hero .hero-semester {
-  position: absolute;
-  top: 1rem;
-  right: 1.5rem;
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  opacity: 0.55;
-  z-index: 2;
-  font-family: var(--font-body);
-}
-#page-hero {
-  animation: heroSlide 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-@keyframes heroSlide {
-  from { opacity: 0; transform: translateY(-10px); }
-  to   { opacity: 1; transform: translateY(0); }
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* ─── CARDS ─── */
 .card {
-  background: var(--card-bg);
-  border: 1px solid rgba(0,0,0,0.07);
+  background: var(--warm-white);
+  border: 1px solid rgba(26,26,46,0.06);
   border-radius: var(--radius-lg);
   padding: 1.5rem;
   margin-bottom: 1.25rem;
   box-shadow: var(--shadow-sm);
-  transition: box-shadow 0.2s, transform 0.2s;
-  position: relative;
-  overflow: hidden;
+  transition: box-shadow 0.2s;
 }
 .card:hover { box-shadow: var(--shadow-md); }
-
-/* Decorative blob circle inside every colored card-header */
-.card-header::after {
-  content: '';
-  position: absolute;
-  top: -30px;
-  right: -30px;
-  width: 110px;
-  height: 110px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.22);
-  pointer-events: none;
-}
-.card-header::before {
-  content: '';
-  position: absolute;
-  bottom: -20px;
-  right: 60px;
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.12);
-  pointer-events: none;
-}
-
-/* Alternating corner radii in grid cards for variety */
-.grid-2 > .card:nth-child(2),
-.grid-3 > .card:nth-child(3n+2),
-.grid-4 > .card:nth-child(even) {
-  border-radius: 24px 6px 24px 6px;
-}
-.grid-2 > .card:nth-child(1),
-.grid-3 > .card:nth-child(3n+3),
-.grid-4 > .card:nth-child(odd) {
-  border-radius: 6px 24px 6px 24px;
-}
-/* But keep dashboard stat cards and course cards with their own radius */
-.stat-card, .course-card, .mbe-question, .text-question-card { border-radius: 24px !important; }
-
-/* Course cards — pill accent on the left instead of top bar */
-.course-card {
-  border-left: 5px solid var(--teal) !important;
-  border-top: none;
-}
-.course-card::before { display: none; }
-
-/* Left-accent pill cards (for AI tool cards, quick actions, etc.) */
-.card-accent-left {
-  border-left: 5px solid var(--teal);
-  border-radius: 4px 16px 16px 4px;
-}
-
-/* Add a subtle dot-grid texture watermark to some cards */
-.card::after {
-  content: '';
-  position: absolute;
-  bottom: 0; right: 0;
-  width: 120px; height: 80px;
-  background-image: radial-gradient(circle, rgba(0,0,0,0.06) 1px, transparent 1px);
-  background-size: 10px 10px;
-  pointer-events: none;
-  border-radius: 0 0 var(--radius-lg) 0;
-}
 .card-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 1rem;
-  position: relative;
-  overflow: hidden;
 }
 .card-title {
   font-family: var(--font-display);
-  font-size: 1.2rem;
-  font-weight: 700;
+  font-size: 1.15rem;
+  font-weight: 600;
   color: var(--ink);
 }
 .card-badge {
-  font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   padding: 4px 10px;
   border-radius: 20px;
-  background: var(--teal-soft);
-  color: var(--teal);
+  background: rgba(197,165,90,0.12);
+  color: var(--gold-dark);
 }
 
 /* Grid layouts */
@@ -557,68 +332,25 @@ body {
 
 /* Stats */
 .stat-card {
-  background: var(--card-bg);
-  border: 1px solid rgba(0,0,0,0.07);
-  border-radius: 20px;
-  padding: 0;
+  background: var(--warm-white);
+  border: 1px solid rgba(26,26,46,0.06);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  text-align: center;
   box-shadow: var(--shadow-sm);
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  flex-direction: row;
-  align-items: stretch;
-  transition: box-shadow 0.2s, transform 0.2s;
 }
-.stat-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
-
-/* Colored left panel */
-.stat-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; bottom: 0;
-  width: 6px;
-  background: var(--red);
-  border-radius: 20px 0 0 20px;
-}
-.stat-card:nth-child(1)::before { background: var(--red); }
-.stat-card:nth-child(2)::before { background: var(--teal); }
-.stat-card:nth-child(3)::before { background: var(--amber); }
-.stat-card:nth-child(4)::before { background: var(--sage); }
-
-/* Ghost watermark number in background */
-.stat-card::after {
-  content: attr(data-value);
-  position: absolute;
-  right: -8px; bottom: -12px;
-  font-family: var(--font-display);
-  font-size: 5rem;
-  font-weight: 900;
-  line-height: 1;
-  color: currentColor;
-  opacity: 0.06;
-  pointer-events: none;
-  letter-spacing: -0.04em;
-}
-.stat-card:nth-child(1) { color: var(--red); }
-.stat-card:nth-child(2) { color: var(--teal); }
-.stat-card:nth-child(3) { color: var(--amber); }
-.stat-card:nth-child(4) { color: var(--sage); }
-
 .stat-value {
   font-family: var(--font-display);
-  font-size: 2.2rem;
-  font-weight: 900;
-  color: currentColor;
-  line-height: 1;
-  padding: 1.1rem 1.25rem 0.2rem 1.5rem;
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--gold-dark);
 }
 .stat-label {
-  font-size: 0.62rem;
-  letter-spacing: 0.14em;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--slate);
-  font-weight: 700;
-  padding: 0 1.25rem 1rem 1.5rem;
+  margin-top: 4px;
 }
 
 /* Progress bars */
@@ -632,7 +364,7 @@ body {
 }
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--teal), var(--teal-light));
+  background: linear-gradient(90deg, var(--gold-dark), var(--gold));
   border-radius: 3px;
   transition: width 0.6s ease;
 }
@@ -651,18 +383,17 @@ body {
 .form-input, .form-select, .form-textarea {
   width: 100%;
   padding: 10px 14px;
-  border: 1.5px solid var(--mist);
+  border: 1px solid rgba(26,26,46,0.12);
   border-radius: var(--radius);
   font-family: var(--font-body);
   font-size: 0.85rem;
   color: var(--ink);
-  background: var(--warm-white);
+  background: white;
   outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition: border-color 0.2s;
 }
 .form-input:focus, .form-select:focus, .form-textarea:focus {
-  border-color: var(--teal);
-  box-shadow: 0 0 0 3px var(--teal-soft);
+  border-color: var(--gold);
 }
 .form-textarea { resize: vertical; min-height: 100px; }
 
@@ -676,9 +407,9 @@ body {
   font-weight: 500;
   gap: 4px;
 }
-.tag-gold { background: var(--teal-soft); color: var(--teal); }
-.tag-crimson { background: rgba(186,12,47,0.1); color: var(--red); }
-.tag-success { background: var(--sage-soft); color: var(--sage); }
+.tag-gold { background: rgba(197,165,90,0.15); color: var(--gold-dark); }
+.tag-crimson { background: rgba(139,38,53,0.1); color: var(--crimson); }
+.tag-success { background: rgba(74,124,89,0.1); color: var(--success); }
 
 /* Tables */
 .table-wrap { overflow-x: auto; }
@@ -701,7 +432,7 @@ td {
   border-bottom: 1px solid rgba(26,26,46,0.04);
   color: var(--ink);
 }
-tr:hover td { background: rgba(42,127,127,0.04); }
+tr:hover td { background: rgba(197,165,90,0.03); }
 
 /* Tabs */
 .tabs {
@@ -720,23 +451,23 @@ tr:hover td { background: rgba(42,127,127,0.04); }
   transition: all 0.2s;
 }
 .tab:hover { color: var(--ink); }
-.tab.active { color: var(--teal); border-bottom-color: var(--teal); font-weight: 700; }
+.tab.active { color: var(--gold-dark); border-bottom-color: var(--gold); }
 
 /* File upload zone */
 .upload-zone {
-  border: 2px dashed rgba(42,127,127,0.3);
+  border: 2px dashed rgba(197,165,90,0.3);
   border-radius: var(--radius-lg);
   padding: 2rem;
   text-align: center;
   cursor: pointer;
   transition: all 0.2s;
-  background: var(--teal-soft);
+  background: rgba(197,165,90,0.03);
 }
 .upload-zone:hover {
-  border-color: var(--teal);
-  background: rgba(42,127,127,0.12);
+  border-color: var(--gold);
+  background: rgba(197,165,90,0.06);
 }
-.upload-zone svg { width: 32px; height: 32px; color: var(--teal); margin-bottom: 8px; }
+.upload-zone svg { width: 32px; height: 32px; color: var(--gold); margin-bottom: 8px; }
 .upload-zone p { font-size: 0.82rem; color: var(--slate); }
 .upload-zone .upload-hint { font-size: 0.7rem; color: rgba(58,58,92,0.5); margin-top: 4px; }
 
@@ -784,12 +515,10 @@ tr:hover td { background: rgba(42,127,127,0.04); }
   gap: 8px;
   padding: 12px 16px;
   background: var(--navy);
-  color: white;
+  color: var(--gold);
   font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  border-bottom: 2px solid var(--red);
+  font-weight: 600;
+  letter-spacing: 0.06em;
 }
 .ai-panel-header svg { width: 16px; height: 16px; }
 
@@ -810,16 +539,14 @@ tr:hover td { background: rgba(42,127,127,0.04); }
   white-space: pre-wrap;
 }
 .ai-msg.user {
-  background: rgba(186,12,47,0.08);
+  background: rgba(197,165,90,0.12);
   color: var(--ink);
   align-self: flex-end;
   border-bottom-right-radius: 2px;
-  border: 1px solid rgba(186,12,47,0.14);
 }
 .ai-msg.assistant {
-  background: rgba(42,127,127,0.07);
+  background: var(--mist);
   color: var(--ink);
-  border: 1px solid rgba(42,127,127,0.12);
   align-self: flex-start;
   border-bottom-left-radius: 2px;
 }
@@ -878,7 +605,7 @@ tr:hover td { background: rgba(42,127,127,0.04); }
 /* Outline viewer */
 .outline-section {
   margin-bottom: 1rem;
-  border-left: 4px solid var(--teal);
+  border-left: 3px solid var(--gold);
   padding-left: 1rem;
 }
 .outline-topic {
@@ -899,19 +626,19 @@ tr:hover td { background: rgba(42,127,127,0.04); }
 .md-rendered { font-size: 0.875rem; line-height: 1.8; color: var(--ink); }
 .md-rendered h1 {
   font-family: var(--font-display);
-  font-size: 1.75rem; font-weight: 900; color: var(--ink);
-  border-bottom: 3px solid var(--red);
+  font-size: 1.75rem; font-weight: 600; color: var(--ink);
+  border-bottom: 2px solid var(--gold);
   padding-bottom: 0.4rem; margin: 1.5rem 0 0.75rem;
 }
 .md-rendered h2 {
   font-family: var(--font-display);
-  font-size: 1.3rem; font-weight: 700; color: var(--navy);
-  border-left: 4px solid var(--teal);
+  font-size: 1.3rem; font-weight: 600; color: var(--navy);
+  border-left: 3px solid var(--gold);
   padding-left: 0.75rem; margin: 1.25rem 0 0.5rem;
 }
 .md-rendered h3 {
   font-family: var(--font-display);
-  font-size: 1.05rem; font-weight: 700; color: var(--amber);
+  font-size: 1.05rem; font-weight: 600; color: var(--crimson);
   margin: 1rem 0 0.35rem;
 }
 .md-rendered h4 {
@@ -973,23 +700,23 @@ tr:hover td { background: rgba(42,127,127,0.04); }
   width: 100%;
   color: var(--ink);
 }
-.mbe-option:hover { border-color: var(--teal); background: var(--teal-soft); }
+.mbe-option:hover { border-color: var(--gold); background: rgba(197,165,90,0.05); }
 .mbe-option.selected {
-  border-color: var(--teal);
-  background: var(--teal-soft);
-  color: var(--ink);
-  font-weight: 600;
+  border-color: var(--gold);
+  background: rgba(197,165,90,0.12);
+  color: var(--navy);
+  font-weight: 500;
 }
 .mbe-option-letter {
   flex-shrink: 0; width: 22px; height: 22px;
   border-radius: 50%;
-  border: 1.5px solid rgba(0,0,0,0.15);
+  border: 1.5px solid rgba(26,26,46,0.2);
   display: flex; align-items: center; justify-content: center;
   font-size: 0.72rem; font-weight: 700;
   transition: all 0.2s;
 }
 .mbe-option.selected .mbe-option-letter {
-  background: var(--teal); border-color: var(--teal); color: white;
+  background: var(--gold); border-color: var(--gold); color: white;
 }
 .mbe-submit-row {
   display: flex; align-items: center; gap: 12px;
@@ -1001,10 +728,10 @@ tr:hover td { background: rgba(42,127,127,0.04); }
   font-size: 0.78rem; color: var(--slate); margin-left: auto;
 }
 /* Feedback correct/incorrect coloring */
-.mbe-option.correct { border-color: var(--sage); background: var(--sage-soft); }
-.mbe-option.incorrect { border-color: var(--red); background: rgba(186,12,47,0.07); }
-.mbe-option.correct .mbe-option-letter { background: var(--sage); border-color: var(--sage); color: white; }
-.mbe-option.incorrect .mbe-option-letter { background: var(--red); border-color: var(--red); color: white; }
+.mbe-option.correct { border-color: var(--success); background: rgba(74,124,89,0.08); }
+.mbe-option.incorrect { border-color: var(--crimson); background: rgba(139,38,53,0.07); }
+.mbe-option.correct .mbe-option-letter { background: var(--success); border-color: var(--success); color: white; }
+.mbe-option.incorrect .mbe-option-letter { background: var(--crimson); border-color: var(--crimson); color: white; }
 
 /* (outline uses shared .md-rendered class) */
 
@@ -1024,24 +751,24 @@ tr:hover td { background: rgba(42,127,127,0.04); }
   padding: 8px 0;
 }
 .cal-cell {
-  height: 52px;
+  aspect-ratio: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  padding: 6px 4px;
-  border-radius: 8px;
-  font-size: 0.78rem;
+  padding: 4px;
+  border-radius: 6px;
+  font-size: 0.75rem;
   cursor: pointer;
   transition: background 0.15s;
 }
-.cal-cell:hover { background: rgba(42,127,127,0.08); }
-.cal-cell.today { background: rgba(42,127,127,0.18); font-weight: 700; color: var(--teal); }
+.cal-cell:hover { background: rgba(197,165,90,0.08); }
+.cal-cell.today { background: rgba(197,165,90,0.15); font-weight: 700; }
 .cal-cell.has-event::after {
   content: '';
-  width: 5px; height: 5px;
+  width: 4px; height: 4px;
   border-radius: 50%;
-  background: var(--red);
+  background: var(--crimson);
   margin-top: 2px;
 }
 .cal-cell.empty { pointer-events: none; }
@@ -1059,10 +786,10 @@ tr:hover td { background: rgba(42,127,127,0.04); }
   position: relative;
 }
 .heat-cell[data-level="0"] { background: var(--mist); color: var(--slate); }
-.heat-cell[data-level="1"] { background: rgba(181,101,29,0.25); color: var(--amber); }
-.heat-cell[data-level="2"] { background: rgba(181,101,29,0.5); color: white; }
-.heat-cell[data-level="3"] { background: rgba(181,101,29,0.75); color: white; }
-.heat-cell[data-level="4"] { background: var(--amber); color: white; }
+.heat-cell[data-level="1"] { background: rgba(197,165,90,0.3); color: var(--gold-dark); }
+.heat-cell[data-level="2"] { background: rgba(197,165,90,0.55); }
+.heat-cell[data-level="3"] { background: var(--gold); }
+.heat-cell[data-level="4"] { background: var(--gold-dark); }
 
 /* Toast */
 .toast-container {
@@ -1075,247 +802,17 @@ tr:hover td { background: rgba(42,127,127,0.04); }
   gap: 8px;
 }
 .toast {
-  background: var(--ink);
-  color: white;
+  background: var(--navy);
+  color: var(--parchment);
   padding: 12px 20px;
   border-radius: var(--radius);
   font-size: 0.8rem;
-  font-weight: 500;
   box-shadow: var(--shadow-lg);
   animation: toastIn 0.3s ease, toastOut 0.3s ease 2.7s forwards;
-  border-left: 4px solid var(--gold);
+  border-left: 3px solid var(--gold);
 }
 @keyframes toastIn { from { opacity: 0; transform: translateX(40px); } }
 @keyframes toastOut { to { opacity: 0; transform: translateX(40px); } }
-
-/* ─── PAGE-SPECIFIC CARD COLORWAYS ─── */
-
-/* Shared: card-header gets a colored band for ALL cards */
-.card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin: -1.5rem -1.5rem 1.25rem -1.5rem;
-  padding: 1rem 1.5rem;
-  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-  border-bottom: 1px solid rgba(0,0,0,0.07);
-}
-
-/* ── DASHBOARD ── warm amber page bg, distinct cards */
-#page-dashboard { background: none; }
-#page-dashboard .stat-card { background: var(--card-bg); }
-#page-dashboard .card {
-  background: #fffcf5;
-  border: 1.5px solid rgba(181,101,29,0.2);
-  box-shadow: 0 2px 12px rgba(181,101,29,0.08);
-}
-#page-dashboard .card-header {
-  background: linear-gradient(135deg, #fdf0d5 0%, #fae8be 100%);
-  border-bottom-color: rgba(181,101,29,0.18);
-}
-
-/* ── COURSES ── sage green */
-#page-courses .card, #page-courses .course-card {
-  background: #f4fbf6;
-  border: 1.5px solid rgba(74,124,95,0.2);
-  box-shadow: 0 2px 12px rgba(74,124,95,0.08);
-}
-#page-courses .card-header {
-  background: linear-gradient(135deg, #ddf0e4 0%, #cce8d8 100%);
-  border-bottom-color: rgba(74,124,95,0.18);
-}
-
-/* ── STUDY ENGINE ── cool indigo-navy */
-#page-study .card {
-  background: #f2f5fc;
-  border: 1.5px solid rgba(60,80,140,0.15);
-  box-shadow: 0 2px 12px rgba(60,80,140,0.08);
-}
-#page-study .card-header {
-  background: linear-gradient(135deg, #dce4f7 0%, #cad5f0 100%);
-  border-bottom-color: rgba(60,80,140,0.15);
-}
-
-/* ── OUTLINES ── forest sage */
-#page-outlines .card {
-  background: #f3faf5;
-  border: 1.5px solid rgba(42,100,70,0.18);
-  box-shadow: 0 2px 12px rgba(42,100,70,0.07);
-}
-#page-outlines .card-header {
-  background: linear-gradient(135deg, #d4edde 0%, #c4e4d0 100%);
-  border-bottom-color: rgba(42,100,70,0.18);
-}
-
-/* ── CALENDAR ── peach/blush (rose family, pairs with Wellness) */
-#page-calendar .card {
-  background: #fff3ee;
-  border: 1.5px solid rgba(181,80,40,0.18);
-  box-shadow: 0 2px 12px rgba(181,80,40,0.07);
-}
-#page-calendar .card-header {
-  background: linear-gradient(135deg, #fde0cc 0%, #f8cdb8 100%);
-  border-bottom-color: rgba(181,80,40,0.18);
-}
-
-/* ── BAR EXAM ── deep teal (pairs with AI Chat) */
-#page-bar .card {
-  background: #edfafa;
-  border: 1.5px solid rgba(25,110,110,0.22);
-  box-shadow: 0 2px 14px rgba(25,110,110,0.09);
-}
-#page-bar .card-header {
-  background: linear-gradient(135deg, #bce8e8 0%, #a8dede 100%);
-  border-bottom-color: rgba(25,110,110,0.2);
-}
-#page-bar .form-select,
-#page-bar .form-input { background: #f5fdfd; border-color: rgba(42,127,127,0.25); }
-
-/* ── CAREER ── warm amber-gold (pairs with Dashboard) */
-#page-career .card {
-  background: #fffaf0;
-  border: 1.5px solid rgba(181,101,29,0.22);
-  box-shadow: 0 2px 12px rgba(181,101,29,0.09);
-}
-#page-career .card-header {
-  background: linear-gradient(135deg, #fde8c0 0%, #fad8a0 100%);
-  border-bottom-color: rgba(181,101,29,0.2);
-}
-#page-career .form-select,
-#page-career .form-input,
-#page-career .form-textarea { background: #fffcf5; border-color: rgba(181,101,29,0.2); }
-
-/* ── BLUEBOOK ── deeper indigo (pairs with Study Engine) */
-#page-bluebook .card {
-  background: #f0f3fc;
-  border: 1.5px solid rgba(40,55,140,0.18);
-  box-shadow: 0 2px 12px rgba(40,55,140,0.08);
-}
-#page-bluebook .card-header {
-  background: linear-gradient(135deg, #ccd6f5 0%, #b8c6ee 100%);
-  border-bottom-color: rgba(40,55,140,0.18);
-}
-
-/* ── WELLNESS ── rose-blush (pairs with Calendar) */
-#page-wellness .card {
-  background: #fff5f6;
-  border: 1.5px solid rgba(186,12,47,0.14);
-  box-shadow: 0 2px 12px rgba(186,12,47,0.06);
-}
-#page-wellness .card-header {
-  background: linear-gradient(135deg, #fdd8dc 0%, #f9c4ca 100%);
-  border-bottom-color: rgba(186,12,47,0.15);
-}
-
-/* ── AI CHAT ── lighter teal (pairs with Bar Alignment) */
-#page-ai-chat .ai-panel {
-  background: #edfafa;
-  border: 1.5px solid rgba(25,110,110,0.2);
-  box-shadow: 0 4px 20px rgba(25,110,110,0.1);
-}
-
-/* Outlines + Study form inputs */
-#page-outlines .form-select,
-#page-outlines .form-input,
-#page-outlines .form-textarea { background: #f5fdf7; border-color: rgba(42,100,70,0.2); }
-#page-study .form-select,
-#page-study .form-input { background: #f5f7fd; border-color: rgba(60,80,140,0.15); }
-
-/* Make page background itself slightly colored per section */
-#page-bar { background: radial-gradient(ellipse at 80% 20%, rgba(42,127,127,0.08) 0%, transparent 60%); }
-#page-career { background: radial-gradient(ellipse at 20% 80%, rgba(181,101,29,0.08) 0%, transparent 60%); }
-#page-study { background: radial-gradient(ellipse at 70% 30%, rgba(60,80,140,0.07) 0%, transparent 55%); }
-#page-wellness { background: radial-gradient(ellipse at 30% 60%, rgba(186,12,47,0.06) 0%, transparent 55%); }
-#page-outlines { background: radial-gradient(ellipse at 60% 80%, rgba(42,100,70,0.07) 0%, transparent 55%); }
-#page-calendar { background: radial-gradient(ellipse at 40% 30%, rgba(181,80,40,0.07) 0%, transparent 55%); }
-#page-bluebook { background: radial-gradient(ellipse at 75% 60%, rgba(40,55,140,0.07) 0%, transparent 55%); }
-#page-ai-chat { background: radial-gradient(ellipse at 50% 20%, rgba(25,110,110,0.07) 0%, transparent 55%); }
-
-/* ─── END PAGE-SPECIFIC COLORWAYS ─── */
-
-/* ─── FLOATING AI CHAT BUTTON ─── */
-.fab-chat {
-  position: fixed;
-  bottom: 2rem;
-  right: 2rem;
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background: var(--navy);
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-  z-index: 998;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.25);
-  transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.25s;
-  display: flex; align-items: center; justify-content: center;
-  line-height: 1;
-}
-.fab-chat:hover {
-  transform: scale(1.12) rotate(-8deg);
-  box-shadow: 0 8px 28px rgba(0,0,0,0.3);
-}
-.fab-chat:active { transform: scale(0.95); }
-
-/* ─── LEGAL QUOTE CARD ─── */
-.quote-card {
-  text-align: center;
-  padding: 2rem 3rem;
-  background: linear-gradient(135deg, #fdf3dc 0%, #f9e8bc 100%) !important;
-  border-color: rgba(181,101,29,0.2) !important;
-  min-height: 120px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-.quote-text {
-  font-family: var(--font-display);
-  font-size: 1.15rem;
-  font-style: italic;
-  color: var(--ink);
-  line-height: 1.6;
-  max-width: 700px;
-  margin: 0 auto;
-  transition: opacity 0.5s ease;
-}
-.quote-author {
-  margin-top: 0.75rem;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--amber);
-  transition: opacity 0.5s ease;
-}
-.quote-dots {
-  display: flex;
-  gap: 6px;
-  margin-top: 1rem;
-  justify-content: center;
-}
-.quote-dot {
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: rgba(181,101,29,0.25);
-  cursor: pointer;
-  transition: background 0.3s, transform 0.3s;
-}
-.quote-dot.active {
-  background: var(--amber);
-  transform: scale(1.3);
-}
-
-/* ─── CARD 3D TILT ─── */
-.card { transform-style: preserve-3d; }
-.card.tilting { transition: transform 0.1s ease-out, box-shadow 0.1s ease-out; }
-
-/* ─── STAT COUNTER ─── */
-@keyframes countUp {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.stat-value.counting { animation: countUp 0.4s ease both; }
 
 /* Responsive */
 @media (max-width: 900px) {
@@ -1333,12 +830,8 @@ tr:hover td { background: rgba(42,127,127,0.04); }
 /* Empty state */
 .empty-state {
   text-align: center;
-  padding: 4rem 1rem;
+  padding: 3rem 1rem;
   color: var(--slate);
-  background: rgba(255,255,255,0.5);
-  border-radius: var(--radius-lg);
-  border: 2px dashed rgba(0,0,0,0.08);
-  margin: 0.5rem 0;
 }
 .empty-state svg { width: 48px; height: 48px; color: var(--mist); margin-bottom: 1rem; }
 .empty-state h3 {
@@ -1351,21 +844,25 @@ tr:hover td { background: rgba(42,127,127,0.04); }
 
 /* Specific components */
 .course-card {
-  background: var(--card-bg);
-  border: 1px solid rgba(0,0,0,0.07);
-  border-left: 5px solid var(--teal) !important;
-  border-radius: 4px 20px 20px 4px;
+  background: var(--warm-white);
+  border: 1px solid rgba(26,26,46,0.06);
+  border-radius: var(--radius-lg);
   padding: 1.25rem;
   cursor: pointer;
   transition: all 0.25s;
   position: relative;
   overflow: hidden;
 }
-.course-card::before { display: none; }
+.course-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--gold);
+}
 .course-card:hover {
   box-shadow: var(--shadow-md);
   transform: translateY(-2px);
-  border-left-color: var(--teal-light) !important;
 }
 .course-name {
   font-family: var(--font-display);
@@ -1432,8 +929,8 @@ tr:hover td { background: rgba(42,127,127,0.04); }
 <!-- ═══════ SPLASH SCREEN ═══════ -->
 <div id="splash-screen">
   <div class="splash-inner">
-    <div class="splash-logo">LAW<span>DAWG</span></div>
-    <div class="splash-tagline">UGA School of Law · AI Assistant</div>
+    <div class="splash-logo">JURIS</div>
+    <div class="splash-tagline">Intelligent Law Student Platform</div>
     <div class="splash-divider"></div>
     <div class="splash-label">Gemini API Key</div>
     <div class="api-input-wrap">
@@ -1442,11 +939,7 @@ tr:hover td { background: rgba(42,127,127,0.04); }
     <button class="btn-enter" id="btn-enter" onclick="enterApp()">Enter Platform</button>
     <div class="splash-note">
       Your API key is used exclusively for AI-powered features. Data is saved per key.
-      <br>Obtain a key from <em>aistudio.google.com</em>
-      <br><br><span id="protocol-warning" style="display:none;color:#e57373;font-weight:600;">
-        ⚠️ You are opening this as a file:// URL — API calls will be blocked by your browser.<br>
-        Serve this file via a local web server or upload it to a host.
-      </span>
+      <br>Obtain a FREE key from <a href="https://aistudio.google.com" target="_blank" style="color:var(--gold);text-decoration:underline;">aistudio.google.com</a>
     </div>
   </div>
 </div>
@@ -1457,8 +950,8 @@ tr:hover td { background: rgba(42,127,127,0.04); }
   <!-- Sidebar -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
-      <div class="sidebar-brand"><span class="paw">🐾</span> LAW DAWG</div>
-      <div class="sidebar-sub">UGA School of Law</div>
+      <div class="sidebar-brand">JURIS</div>
+      <div class="sidebar-sub">Law Student Platform</div>
     </div>
     <nav class="sidebar-nav">
       <div class="nav-section-label">Academic</div>
@@ -1527,24 +1020,23 @@ tr:hover td { background: rgba(42,127,127,0.04); }
     </div>
 
     <div class="content-area">
-      <div id="page-hero"></div>
 
       <!-- ══════ DASHBOARD PAGE ══════ -->
       <div class="page active" id="page-dashboard">
         <div class="grid-4" id="dash-stats">
-          <div class="stat-card" data-value="0">
+          <div class="stat-card">
             <div class="stat-value" id="stat-courses">0</div>
             <div class="stat-label">Courses</div>
           </div>
-          <div class="stat-card" data-value="0">
+          <div class="stat-card">
             <div class="stat-value" id="stat-assignments">0</div>
             <div class="stat-label">Assignments</div>
           </div>
-          <div class="stat-card" data-value="0">
+          <div class="stat-card">
             <div class="stat-value" id="stat-study-hrs">0</div>
             <div class="stat-label">Study Hours</div>
           </div>
-          <div class="stat-card" data-value="—">
+          <div class="stat-card">
             <div class="stat-value" id="stat-bar-score">—</div>
             <div class="stat-label">Bar Readiness</div>
           </div>
@@ -1606,7 +1098,7 @@ tr:hover td { background: rgba(42,127,127,0.04); }
           </button>
         </div>
 
-        <div class="grid-3" id="courses-grid" style="background: rgba(255,255,255,0.45); border-radius: var(--radius-lg); padding: 1.5rem; border: 1.5px solid rgba(74,124,95,0.15); min-height: 280px;">
+        <div class="grid-3" id="courses-grid">
           <div class="empty-state" style="grid-column:1/-1;">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
             <h3>No courses added</h3>
@@ -1834,38 +1326,36 @@ tr:hover td { background: rgba(42,127,127,0.04); }
 
       <!-- ══════ CALENDAR PAGE ══════ -->
       <div class="page" id="page-calendar">
-        <div style="display:grid;grid-template-columns:1fr 320px;gap:1.25rem;align-items:start;">
-          <div class="card">
-            <div class="card-header">
-              <span class="card-title" id="cal-month-title"></span>
-              <div style="display:flex;gap:6px;">
-                <button class="btn btn-ghost" onclick="changeMonth(-1)">←</button>
-                <button class="btn btn-ghost" onclick="changeMonth(1)">→</button>
-              </div>
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title" id="cal-month-title"></span>
+            <div style="display:flex;gap:6px;">
+              <button class="btn btn-ghost" onclick="changeMonth(-1)">←</button>
+              <button class="btn btn-ghost" onclick="changeMonth(1)">→</button>
             </div>
-            <div class="cal-grid">
-              <div class="cal-header-cell">Sun</div>
-              <div class="cal-header-cell">Mon</div>
-              <div class="cal-header-cell">Tue</div>
-              <div class="cal-header-cell">Wed</div>
-              <div class="cal-header-cell">Thu</div>
-              <div class="cal-header-cell">Fri</div>
-              <div class="cal-header-cell">Sat</div>
-            </div>
-            <div class="cal-grid" id="cal-days"></div>
           </div>
+          <div class="cal-grid">
+            <div class="cal-header-cell">Sun</div>
+            <div class="cal-header-cell">Mon</div>
+            <div class="cal-header-cell">Tue</div>
+            <div class="cal-header-cell">Wed</div>
+            <div class="cal-header-cell">Thu</div>
+            <div class="cal-header-cell">Fri</div>
+            <div class="cal-header-cell">Sat</div>
+          </div>
+          <div class="cal-grid" id="cal-days"></div>
+        </div>
 
-          <div class="card">
-            <div class="card-header">
-              <span class="card-title">Smart Reminders</span>
-              <button class="btn btn-primary" onclick="generateStudyPlan()">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-                Plan
-              </button>
-            </div>
-            <div id="reminders-list" style="font-size:0.82rem;line-height:1.8;">
-              <p style="color:var(--slate);">Add courses and assignments to receive intelligent study reminders.</p>
-            </div>
+        <div class="card" style="margin-top:1.25rem;">
+          <div class="card-header">
+            <span class="card-title">Smart Reminders</span>
+            <button class="btn btn-primary" onclick="generateStudyPlan()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+              Generate Study Plan
+            </button>
+          </div>
+          <div id="reminders-list" style="font-size:0.82rem;line-height:1.8;">
+            <p style="color:var(--slate);">Add courses and assignments to receive intelligent study reminders.</p>
           </div>
         </div>
       </div>
@@ -2062,13 +1552,13 @@ tr:hover td { background: rgba(42,127,127,0.04); }
 
       <!-- ══════ AI CHAT PAGE ══════ -->
       <div class="page" id="page-ai-chat">
-        <div class="ai-panel">
+        <div class="ai-panel" style="max-width:800px;">
           <div class="ai-panel-header">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-            🐾 LAW DAWG AI — Your UGA Law School Companion
+            JURIS AI Assistant — Your Law School Companion
           </div>
           <div class="ai-messages" id="chat-messages">
-            <div class="ai-msg assistant md-rendered">Hey there, Dawg! 🐾 I'm <strong>Law Dawg</strong>, your AI assistant built for UGA School of Law students. I can help you with studying, outlines, bar prep, career planning, Bluebook citations, and more. What can I help you crush today? <em>Go Dawgs!</em></div>
+            <div class="ai-msg assistant">Hello! I'm your JURIS AI assistant. I can help you with anything related to law school — studying, outlines, bar prep, career planning, Bluebook citations, and more. What would you like to work on?</div>
           </div>
           <div class="ai-input-wrap">
             <input type="text" id="chat-input" placeholder="Ask anything about law school..." onkeydown="if(event.key==='Enter')sendChat()">
@@ -2121,9 +1611,6 @@ tr:hover td { background: rgba(42,127,127,0.04); }
 <!-- Toast container -->
 <div class="toast-container" id="toast-container"></div>
 
-<!-- Floating AI Chat Button -->
-<button class="fab-chat" onclick="navigateTo('ai-chat')" title="Ask Law Dawg">🐾</button>
-
 <script>
 // ═══════════════════════════════════════════
 //  STATE MANAGEMENT
@@ -2164,11 +1651,6 @@ function enterApp() {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-  // Warn if opened as file:// (API calls will fail)
-  if (location.protocol === 'file:') {
-    const w = document.getElementById('protocol-warning');
-    if (w) w.style.display = 'inline';
-  }
   // Responsive menu toggle
   const mql = window.matchMedia('(max-width: 900px)');
   const toggle = document.getElementById('menu-toggle');
@@ -2183,113 +1665,28 @@ function initApp() {
   refreshCourseSelects();
   renderCalendar();
   renderWeeklyChart();
-  initQuotes();
-  initCardTilt();
-  // Initialize hero for dashboard
-  const hero = document.getElementById('page-hero');
-  if (hero) {
-    const dashColor = '#7a4a10';
-    const dashSvg = svgIcon(`<line x1="24" y1="7" x2="24" y2="43"/><line x1="9" y1="14" x2="39" y2="14"/><path d="M9 14L5 26q0 5 4.5 5t4.5-5Z"/><path d="M39 14l-4 12q0 5 4.5 5t4.5-5Z"/><path d="M16 43h16"/><circle cx="24" cy="7" r="2" fill="${dashColor}" stroke="none"/>`, dashColor);
-    hero.style.background = 'linear-gradient(135deg, #fdf3dc 0%, #f9e8bc 100%)';
-    hero.style.color = dashColor;
-    hero.innerHTML = `
-      <img class="hero-icon" src="${dashSvg}" alt="Dashboard">
-      <div class="hero-title">Dashboard</div>
-      <div class="hero-subtitle">Your law school command center</div>
-      <div class="hero-deco"><img src="${dashSvg}" alt="" style="width:100%;height:100%;object-fit:contain;"></div>
-      <div class="hero-semester">${state.semester}</div>
-    `;
-  }
 }
 
 // ═══════════════════════════════════════════
 //  NAVIGATION
 // ═══════════════════════════════════════════
-// SVG icon builder — returns a data URL for <img> tags
-function svgIcon(paths, color) {
-  const svg = `<svg viewBox="0 0 48 48" fill="none" stroke="${color}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">${paths}</svg>`;
-  return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
-}
-
 function navigateTo(page) {
-  // Smooth exit: briefly fade out content area
-  const contentArea = document.querySelector('.content-area');
-  contentArea.style.transition = 'opacity 0.15s ease';
-  contentArea.style.opacity = '0';
-
-  setTimeout(() => {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-    const pageEl = document.getElementById('page-' + page);
-    if (pageEl) pageEl.classList.add('active');
-    const navItem = document.querySelector(`.nav-item[data-page="${page}"]`);
-    if (navItem) navItem.classList.add('active');
-
-    // Hero config per page
-    const SVGS = {
-      // Scales of justice
-      dashboard: (c) => svgIcon(`<line x1="24" y1="7" x2="24" y2="43"/><line x1="9" y1="14" x2="39" y2="14"/><path d="M9 14L5 26q0 5 4.5 5t4.5-5Z"/><path d="M39 14l-4 12q0 5 4.5 5t4.5-5Z"/><path d="M16 43h16"/><circle cx="24" cy="7" r="2" fill="${c}" stroke="none"/>`, c),
-      // Stack of books
-      courses: (c) => svgIcon(`<rect x="8" y="28" width="32" height="7" rx="1.5"/><rect x="10" y="20" width="28" height="7" rx="1.5"/><rect x="12" y="12" width="24" height="7" rx="1.5"/><line x1="13" y1="12" x2="13" y2="19"/><line x1="11" y1="20" x2="11" y2="27"/><line x1="9" y1="28" x2="9" y2="35"/>`, c),
-      // Lightbulb with rays
-      study: (c) => svgIcon(`<path d="M24 6a10 10 0 0 1 7 17l-1 4H18l-1-4A10 10 0 0 1 24 6z"/><line x1="20" y1="38" x2="28" y2="38"/><line x1="21" y1="42" x2="27" y2="42"/><line x1="24" y1="3" x2="24" y2="1"/><line x1="36" y1="7" x2="37.5" y2="5.5"/><line x1="12" y1="7" x2="10.5" y2="5.5"/><line x1="40" y1="18" x2="42" y2="18"/><line x1="8" y1="18" x2="6" y2="18"/>`, c),
-      // Document with lines
-      outlines: (c) => svgIcon(`<path d="M10 6h20l8 8v28H10z"/><path d="M30 6v8h8"/><line x1="16" y1="22" x2="32" y2="22"/><line x1="16" y1="28" x2="32" y2="28"/><line x1="16" y1="34" x2="26" y2="34"/><circle cx="14" cy="22" r="1.5" fill="${c}" stroke="none"/><circle cx="14" cy="28" r="1.5" fill="${c}" stroke="none"/><circle cx="14" cy="34" r="1.5" fill="${c}" stroke="none"/>`, c),
-      // Calendar grid
-      calendar: (c) => svgIcon(`<rect x="6" y="10" width="36" height="32" rx="3"/><line x1="6" y1="18" x2="42" y2="18"/><line x1="16" y1="6" x2="16" y2="14"/><line x1="32" y1="6" x2="32" y2="14"/><rect x="12" y="23" width="6" height="5" rx="1" fill="${c}" stroke="none" opacity="0.4"/><line x1="24" y1="24" x2="30" y2="24"/><line x1="24" y1="27" x2="36" y2="27"/><line x1="12" y1="34" x2="18" y2="34"/><line x1="24" y1="34" x2="30" y2="34"/>`, c),
-      // Courthouse columns
-      bar: (c) => svgIcon(`<rect x="6" y="38" width="36" height="4" rx="1"/><rect x="6" y="10" width="36" height="5" rx="1"/><path d="M24 6 L6 10 h36 Z"/><rect x="10" y="15" width="4" height="23" rx="1"/><rect x="22" y="15" width="4" height="23" rx="1"/><rect x="34" y="15" width="4" height="23" rx="1"/>`, c),
-      // Briefcase
-      career: (c) => svgIcon(`<rect x="6" y="18" width="36" height="24" rx="3"/><path d="M16 18v-4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4"/><line x1="6" y1="30" x2="42" y2="30"/><line x1="24" y1="27" x2="24" y2="33"/>`, c),
-      // Open book
-      bluebook: (c) => svgIcon(`<path d="M24 12v28"/><path d="M24 12C22 8 12 8 6 10v24c6-2 16-2 18 2"/><path d="M24 12c2-4 12-4 18-2v24c-6-2-16-2-18 2"/><line x1="10" y1="16" x2="20" y2="15"/><line x1="10" y1="22" x2="20" y2="21"/><line x1="10" y1="28" x2="20" y2="27"/><line x1="28" y1="15" x2="38" y2="16"/><line x1="28" y1="21" x2="38" y2="22"/>`, c),
-      // Leaf / plant
-      wellness: (c) => svgIcon(`<path d="M12 36C12 20 24 8 40 8C40 24 28 36 12 36Z" fill="${c}" fill-opacity="0.15"/><path d="M12 36C12 20 24 8 40 8C40 24 28 36 12 36Z"/><path d="M12 36 C16 30 22 24 30 18"/><path d="M20 42 C20 38 16 36 12 36" stroke-width="2"/>`, c),
-      // Paw print
-      'ai-chat': (c) => svgIcon(`<ellipse cx="24" cy="30" rx="10" ry="8" fill="${c}" fill-opacity="0.2"/><ellipse cx="24" cy="30" rx="10" ry="8"/><circle cx="15" cy="20" r="3.5"/><circle cx="24" cy="17" r="3.5"/><circle cx="33" cy="20" r="3.5"/><circle cx="11" cy="26" r="2.5"/>`, c),
-    };
-
-    const heroes = {
-      // AMBER pair: Dashboard + Career
-      dashboard: { title: 'Dashboard', subtitle: 'Your law school command center', svgKey: 'dashboard', bg: 'linear-gradient(135deg, #fdf3dc 0%, #f9e8bc 100%)', color: '#7a4a10' },
-      career:    { title: 'Career Intel', subtitle: 'Paths · Salaries · Strategy', svgKey: 'career', bg: 'linear-gradient(135deg, #fde8c0 0%, #fad8a0 100%)', color: '#7a4a10' },
-      // SAGE/GREEN pair
-      courses:   { title: 'Courses', subtitle: 'Classes · Materials · Progress', svgKey: 'courses', bg: 'linear-gradient(135deg, #d8f0e2 0%, #c4e8d2 100%)', color: '#2a5e40' },
-      outlines:  { title: 'Outline Builder', subtitle: 'Organize · Structure · Conquer', svgKey: 'outlines', bg: 'linear-gradient(135deg, #d2eedd 0%, #bfe4cc 100%)', color: '#1e5c38' },
-      // INDIGO pair
-      study:     { title: 'Study Engine', subtitle: 'Adaptive quizzes · Practice · Mastery', svgKey: 'study', bg: 'linear-gradient(135deg, #dce4f7 0%, #c8d4f0 100%)', color: '#2c3e80' },
-      bluebook:  { title: 'Bluebook Citation', subtitle: 'Format · Check · Perfect your citations', svgKey: 'bluebook', bg: 'linear-gradient(135deg, #ccd6f5 0%, #b8c6ee 100%)', color: '#1e2e78' },
-      // TEAL pair
-      bar:       { title: 'Bar Alignment', subtitle: 'Track your readiness · Close the gaps', svgKey: 'bar', bg: 'linear-gradient(135deg, #b8e4e4 0%, #a0d8d8 100%)', color: '#124f4f' },
-      'ai-chat': { title: 'AI Assistant', subtitle: 'Ask anything · Law Dawg has your back', svgKey: 'ai-chat', bg: 'linear-gradient(135deg, #c8eeee 0%, #b0e4e4 100%)', color: '#1a6060' },
-      // ROSE pair
-      wellness:  { title: 'Wellness', subtitle: 'Balance · Rest · Thrive', svgKey: 'wellness', bg: 'linear-gradient(135deg, #fcd8dc 0%, #f8c4c8 100%)', color: '#8f0922' },
-      calendar:  { title: 'Calendar', subtitle: 'Deadlines · Study plans · Scheduling', svgKey: 'calendar', bg: 'linear-gradient(135deg, #fde0cc 0%, #f8cdb8 100%)', color: '#8a3820' },
-    };
-
-    const h = heroes[page] || { title: page, subtitle: '', svgKey: 'outlines', bg: 'linear-gradient(135deg, #f0ece4, #e8e2d8)', color: '#333' };
-    const iconSrc = SVGS[h.svgKey] ? SVGS[h.svgKey](h.color) : '';
-    const decoSrc = SVGS[h.svgKey] ? SVGS[h.svgKey](h.color) : '';
-    const hero = document.getElementById('page-hero');
-    hero.style.background = h.bg;
-    hero.style.color = h.color;
-    hero.innerHTML = `
-      <img class="hero-icon" src="${iconSrc}" alt="${h.title}">
-      <div class="hero-title">${h.title}</div>
-      <div class="hero-subtitle">${h.subtitle}</div>
-      <div class="hero-deco"><img src="${decoSrc}" alt="" style="width:100%;height:100%;object-fit:contain;"></div>
-      <div class="hero-semester">${state.semester}</div>
-    `;
-
-    // Update top bar title too
-    document.getElementById('page-title').textContent = h.title;
-
-    // Fade back in
-    contentArea.style.opacity = '1';
-
-    // Close sidebar on mobile
-    document.getElementById('sidebar').classList.remove('open');
-  }, 140);
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const pageEl = document.getElementById('page-' + page);
+  if (pageEl) pageEl.classList.add('active');
+  const navItem = document.querySelector(`.nav-item[data-page="${page}"]`);
+  if (navItem) navItem.classList.add('active');
+  const titles = {
+    dashboard: 'Dashboard', courses: 'Courses', study: 'Study Engine',
+    outlines: 'Outline Builder', calendar: 'Calendar & Scheduling',
+    bar: 'Bar Alignment', career: 'Career Intelligence',
+    bluebook: 'Bluebook Citation Assistant', wellness: 'Work-Life Wellness',
+    'ai-chat': 'AI Assistant'
+  };
+  document.getElementById('page-title').textContent = titles[page] || page;
+  // Close sidebar on mobile
+  document.getElementById('sidebar').classList.remove('open');
 }
 
 function toggleSidebar() {
@@ -2326,19 +1723,6 @@ function toast(msg) {
   t.textContent = msg;
   c.appendChild(t);
   setTimeout(() => t.remove(), 3000);
-}
-
-// ═══════════════════════════════════════════
-//  RENDER AI OUTPUT (strips asterisks, renders clean markdown)
-// ═══════════════════════════════════════════
-function renderAI(el, text) {
-  // Use marked.js to render markdown properly
-  if (typeof marked !== 'undefined') {
-    el.innerHTML = marked.parse(text);
-    el.classList.add('md-rendered');
-  } else {
-    el.textContent = text;
-  }
 }
 
 // ═══════════════════════════════════════════
@@ -2385,12 +1769,13 @@ async function resolveModel() {
 }
 
 async function callGemini(prompt, systemInstruction) {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${API_KEY}`;;
+  const model = await resolveModel();
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${API_KEY}`;
   const body = {
     contents: [{ parts: [{ text: prompt }] }],
   };
-  if (fullSystem) {
-    body.systemInstruction = { parts: [{ text: fullSystem }] };
+  if (systemInstruction) {
+    body.systemInstruction = { parts: [{ text: systemInstruction }] };
   }
   try {
     const resp = await fetch(url, {
@@ -2408,7 +1793,7 @@ async function callGemini(prompt, systemInstruction) {
   } catch (e) {
     console.error('Gemini error:', e);
     if (e.message === 'Failed to fetch') {
-      return 'Error: Could not reach the Gemini API. Check your internet connection and make sure your API key is valid.';
+      return 'Error: Could not reach the Gemini API. Check your internet connection and make sure your API key is valid. If you are using a browser that blocks requests from local files, try opening this file in Chrome or Edge instead.';
     }
     return `Error: ${e.message}`;
   }
@@ -2537,61 +1922,6 @@ function handleFileUpload(event) {
   event.target.value = '';
 }
 
-// Drag and drop support
-(function initDragDrop() {
-  document.addEventListener('DOMContentLoaded', () => {
-    const zone = document.querySelector('.upload-zone');
-    if (!zone) return;
-    setupDropZone(zone);
-  });
-
-  // Re-setup after dynamic renders (MutationObserver)
-  const obs = new MutationObserver(() => {
-    const zone = document.querySelector('.upload-zone');
-    if (zone && !zone._dropReady) setupDropZone(zone);
-  });
-  obs.observe(document.documentElement, { childList: true, subtree: true });
-
-  function setupDropZone(zone) {
-    zone._dropReady = true;
-    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(evt =>
-      zone.addEventListener(evt, e => { e.preventDefault(); e.stopPropagation(); })
-    );
-    zone.addEventListener('dragenter', () => zone.classList.add('drag-over'));
-    zone.addEventListener('dragover', () => zone.classList.add('drag-over'));
-    zone.addEventListener('dragleave', (e) => {
-      if (!zone.contains(e.relatedTarget)) zone.classList.remove('drag-over');
-    });
-    zone.addEventListener('drop', (e) => {
-      zone.classList.remove('drag-over');
-      const files = e.dataTransfer.files;
-      if (!files.length) return;
-      const course = state.courses.find(c => c.id === state.currentCourseId);
-      if (!course) { toast('Open a course first'); return; }
-      Array.from(files).forEach(file => {
-        const allowed = ['.pdf','.docx','.txt','.pptx','.md'];
-        const ext = '.' + file.name.split('.').pop().toLowerCase();
-        if (!allowed.includes(ext)) { toast(`${file.name}: unsupported file type`); return; }
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-          course.materials.push({
-            id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-            name: file.name,
-            type: file.type,
-            size: file.size,
-            content: ev.target.result.slice(0, 50000),
-            uploadedAt: new Date().toISOString()
-          });
-          saveState();
-          renderMaterials(course);
-          toast(`${file.name} uploaded`);
-        };
-        reader.readAsText(file);
-      });
-    });
-  }
-})();
-
 function renderMaterials(course) {
   const list = document.getElementById('materials-list');
   if (course.materials.length === 0) { list.innerHTML = ''; return; }
@@ -2693,7 +2023,7 @@ async function runAITool(type) {
   const contentEl = document.getElementById('ai-tool-content');
   const titleEl = document.getElementById('ai-tool-title');
   outputEl.style.display = 'block';
-  contentEl.innerHTML = (typeof marked !== "undefined") ? marked.parse(result) : result; contentEl.classList.add("md-rendered");
+  contentEl.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div> Generating...';
 
   const prompts = {
     'practice-q': {
@@ -2716,9 +2046,9 @@ async function runAITool(type) {
 
   const p = prompts[type];
   titleEl.textContent = p.title;
-  const system = `You are Law Dawg, an expert law school AI tutor. You help law students study effectively. Be thorough, accurate, and pedagogically sound. Format your responses clearly with proper structure.`;
+  const system = `You are JURIS, an expert law school AI tutor. You help law students study effectively. Be thorough, accurate, and pedagogically sound. Format your responses clearly with proper structure.`;
   const result = await callGemini(p.prompt, system);
-  contentEl.innerHTML = (typeof marked !== "undefined") ? marked.parse(result) : result; contentEl.classList.add("md-rendered");
+  contentEl.textContent = result;
 }
 
 function gatherCourseContext(course) {
@@ -2751,7 +2081,7 @@ async function generateQuiz() {
   const outputArea = document.getElementById('quiz-output-area');
   const contentEl = document.getElementById('quiz-content');
   outputArea.style.display = 'block';
-  contentEl.innerHTML = (typeof marked !== "undefined") ? marked.parse(result) : result; contentEl.classList.add("md-rendered");
+  contentEl.innerHTML = '<div style="text-align:center;padding:2rem;"><div class="loading-dots"><span></span><span></span><span></span></div><div style="margin-top:8px;font-size:0.82rem;color:var(--slate);">Generating quiz...</div></div>';
   document.getElementById('quiz-mbe-submit-section').style.display = 'none';
   document.getElementById('quiz-text-submit-section').style.display = 'none';
   document.getElementById('grade-output').style.display = 'none';
@@ -2760,7 +2090,7 @@ async function generateQuiz() {
   const diffLabels = { early: 'early-semester comprehension level', mid: 'midterm reinforcement level', final: 'final exam complexity level' };
   const topicClause = topic ? ` focused specifically on the topic: "${topic}"` : '';
 
-  const system = 'You are Law Dawg, an expert law school quiz generator. Create challenging, pedagogically sound questions that test understanding of legal doctrines, rules, and analytical skills.';
+  const system = 'You are JURIS, an expert law school quiz generator. Create challenging, pedagogically sound questions that test understanding of legal doctrines, rules, and analytical skills.';
 
   if (qtype === 'mbe') {
     document.getElementById('quiz-output-title').textContent = 'Multiple Choice Quiz';
@@ -2781,7 +2111,7 @@ Base questions on these materials:\n${materialsContext}`;
     mbeQuestions = parseMBEQuestions(result);
     if (mbeQuestions.length === 0) {
       // Fallback: AI didn't follow format, render as markdown
-      contentEl.innerHTML = (typeof marked !== "undefined") ? marked.parse(result) : result; contentEl.classList.add("md-rendered");
+      contentEl.innerHTML = `<div class="md-rendered">${marked.parse(result)}</div>`;
       document.getElementById('quiz-text-answer-section').style.display = 'block';
     } else {
       renderMBEQuestions(mbeQuestions);
@@ -2813,7 +2143,7 @@ Base questions on these materials:\n${materialsContext}`;
 
     if (textQuestions.length === 0) {
       // Fallback: render as plain markdown if parsing fails
-      contentEl.innerHTML = (typeof marked !== "undefined") ? marked.parse(result) : result; contentEl.classList.add("md-rendered");
+      contentEl.innerHTML = `<div class="md-rendered">${marked.parse(result)}</div>`;
       toast('Questions generated — use AI Chat to discuss your answers');
     } else {
       renderTextQuestions(textQuestions, qtype);
@@ -2903,7 +2233,7 @@ Use ## Question N — [brief topic] as the heading for each question.
 
 ${qaText}`;
 
-  const system = 'You are Law Dawg, an expert law professor. Grade each answer rigorously but constructively. Always produce a rubric first, then score against it. Use clear markdown formatting.';
+  const system = 'You are JURIS, an expert law professor. Grade each answer rigorously but constructively. Always produce a rubric first, then score against it. Use clear markdown formatting.';
   const result = await callGemini(prompt, system);
   gradeContent.innerHTML = marked.parse(result);
 }
@@ -2918,7 +2248,7 @@ async function gradeAnswer() {
   gradeEl.style.display = 'block';
   gradeContent.innerHTML = '<div style="text-align:center;padding:1.5rem;"><div class="loading-dots"><span></span><span></span><span></span></div></div>';
   const prompt = `Grade this law student answer.\n\nQuestion:\n${question}\n\nAnswer:\n${answer}\n\nProvide a rubric, score each criterion, give a total out of 10, and 2-3 sentences of feedback.`;
-  const system = 'You are Law Dawg, an expert law professor. Use markdown with clear headings.';
+  const system = 'You are JURIS, an expert law professor. Use markdown with clear headings.';
   const result = await callGemini(prompt, system);
   gradeContent.innerHTML = marked.parse(result);
 }
@@ -2997,7 +2327,7 @@ async function submitMBEQuiz() {
   ).join('\n\n');
 
   const prompt = `A law student just completed a multiple choice quiz. Grade their answers.\n\nFor EACH question:\n1. State whether they were CORRECT or INCORRECT\n2. Reveal the correct answer and letter\n3. Briefly explain the controlling rule and why the correct answer is right\n4. If wrong, explain why their choice was incorrect\n\nEnd with a total score (X out of ${mbeQuestions.length}) and 1-2 sentences of overall feedback.\n\nStudent's answers:\n${answersText}`;
-  const system = 'You are Law Dawg, an expert law professor. Grade MBE answers clearly and educationally. Use markdown with ## for each question heading.';
+  const system = 'You are JURIS, an expert law professor. Grade MBE answers clearly and educationally. Use markdown with ## for each question heading.';
   const result = await callGemini(prompt, system);
   gradeContent.innerHTML = marked.parse(result);
 }
@@ -3013,7 +2343,7 @@ async function gradeAnswer() {
   gradeContent.innerHTML = '<div style="text-align:center;padding:1.5rem;"><div class="loading-dots"><span></span><span></span><span></span></div><div style="margin-top:8px;font-size:0.82rem;color:var(--slate);">Grading...</div></div>';
 
   const prompt = `You are grading a law student's answer. Here is the question:\n\n${question}\n\nHere is the student's answer:\n\n${answer}\n\nProvide detailed feedback including:\n1. Score (out of 10)\n2. Issues correctly identified\n3. Missing issues or rules\n4. Quality of rule articulation\n5. IRAC structure assessment\n6. Specific suggestions for improvement`;
-  const system = 'You are Law Dawg, an expert law professor grading student work. Be constructive, thorough, and specific. Use markdown with clear headings for each section of feedback.';
+  const system = 'You are JURIS, an expert law professor grading student work. Be constructive, thorough, and specific. Use markdown with clear headings for each section of feedback.';
   const result = await callGemini(prompt, system);
   gradeContent.innerHTML = marked.parse(result);
 }
@@ -3094,7 +2424,7 @@ async function generateOutline(type) {
   } else {
     prompt = `For the course "${course.name}", ${typeInstructions[type]}\n\nBase this on the following materials:\n${materialsContext}`;
   }
-  const system = 'You are Law Dawg, an expert law school outline builder. Create clear, well-organized, accurate legal outlines that would help a student prepare for exams.';
+  const system = 'You are JURIS, an expert law school outline builder. Create clear, well-organized, accurate legal outlines that would help a student prepare for exams.';
   const result = await callGemini(prompt, system);
   course.outlineData = result;
   saveState();
@@ -3151,7 +2481,7 @@ async function generateStudyPlan() {
   el.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div> Generating study plan...';
 
   const prompt = `Create a detailed weekly study plan based on these courses and upcoming assignments:\n\n${JSON.stringify(courses, null, 2)}\n\nToday is ${new Date().toLocaleDateString()}. Include spaced repetition, break reminders, and prioritize upcoming deadlines.`;
-  const system = 'You are Law Dawg, a law school study planning assistant. Create practical, time-blocked study plans that incorporate spaced repetition and prevent burnout.';
+  const system = 'You are JURIS, a law school study planning assistant. Create practical, time-blocked study plans that incorporate spaced repetition and prevent burnout.';
   const result = await callGemini(prompt, system);
   el.innerHTML = `<div style="white-space:pre-wrap;">${esc(result)}</div>`;
 }
@@ -3181,7 +2511,7 @@ Analyze my bar readiness:
 
 Format the MBE coverage as a simple list with percentages.`;
 
-  const system = 'You are Law Dawg, an expert bar exam preparation advisor. Provide accurate, jurisdiction-specific bar exam guidance.';
+  const system = 'You are JURIS, an expert bar exam preparation advisor. Provide accurate, jurisdiction-specific bar exam guidance.';
   const result = await callGemini(prompt, system);
 
   // Parse and display
@@ -3207,7 +2537,7 @@ async function analyzeCareer() {
   const resultsEl = document.getElementById('career-results');
   const outputEl = document.getElementById('career-output');
   resultsEl.style.display = 'block';
-  outputEl.innerHTML = (typeof marked !== "undefined") ? marked.parse(result) : result; outputEl.classList.add("md-rendered");
+  outputEl.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div> Analyzing career matches...';
 
   const prompt = `Based on the following law student profile, provide comprehensive career intelligence:
 
@@ -3228,9 +2558,9 @@ Provide:
 3. A comparison table of the top 3 paths
 4. Recommended next steps (internships, clinics, networking)`;
 
-  const system = 'You are Law Dawg, an expert legal career counselor. Provide realistic, data-informed career guidance for law students. Be specific about compensation ranges and lifestyle realities.';
+  const system = 'You are JURIS, an expert legal career counselor. Provide realistic, data-informed career guidance for law students. Be specific about compensation ranges and lifestyle realities.';
   const result = await callGemini(prompt, system);
-  outputEl.innerHTML = (typeof marked !== "undefined") ? marked.parse(result) : result; outputEl.classList.add("md-rendered");
+  outputEl.textContent = result;
 }
 
 // ═══════════════════════════════════════════
@@ -3247,9 +2577,9 @@ async function generateCitation() {
   outputEl.textContent = 'Generating citation...';
 
   const prompt = `Generate a proper Bluebook citation for the following ${type}:\n\n${input}\n\nProvide:\n1. Full citation\n2. Short form\n3. If a case: proper parenthetical\n4. Explanation of any formatting rules applied`;
-  const system = 'You are Law Dawg, an expert in Bluebook citation format (21st edition). Generate perfectly formatted legal citations. Be precise about italics (indicated with *asterisks*), small caps, and punctuation.';
+  const system = 'You are JURIS, an expert in Bluebook citation format (21st edition). Generate perfectly formatted legal citations. Be precise about italics (indicated with *asterisks*), small caps, and punctuation.';
   const result = await callGemini(prompt, system);
-  outputEl.innerHTML = (typeof marked !== "undefined") ? marked.parse(result) : result; outputEl.classList.add("md-rendered");
+  outputEl.textContent = result;
 }
 
 async function fixCitation() {
@@ -3262,9 +2592,9 @@ async function fixCitation() {
   outputEl.textContent = 'Analyzing citation...';
 
   const prompt = `Analyze and fix this Bluebook citation:\n\n${input}\n\nIdentify all errors, explain the Bluebook rules violated, and provide the corrected citation.`;
-  const system = 'You are Law Dawg, an expert Bluebook citation checker. Identify errors precisely and explain the relevant Bluebook rules.';
+  const system = 'You are JURIS, an expert Bluebook citation checker. Identify errors precisely and explain the relevant Bluebook rules.';
   const result = await callGemini(prompt, system);
-  outputEl.innerHTML = (typeof marked !== "undefined") ? marked.parse(result) : result; outputEl.classList.add("md-rendered");
+  outputEl.textContent = result;
 }
 
 function copyCitation() {
@@ -3336,9 +2666,9 @@ Provide:
 4. Suggested adjustments to study schedule
 Be supportive and constructive.`;
 
-  const system = 'You are Law Dawg wellness advisor. You help UGA law students maintain healthy study habits and prevent burnout. Be warm, supportive, and practical.';
+  const system = 'You are JURIS wellness advisor. You help law students maintain healthy study habits and prevent burnout. Be warm, supportive, and practical.';
   const result = await callGemini(prompt, system);
-  el.innerHTML = (typeof marked !== "undefined") ? marked.parse(result) : result; el.classList.add("md-rendered");
+  el.textContent = result;
 }
 
 // ═══════════════════════════════════════════
@@ -3361,7 +2691,7 @@ async function sendChat() {
   const courseSummary = state.courses.map(c => `${c.name} (${c.prof}, ${c.materials.length} files, ${c.notes.length} notes)`).join('; ');
   const contextPrompt = `Student context: Courses: [${courseSummary || 'none'}]. Semester: ${state.semester}.\n\nConversation so far:\n${state.chatHistory.map(m => `${m.role}: ${m.content}`).join('\n')}\n\nRespond to the student's latest message.`;
 
-  const system = `You are Law Dawg, an intelligent AI assistant built specifically for UGA School of Law students. You help with studying, outlines, bar prep, career planning, Bluebook citations, and general law school advice. Be knowledgeable, supportive, and thorough. Reference the student's actual courses and materials when relevant. Go Dawgs!`;
+  const system = `You are JURIS, an intelligent law school AI assistant. You help with studying, outlines, bar prep, career planning, Bluebook citations, and general law school advice. Be knowledgeable, supportive, and thorough. Reference the student's actual courses and materials when relevant.`;
   const result = await callGemini(contextPrompt, system);
 
   state.chatHistory.push({ role: 'assistant', content: result });
@@ -3369,10 +2699,7 @@ async function sendChat() {
 
   const loadingEl = document.getElementById('chat-loading');
   if (loadingEl) loadingEl.remove();
-  const assistantDiv = document.createElement('div');
-  assistantDiv.className = 'ai-msg assistant md-rendered';
-  assistantDiv.innerHTML = (typeof marked !== 'undefined') ? marked.parse(result) : esc(result);
-  msgsEl.appendChild(assistantDiv);
+  msgsEl.innerHTML += `<div class="ai-msg assistant">${esc(result)}</div>`;
   msgsEl.scrollTop = msgsEl.scrollHeight;
 }
 
@@ -3386,19 +2713,13 @@ async function quickAI(prompt) {
 //  DASHBOARD REFRESH
 // ═══════════════════════════════════════════
 function refreshDashboard() {
-  const statCards = document.querySelectorAll('.stat-card');
-  const setStatVal = (id, val, cardIndex, isFloat = false) => {
-    const el = document.getElementById(id);
-    if (el) {
-      animateCounter(el, val, isFloat);
-      if (statCards[cardIndex]) statCards[cardIndex].dataset.value = isFloat ? val.toFixed(1) : val;
-    }
-  };
-  setStatVal('stat-courses', state.courses.length, 0);
+  document.getElementById('stat-courses').textContent = state.courses.length;
+
   const totalAssign = state.courses.reduce((s, c) => s + c.assignments.length, 0);
-  setStatVal('stat-assignments', totalAssign, 1);
+  document.getElementById('stat-assignments').textContent = totalAssign;
+
   const totalHrs = state.studyLog.reduce((s, l) => s + l.hours, 0);
-  setStatVal('stat-study-hrs', totalHrs, 2, true);
+  document.getElementById('stat-study-hrs').textContent = totalHrs.toFixed(1);
 
   // Dashboard course cards
   const dashList = document.getElementById('dash-courses-list');
@@ -3464,93 +2785,6 @@ function refreshCourseSelects() {
 function esc(str) {
   if (!str) return '';
   return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-// ═══════════════════════════════════════════
-//  LEGAL QUOTES ROTATOR
-// ═══════════════════════════════════════════
-const LEGAL_QUOTES = [
-  { text: "The law is reason, free from passion.", author: "Aristotle" },
-  { text: "Injustice anywhere is a threat to justice everywhere.", author: "Martin Luther King Jr." },
-  { text: "In law, nothing is certain but the expense.", author: "Samuel Butler" },
-  { text: "The good lawyer is not the one who knows the most law, but the one who knows where to find it.", author: "Anonymous" },
-  { text: "It is not what a lawyer tells me I may do; it is what humanity, reason, and justice tell me I ought to do.", author: "Edmund Burke" },
-  { text: "The first thing we do, let's kill all the lawyers. (Not literally — we need you.)", author: "Shakespeare, Henry VI" },
-  { text: "Laws are spider webs through which the big flies pass and the little ones get caught.", author: "Honoré de Balzac" },
-  { text: "The life of the law has not been logic; it has been experience.", author: "Oliver Wendell Holmes Jr." },
-  { text: "Lawyers are the only persons in whom ignorance of the law is not punished.", author: "Jeremy Bentham" },
-  { text: "Courage is the most important of all the virtues because without courage, you can't practice any other virtue consistently.", author: "Maya Angelou" },
-  { text: "Equal justice under law.", author: "Inscribed on the U.S. Supreme Court" },
-  { text: "The law is a ass — a idiot.", author: "Charles Dickens, Oliver Twist" },
-];
-let quoteIndex = 0, quoteTimer = null;
-
-function initQuotes() {
-  renderQuote();
-  quoteTimer = setInterval(nextQuote, 6000);
-}
-function renderQuote(dir = 1) {
-  const textEl = document.getElementById('quote-text');
-  const authorEl = document.getElementById('quote-author');
-  const dotsEl = document.getElementById('quote-dots');
-  if (!textEl) return;
-  textEl.style.opacity = '0'; authorEl.style.opacity = '0';
-  setTimeout(() => {
-    const q = LEGAL_QUOTES[quoteIndex];
-    textEl.textContent = `"${q.text}"`;
-    authorEl.textContent = `— ${q.author}`;
-    textEl.style.opacity = '1'; authorEl.style.opacity = '1';
-    // Dots
-    dotsEl.innerHTML = LEGAL_QUOTES.map((_, i) =>
-      `<div class="quote-dot ${i === quoteIndex ? 'active' : ''}" onclick="goToQuote(${i})"></div>`
-    ).join('');
-  }, 300);
-}
-function nextQuote() { quoteIndex = (quoteIndex + 1) % LEGAL_QUOTES.length; renderQuote(1); }
-function goToQuote(i) { quoteIndex = i; clearInterval(quoteTimer); renderQuote(0); quoteTimer = setInterval(nextQuote, 6000); }
-
-// ═══════════════════════════════════════════
-//  ANIMATED STAT COUNTER
-// ═══════════════════════════════════════════
-function animateCounter(el, target, isFloat = false) {
-  const duration = 800;
-  const start = performance.now();
-  const startVal = 0;
-  el.classList.add('counting');
-  function step(now) {
-    const progress = Math.min((now - start) / duration, 1);
-    const eased = 1 - Math.pow(1 - progress, 3);
-    const current = startVal + (target - startVal) * eased;
-    el.textContent = isFloat ? current.toFixed(1) : Math.round(current);
-    if (progress < 1) requestAnimationFrame(step);
-    else { el.textContent = isFloat ? target.toFixed(1) : target; el.classList.remove('counting'); }
-  }
-  requestAnimationFrame(step);
-}
-
-// ═══════════════════════════════════════════
-//  CARD 3D TILT ON HOVER
-// ═══════════════════════════════════════════
-function initCardTilt() {
-  document.addEventListener('mousemove', e => {
-    const card = e.target.closest('.card:not(.quote-card)');
-    if (!card) { document.querySelectorAll('.card.tilting').forEach(c => {
-      c.style.transform = ''; c.classList.remove('tilting');
-    }); return; }
-    const rect = card.getBoundingClientRect();
-    const cx = rect.left + rect.width / 2;
-    const cy = rect.top + rect.height / 2;
-    const dx = (e.clientX - cx) / (rect.width / 2);
-    const dy = (e.clientY - cy) / (rect.height / 2);
-    card.classList.add('tilting');
-    card.style.transform = `perspective(600px) rotateY(${dx * 3}deg) rotateX(${-dy * 3}deg) translateY(-2px)`;
-    card.style.boxShadow = `${-dx * 6}px ${dy * 6}px 24px rgba(0,0,0,0.12)`;
-  });
-  document.addEventListener('mouseleave', () => {
-    document.querySelectorAll('.card.tilting').forEach(c => {
-      c.style.transform = ''; c.style.boxShadow = ''; c.classList.remove('tilting');
-    });
-  });
 }
 </script>
 </body>
