@@ -1,0 +1,4204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JURIS — Intelligent Law Student Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<style>
+:root {
+  --ink: #1a1a2e;
+  --parchment: #f5f0e8;
+  --gold: #c5a55a;
+  --gold-light: #dbc88e;
+  --gold-dark: #a08840;
+  --crimson: #8b2635;
+  --crimson-light: #b33a4a;
+  --navy: #16213e;
+  --slate: #3a3a5c;
+  --mist: #e8e4dc;
+  --warm-white: #faf8f4;
+  --success: #4a7c59;
+  --warning: #c5873a;
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-body: 'DM Sans', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --shadow-sm: 0 1px 3px rgba(26,26,46,0.08);
+  --shadow-md: 0 4px 12px rgba(26,26,46,0.1);
+  --shadow-lg: 0 8px 30px rgba(26,26,46,0.12);
+  --shadow-xl: 0 20px 60px rgba(26,26,46,0.15);
+  --radius: 8px;
+  --radius-lg: 14px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--parchment);
+  color: var(--ink);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 3px; }
+
+/* ─── SPLASH / API KEY SCREEN ─── */
+#splash-screen {
+  position: fixed; inset: 0; z-index: 9999;
+  background: var(--navy);
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column;
+  transition: opacity 0.6s, transform 0.6s;
+}
+#splash-screen.hidden { opacity: 0; pointer-events: none; transform: scale(1.02); }
+
+.splash-inner {
+  text-align: center;
+  max-width: 480px;
+  padding: 3rem;
+}
+
+.splash-logo {
+  font-family: var(--font-display);
+  font-size: 4.5rem;
+  font-weight: 300;
+  color: var(--gold);
+  letter-spacing: 0.3em;
+  margin-bottom: 0.25rem;
+}
+.splash-tagline {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  color: rgba(197,165,90,0.6);
+  font-style: italic;
+  letter-spacing: 0.08em;
+  margin-bottom: 3rem;
+}
+
+.splash-divider {
+  width: 60px;
+  height: 1px;
+  background: var(--gold);
+  margin: 0 auto 2rem;
+  opacity: 0.4;
+}
+
+.splash-label {
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(245,240,232,0.5);
+  margin-bottom: 0.75rem;
+}
+
+.api-input-wrap {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+.api-input-wrap input {
+  width: 100%;
+  padding: 14px 18px;
+  background: rgba(245,240,232,0.06);
+  border: 1px solid rgba(197,165,90,0.25);
+  border-radius: var(--radius);
+  color: var(--parchment);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  outline: none;
+  transition: border-color 0.3s;
+}
+.api-input-wrap input:focus {
+  border-color: var(--gold);
+}
+.api-input-wrap input::placeholder {
+  color: rgba(245,240,232,0.25);
+}
+
+.btn-enter {
+  background: var(--gold);
+  color: var(--navy);
+  border: none;
+  padding: 14px 48px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.btn-enter:hover { background: var(--gold-light); transform: translateY(-1px); }
+.btn-enter:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+.splash-note {
+  margin-top: 1.5rem;
+  font-size: 0.7rem;
+  color: rgba(245,240,232,0.3);
+  line-height: 1.6;
+}
+
+/* ─── MAIN APP LAYOUT ─── */
+#app { display: none; min-height: 100vh; }
+#app.active { display: flex; }
+
+/* Sidebar */
+.sidebar {
+  width: 260px;
+  background: var(--navy);
+  color: var(--parchment);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  z-index: 100;
+  transition: transform 0.3s;
+}
+
+.sidebar-header {
+  padding: 1.5rem 1.25rem;
+  border-bottom: 1px solid rgba(197,165,90,0.15);
+}
+.sidebar-brand {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  font-weight: 300;
+  color: var(--gold);
+  letter-spacing: 0.25em;
+}
+.sidebar-sub {
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(197,165,90,0.45);
+  margin-top: 2px;
+}
+
+.sidebar-nav { flex: 1; padding: 1rem 0; overflow-y: auto; }
+
+.nav-section-label {
+  font-size: 0.6rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(245,240,232,0.3);
+  padding: 1rem 1.25rem 0.4rem;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 1.25rem;
+  cursor: pointer;
+  font-size: 0.82rem;
+  color: rgba(245,240,232,0.6);
+  transition: all 0.2s;
+  border-left: 2px solid transparent;
+}
+.nav-item:hover {
+  color: var(--parchment);
+  background: rgba(197,165,90,0.06);
+}
+.nav-item.active {
+  color: var(--gold);
+  background: rgba(197,165,90,0.1);
+  border-left-color: var(--gold);
+}
+.nav-item svg { width: 16px; height: 16px; flex-shrink: 0; opacity: 0.7; }
+.nav-item.active svg { opacity: 1; }
+
+.sidebar-footer {
+  padding: 1rem 1.25rem;
+  border-top: 1px solid rgba(197,165,90,0.15);
+  font-size: 0.65rem;
+  color: rgba(245,240,232,0.25);
+}
+
+/* Main Content */
+.main-content {
+  margin-left: 260px;
+  flex: 1;
+  min-height: 100vh;
+}
+
+/* Top Bar */
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 2rem;
+  background: var(--warm-white);
+  border-bottom: 1px solid rgba(26,26,46,0.06);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+.page-title {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: var(--ink);
+}
+.top-actions { display: flex; align-items: center; gap: 12px; }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: var(--radius);
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+.btn-primary {
+  background: var(--gold);
+  color: var(--navy);
+}
+.btn-primary:hover { background: var(--gold-light); }
+.btn-ghost {
+  background: transparent;
+  color: var(--slate);
+  border: 1px solid rgba(26,26,46,0.12);
+}
+.btn-ghost:hover { border-color: var(--gold); color: var(--gold-dark); }
+.btn-danger { background: var(--crimson); color: white; }
+.btn-danger:hover { background: var(--crimson-light); }
+
+.btn svg { width: 14px; height: 14px; }
+
+/* Content Area */
+.content-area {
+  padding: 2rem;
+  max-width: 1200px;
+}
+
+/* Page sections */
+.page { display: none; }
+.page.active { display: block; animation: fadeUp 0.35s ease; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── CARDS ─── */
+.card {
+  background: var(--warm-white);
+  border: 1px solid rgba(26,26,46,0.06);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  margin-bottom: 1.25rem;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.2s;
+}
+.card:hover { box-shadow: var(--shadow-md); }
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+.card-title {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+.card-badge {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: rgba(197,165,90,0.12);
+  color: var(--gold-dark);
+}
+
+/* Grid layouts */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+
+/* Stats */
+.stat-card {
+  background: var(--warm-white);
+  border: 1px solid rgba(26,26,46,0.06);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+}
+.stat-value {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--gold-dark);
+}
+.stat-label {
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--slate);
+  margin-top: 4px;
+}
+
+/* Progress bars */
+.progress-bar {
+  width: 100%;
+  height: 6px;
+  background: var(--mist);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 6px;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold-dark), var(--gold));
+  border-radius: 3px;
+  transition: width 0.6s ease;
+}
+
+/* Form elements */
+.form-group { margin-bottom: 1rem; }
+.form-label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--slate);
+  margin-bottom: 6px;
+}
+.form-input, .form-select, .form-textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid rgba(26,26,46,0.12);
+  border-radius: var(--radius);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  color: var(--ink);
+  background: white;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  border-color: var(--gold);
+}
+.form-textarea { resize: vertical; min-height: 100px; }
+
+/* Tags */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.68rem;
+  font-weight: 500;
+  gap: 4px;
+}
+.tag-gold { background: rgba(197,165,90,0.15); color: var(--gold-dark); }
+.tag-crimson { background: rgba(139,38,53,0.1); color: var(--crimson); }
+.tag-success { background: rgba(74,124,89,0.1); color: var(--success); }
+
+/* Tables */
+.table-wrap { overflow-x: auto; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+th {
+  text-align: left;
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--slate);
+  padding: 10px 12px;
+  border-bottom: 2px solid var(--mist);
+}
+td {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(26,26,46,0.04);
+  color: var(--ink);
+}
+tr:hover td { background: rgba(197,165,90,0.03); }
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid rgba(26,26,46,0.08);
+  margin-bottom: 1.5rem;
+}
+.tab {
+  padding: 10px 20px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--slate);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+}
+.tab:hover { color: var(--ink); }
+.tab.active { color: var(--gold-dark); border-bottom-color: var(--gold); }
+
+/* File upload zone */
+.upload-zone {
+  border: 2px dashed rgba(197,165,90,0.3);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: rgba(197,165,90,0.03);
+}
+.upload-zone:hover {
+  border-color: var(--gold);
+  background: rgba(197,165,90,0.06);
+}
+.upload-zone svg { width: 32px; height: 32px; color: var(--gold); margin-bottom: 8px; }
+.upload-zone p { font-size: 0.82rem; color: var(--slate); }
+.upload-zone .upload-hint { font-size: 0.7rem; color: rgba(58,58,92,0.5); margin-top: 4px; }
+
+/* Modal */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(26,26,46,0.5);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s;
+}
+.modal-overlay.active { opacity: 1; pointer-events: all; }
+.modal {
+  background: var(--warm-white);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  max-width: 560px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-xl);
+  transform: translateY(20px);
+  transition: transform 0.3s;
+}
+.modal-overlay.active .modal { transform: translateY(0); }
+.modal-title {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 1.25rem;
+}
+
+/* Chat / AI Panel */
+.ai-panel {
+  background: var(--warm-white);
+  border: 1px solid rgba(26,26,46,0.06);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.ai-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: var(--navy);
+  color: var(--gold);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+.ai-panel-header svg { width: 16px; height: 16px; }
+
+.ai-messages {
+  padding: 1rem;
+  max-height: 400px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.ai-msg {
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  font-size: 0.82rem;
+  line-height: 1.6;
+  max-width: 85%;
+  white-space: pre-wrap;
+}
+.ai-msg.user {
+  background: rgba(197,165,90,0.12);
+  color: var(--ink);
+  align-self: flex-end;
+  border-bottom-right-radius: 2px;
+}
+.ai-msg.assistant {
+  background: var(--mist);
+  color: var(--ink);
+  align-self: flex-start;
+  border-bottom-left-radius: 2px;
+}
+.ai-msg.system {
+  background: rgba(139,38,53,0.06);
+  color: var(--crimson);
+  font-size: 0.75rem;
+  align-self: center;
+  text-align: center;
+}
+
+.ai-input-wrap {
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  border-top: 1px solid rgba(26,26,46,0.06);
+}
+.ai-input-wrap input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1px solid rgba(26,26,46,0.1);
+  border-radius: var(--radius);
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  outline: none;
+}
+.ai-input-wrap input:focus { border-color: var(--gold); }
+.ai-input-wrap button {
+  background: var(--gold);
+  color: var(--navy);
+  border: none;
+  padding: 10px 18px;
+  border-radius: var(--radius);
+  font-weight: 600;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.ai-input-wrap button:hover { background: var(--gold-light); }
+
+/* Loading dots */
+.loading-dots { display: inline-flex; gap: 4px; align-items: center; }
+.loading-dots span {
+  width: 6px; height: 6px;
+  background: var(--gold);
+  border-radius: 50%;
+  animation: dotPulse 1.2s infinite;
+}
+.loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+.loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes dotPulse {
+  0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+  40% { opacity: 1; transform: scale(1); }
+}
+
+/* Outline viewer */
+.outline-section {
+  margin-bottom: 1rem;
+  border-left: 3px solid var(--gold);
+  padding-left: 1rem;
+}
+.outline-topic {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 0.4rem;
+}
+.outline-rule {
+  font-size: 0.82rem;
+  color: var(--slate);
+  line-height: 1.7;
+  margin-bottom: 0.3rem;
+}
+
+/* Rendered markdown (shared by outline + quiz) */
+.md-rendered { font-size: 0.875rem; line-height: 1.8; color: var(--ink); }
+.md-rendered h1 {
+  font-family: var(--font-display);
+  font-size: 1.75rem; font-weight: 600; color: var(--ink);
+  border-bottom: 2px solid var(--gold);
+  padding-bottom: 0.4rem; margin: 1.5rem 0 0.75rem;
+}
+.md-rendered h2 {
+  font-family: var(--font-display);
+  font-size: 1.3rem; font-weight: 600; color: var(--navy);
+  border-left: 3px solid var(--gold);
+  padding-left: 0.75rem; margin: 1.25rem 0 0.5rem;
+}
+.md-rendered h3 {
+  font-family: var(--font-display);
+  font-size: 1.05rem; font-weight: 600; color: var(--crimson);
+  margin: 1rem 0 0.35rem;
+}
+.md-rendered h4 {
+  font-size: 0.875rem; font-weight: 600; color: var(--slate);
+  text-transform: uppercase; letter-spacing: 0.06em;
+  margin: 0.75rem 0 0.25rem;
+}
+.md-rendered p { margin: 0.4rem 0; }
+.md-rendered ul, .md-rendered ol { padding-left: 1.5rem; margin: 0.35rem 0 0.5rem; }
+.md-rendered li { margin-bottom: 0.25rem; }
+.md-rendered li > ul, .md-rendered li > ol { margin-top: 0.2rem; }
+.md-rendered strong { color: var(--ink); font-weight: 600; }
+.md-rendered em { color: var(--slate); }
+.md-rendered hr { border: none; border-top: 1px solid var(--mist); margin: 1.25rem 0; }
+.md-rendered blockquote {
+  border-left: 3px solid var(--gold-light);
+  padding-left: 1rem; color: var(--slate);
+  margin: 0.75rem 0; font-style: italic;
+}
+
+/* Per-question text answer cards (short / issue-spot / hypo) */
+.text-question-card {
+  border: 1px solid rgba(26,26,46,0.08);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  margin-bottom: 1.25rem;
+  background: var(--warm-white);
+}
+.text-question-card .md-rendered p:first-child { margin-top: 0; }
+
+/* MBE interactive quiz */
+.mbe-question {
+  border: 1px solid rgba(26,26,46,0.08);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.25rem;
+  background: var(--warm-white);
+}
+.mbe-question-num {
+  font-size: 0.65rem; font-weight: 600; letter-spacing: 0.15em;
+  text-transform: uppercase; color: var(--gold-dark);
+  margin-bottom: 0.5rem;
+}
+.mbe-question-text {
+  font-size: 0.9rem; line-height: 1.7; color: var(--ink);
+  margin-bottom: 1rem; font-family: var(--font-display); font-size: 1rem;
+}
+.mbe-options { display: flex; flex-direction: column; gap: 8px; }
+.mbe-option {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 10px 14px;
+  border: 1.5px solid rgba(26,26,46,0.1);
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 0.85rem; line-height: 1.5;
+  transition: all 0.2s;
+  background: white;
+  text-align: left;
+  width: 100%;
+  color: var(--ink);
+}
+.mbe-option:hover { border-color: var(--gold); background: rgba(197,165,90,0.05); }
+.mbe-option.selected {
+  border-color: var(--gold);
+  background: rgba(197,165,90,0.12);
+  color: var(--navy);
+  font-weight: 500;
+}
+.mbe-option-letter {
+  flex-shrink: 0; width: 22px; height: 22px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(26,26,46,0.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.72rem; font-weight: 700;
+  transition: all 0.2s;
+}
+.mbe-option.selected .mbe-option-letter {
+  background: var(--gold); border-color: var(--gold); color: white;
+}
+.mbe-submit-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 1rem 0 0.25rem;
+  border-top: 1px solid var(--mist);
+  margin-top: 0.5rem;
+}
+.mbe-progress {
+  font-size: 0.78rem; color: var(--slate); margin-left: auto;
+}
+/* Feedback correct/incorrect coloring */
+.mbe-option.correct { border-color: var(--success); background: rgba(74,124,89,0.08); }
+.mbe-option.incorrect { border-color: var(--crimson); background: rgba(139,38,53,0.07); }
+.mbe-option.correct .mbe-option-letter { background: var(--success); border-color: var(--success); color: white; }
+.mbe-option.incorrect .mbe-option-letter { background: var(--crimson); border-color: var(--crimson); color: white; }
+
+/* (outline uses shared .md-rendered class) */
+
+/* Calendar */
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+.cal-header-cell {
+  text-align: center;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--slate);
+  padding: 8px 0;
+}
+.cal-cell {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 4px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.cal-cell:hover { background: rgba(197,165,90,0.08); }
+.cal-cell.today { background: rgba(197,165,90,0.15); font-weight: 700; }
+.cal-cell.has-event::after {
+  content: '';
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: var(--crimson);
+  margin-top: 2px;
+}
+.cal-cell.empty { pointer-events: none; }
+
+/* Heat map */
+.heat-map { display: flex; gap: 3px; flex-wrap: wrap; }
+.heat-cell {
+  width: 28px; height: 28px;
+  border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.55rem;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  position: relative;
+}
+.heat-cell[data-level="0"] { background: var(--mist); color: var(--slate); }
+.heat-cell[data-level="1"] { background: rgba(197,165,90,0.3); color: var(--gold-dark); }
+.heat-cell[data-level="2"] { background: rgba(197,165,90,0.55); }
+.heat-cell[data-level="3"] { background: var(--gold); }
+.heat-cell[data-level="4"] { background: var(--gold-dark); }
+
+/* Toast */
+.toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.toast {
+  background: var(--navy);
+  color: var(--parchment);
+  padding: 12px 20px;
+  border-radius: var(--radius);
+  font-size: 0.8rem;
+  box-shadow: var(--shadow-lg);
+  animation: toastIn 0.3s ease, toastOut 0.3s ease 2.7s forwards;
+  border-left: 3px solid var(--gold);
+}
+@keyframes toastIn { from { opacity: 0; transform: translateX(40px); } }
+@keyframes toastOut { to { opacity: 0; transform: translateX(40px); } }
+
+/* Responsive */
+@media (max-width: 900px) {
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.open { transform: translateX(0); }
+  .main-content { margin-left: 0; }
+  .grid-3 { grid-template-columns: 1fr 1fr; }
+  .grid-4 { grid-template-columns: 1fr 1fr; }
+  .content-area { padding: 1rem; }
+}
+@media (max-width: 600px) {
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+}
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--slate);
+}
+.empty-state svg { width: 48px; height: 48px; color: var(--mist); margin-bottom: 1rem; }
+.empty-state h3 {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  color: var(--ink);
+  margin-bottom: 0.5rem;
+}
+.empty-state p { font-size: 0.82rem; }
+
+/* Specific components */
+.course-card {
+  background: var(--warm-white);
+  border: 1px solid rgba(26,26,46,0.06);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  cursor: pointer;
+  transition: all 0.25s;
+  position: relative;
+  overflow: hidden;
+}
+.course-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--gold);
+}
+.course-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+.course-name {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.course-prof {
+  font-size: 0.75rem;
+  color: var(--slate);
+}
+.course-progress { margin-top: 10px; }
+.course-progress-label {
+  font-size: 0.68rem;
+  color: var(--slate);
+  display: flex;
+  justify-content: space-between;
+}
+
+/* Bluebook output */
+.citation-output {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  background: rgba(22,33,62,0.03);
+  border: 1px solid rgba(26,26,46,0.08);
+  border-radius: var(--radius);
+  padding: 1rem;
+  line-height: 1.8;
+  white-space: pre-wrap;
+}
+
+/* Toggle switch */
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+}
+.toggle-label { font-size: 0.82rem; color: var(--ink); }
+.toggle {
+  width: 40px; height: 22px;
+  background: var(--mist);
+  border-radius: 11px;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.toggle.on { background: var(--gold); }
+.toggle::after {
+  content: '';
+  position: absolute;
+  top: 3px; left: 3px;
+  width: 16px; height: 16px;
+  background: white;
+  border-radius: 50%;
+  transition: transform 0.2s;
+  box-shadow: var(--shadow-sm);
+}
+.toggle.on::after { transform: translateX(18px); }
+
+/* ─── WELLNESS: Study Timer ─── */
+.timer-display {
+  font-family: var(--font-mono);
+  font-size: 3.5rem;
+  font-weight: 500;
+  color: var(--ink);
+  text-align: center;
+  letter-spacing: 0.05em;
+  padding: 1rem 0 0.25rem;
+  line-height: 1;
+}
+.timer-phase-label {
+  text-align: center;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+}
+.timer-phase-label.work { color: var(--crimson); }
+.timer-phase-label.break { color: var(--success); }
+.timer-phase-label.idle { color: var(--slate); }
+.timer-controls {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 1rem;
+}
+.timer-controls .btn { min-width: 80px; justify-content: center; }
+.timer-session-info {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  font-size: 0.72rem;
+  color: var(--slate);
+  text-align: center;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(26,26,46,0.06);
+}
+.timer-session-info strong { color: var(--ink); }
+.timer-presets {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+.timer-preset {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.68rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid rgba(26,26,46,0.1);
+  background: transparent;
+  color: var(--slate);
+  transition: all 0.2s;
+  font-family: var(--font-body);
+}
+.timer-preset:hover { border-color: var(--gold); color: var(--gold-dark); }
+.timer-preset.active { background: var(--gold); color: var(--navy); border-color: var(--gold); }
+
+/* ─── WELLNESS: Mood Tracker ─── */
+.mood-btn-row {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.mood-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  border: 1.5px solid rgba(26,26,46,0.08);
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: var(--font-body);
+  min-width: 64px;
+}
+.mood-btn:hover { border-color: var(--gold); background: rgba(197,165,90,0.05); }
+.mood-btn.selected { border-color: var(--gold); background: rgba(197,165,90,0.12); }
+.mood-btn .mood-emoji { font-size: 1.5rem; line-height: 1; }
+.mood-btn .mood-label { font-size: 0.6rem; color: var(--slate); letter-spacing: 0.04em; }
+
+.energy-slider-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0.5rem 0;
+}
+.energy-slider-wrap input[type="range"] {
+  flex: 1;
+  -webkit-appearance: none;
+  height: 6px;
+  background: linear-gradient(90deg, var(--crimson) 0%, var(--gold) 50%, var(--success) 100%);
+  border-radius: 3px;
+  outline: none;
+}
+.energy-slider-wrap input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: var(--warm-white);
+  border: 2px solid var(--gold);
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+}
+.energy-slider-wrap .energy-value {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink);
+  min-width: 24px;
+  text-align: center;
+}
+
+.mood-history-row {
+  display: flex;
+  gap: 4px;
+  align-items: flex-end;
+  padding-top: 0.5rem;
+}
+.mood-history-cell {
+  flex: 1;
+  text-align: center;
+  font-size: 0.6rem;
+  color: var(--slate);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.mood-history-cell .mood-dot {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+.mood-history-cell .mood-date { font-size: 0.55rem; color: rgba(58,58,92,0.5); }
+
+/* ─── WELLNESS: Manual Log ─── */
+.manual-log-form {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+}
+.manual-log-form .form-group { margin-bottom: 0; flex: 1; }
+
+/* ─── WELLNESS: Settings ─── */
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(26,26,46,0.04);
+  gap: 12px;
+}
+.setting-row:last-child { border-bottom: none; }
+.setting-left {
+  flex: 1;
+}
+.setting-title {
+  font-size: 0.82rem;
+  color: var(--ink);
+  font-weight: 500;
+}
+.setting-desc {
+  font-size: 0.68rem;
+  color: var(--slate);
+  margin-top: 2px;
+}
+.setting-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.setting-control input[type="number"] {
+  width: 60px;
+  padding: 5px 8px;
+  border: 1px solid rgba(26,26,46,0.12);
+  border-radius: var(--radius);
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  text-align: center;
+  outline: none;
+}
+.setting-control input[type="number"]:focus { border-color: var(--gold); }
+.setting-unit {
+  font-size: 0.7rem;
+  color: var(--slate);
+}
+
+/* ─── WELLNESS: History Calendar Modals ─── */
+.history-modal .modal {
+  max-width: 720px;
+  width: 95%;
+  max-height: 90vh;
+}
+.history-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+.history-nav-title {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+.history-nav button {
+  background: transparent;
+  border: 1px solid rgba(26,26,46,0.1);
+  border-radius: var(--radius);
+  padding: 6px 12px;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  color: var(--slate);
+  transition: all 0.2s;
+}
+.history-nav button:hover { border-color: var(--gold); color: var(--gold-dark); }
+
+.history-cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px;
+}
+.history-cal-header {
+  text-align: center;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--slate);
+  padding: 6px 0;
+}
+.history-cal-cell {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  position: relative;
+  min-height: 48px;
+  gap: 1px;
+}
+.history-cal-cell:hover { background: rgba(197,165,90,0.08); }
+.history-cal-cell.today { outline: 2px solid var(--gold); outline-offset: -2px; }
+.history-cal-cell.selected { background: rgba(197,165,90,0.18); }
+.history-cal-cell.empty { pointer-events: none; }
+.history-cal-cell .cell-day {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--ink);
+}
+.history-cal-cell .cell-emoji {
+  font-size: 1rem;
+  line-height: 1;
+}
+.history-cal-cell .cell-hours {
+  font-size: 0.58rem;
+  font-weight: 600;
+  color: var(--gold-dark);
+  line-height: 1;
+}
+.history-cal-cell .cell-bar {
+  position: absolute;
+  bottom: 2px;
+  left: 15%;
+  right: 15%;
+  height: 3px;
+  border-radius: 2px;
+}
+
+.history-detail {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: rgba(197,165,90,0.04);
+  border: 1px solid rgba(26,26,46,0.06);
+  border-radius: var(--radius);
+  min-height: 60px;
+}
+.history-detail-title {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 0.5rem;
+}
+.history-detail-empty {
+  font-size: 0.78rem;
+  color: var(--slate);
+  font-style: italic;
+}
+.history-detail-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(26,26,46,0.04);
+  font-size: 0.8rem;
+}
+.history-detail-row:last-child { border-bottom: none; }
+
+.history-summary {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+.history-summary-stat {
+  flex: 1;
+  min-width: 100px;
+  background: var(--warm-white);
+  border: 1px solid rgba(26,26,46,0.06);
+  border-radius: var(--radius);
+  padding: 0.75rem;
+  text-align: center;
+}
+.history-summary-stat .stat-value {
+  font-size: 1.3rem;
+}
+.history-summary-stat .stat-label {
+  font-size: 0.62rem;
+  margin-top: 2px;
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════ SPLASH SCREEN ═══════ -->
+<div id="splash-screen">
+  <div class="splash-inner">
+    <div class="splash-logo">JURIS</div>
+    <div class="splash-tagline">Intelligent Law Student Platform</div>
+    <div class="splash-divider"></div>
+    <div class="splash-label">Gemini API Key</div>
+    <div class="api-input-wrap">
+      <input type="password" id="api-key-input" placeholder="AIza..." autocomplete="off">
+    </div>
+    <button class="btn-enter" id="btn-enter" onclick="enterApp()">Enter Platform</button>
+    <div class="splash-note">
+      Your API key is used exclusively for AI-powered features. Data is saved per key.
+      <br>Obtain a FREE key from <a href="https://aistudio.google.com" target="_blank" style="color:var(--gold);text-decoration:underline;">aistudio.google.com</a>
+    </div>
+    <button onclick="document.getElementById('api-help-panel').style.display = document.getElementById('api-help-panel').style.display === 'none' ? 'block' : 'none'" style="margin-top:1.25rem;background:transparent;border:1px solid rgba(197,165,90,0.3);color:var(--gold-light);padding:8px 20px;border-radius:var(--radius);cursor:pointer;font-family:var(--font-body);font-size:0.75rem;letter-spacing:0.05em;transition:all 0.2s;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      Need help getting your API key?
+    </button>
+    <div id="api-help-panel" style="display:none;margin-top:1rem;text-align:left;background:rgba(245,240,232,0.06);border:1px solid rgba(197,165,90,0.15);border-radius:var(--radius);padding:1.25rem 1.5rem;max-width:420px;margin-left:auto;margin-right:auto;">
+      <div style="font-family:var(--font-display);font-size:1rem;color:var(--gold);margin-bottom:0.75rem;">How to Get Your Free API Key</div>
+      <ol style="color:rgba(245,240,232,0.7);font-size:0.75rem;line-height:1.8;padding-left:1.25rem;">
+        <li>Click the <a href="https://aistudio.google.com" target="_blank" style="color:var(--gold);text-decoration:underline;">aistudio.google.com</a> link above and sign in with your Google account.</li>
+        <li>Click <strong style="color:var(--parchment);">"Create API Key"</strong> and select the default project (or create a new one).</li>
+        <li>Click <strong style="color:var(--parchment);">"Set up billing"</strong> for the key — choose the <strong style="color:var(--parchment);">FREE trial</strong> option (no payment required).</li>
+        <li>Once your key is created and billing is active, <strong style="color:var(--parchment);">copy the key</strong> (it starts with "AIza...").</li>
+        <li>Paste it into the field above and click <strong style="color:var(--parchment);">Enter Platform</strong>!</li>
+      </ol>
+      <div style="margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid rgba(197,165,90,0.12);color:rgba(245,240,232,0.4);font-size:0.68rem;">
+        <strong style="color:rgba(245,240,232,0.55);">Still not working?</strong> Make sure billing is activated on your key — even the free trial requires this step. Also double-check that you copied the full key with no extra spaces.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ MAIN APP ═══════ -->
+<div id="app">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-brand">JURIS</div>
+      <div class="sidebar-sub">Law Student Platform</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Academic</div>
+      <div class="nav-item active" data-page="dashboard" onclick="navigateTo('dashboard')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </div>
+      <div class="nav-item" data-page="courses" onclick="navigateTo('courses')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+        Courses
+      </div>
+      <div class="nav-item" data-page="study" onclick="navigateTo('study')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        Study Engine
+      </div>
+      <div class="nav-item" data-page="outlines" onclick="navigateTo('outlines')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8m8 4H8m2-8H8"/></svg>
+        Outlines
+      </div>
+      <div class="nav-item" data-page="calendar" onclick="navigateTo('calendar')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        Calendar
+      </div>
+
+      <div class="nav-section-label">Bar & Career</div>
+      <div class="nav-item" data-page="bar" onclick="navigateTo('bar')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
+        Bar Alignment
+      </div>
+      <div class="nav-item" data-page="career" onclick="navigateTo('career')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+        Career Intel
+      </div>
+
+      <div class="nav-section-label">Tools</div>
+      <div class="nav-item" data-page="bluebook" onclick="navigateTo('bluebook')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        Bluebook Cite
+      </div>
+      <div class="nav-item" data-page="wellness" onclick="navigateTo('wellness')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+        Wellness
+      </div>
+      <div class="nav-item" data-page="ai-chat" onclick="navigateTo('ai-chat')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        AI Assistant
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div style="cursor:pointer;" onclick="showApiKeyModal()">⚙ API Key Settings</div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <div class="top-bar">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button class="btn btn-ghost" style="display:none;padding:8px;" id="menu-toggle" onclick="toggleSidebar()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+        </button>
+        <div class="page-title" id="page-title">Dashboard</div>
+      </div>
+      <div class="top-actions">
+        <span style="font-size:0.7rem;color:var(--slate);" id="semester-label"></span>
+      </div>
+    </div>
+
+    <div class="content-area">
+
+      <!-- ══════ DASHBOARD PAGE ══════ -->
+      <div class="page active" id="page-dashboard">
+        <div class="grid-4" id="dash-stats">
+          <div class="stat-card">
+            <div class="stat-value" id="stat-courses">0</div>
+            <div class="stat-label">Courses</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-assignments">0</div>
+            <div class="stat-label">Assignments</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-study-hrs">0</div>
+            <div class="stat-label">Study Hours</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-bar-score">—</div>
+            <div class="stat-label">Bar Readiness</div>
+          </div>
+        </div>
+
+        <div class="grid-2" style="margin-top:1.25rem;">
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Your Courses</span>
+              <button class="btn btn-primary" onclick="navigateTo('courses')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M12 5v14M5 12h14"/></svg>
+                Add Course
+              </button>
+            </div>
+            <div id="dash-courses-list">
+              <div class="empty-state">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+                <h3>No courses yet</h3>
+                <p>Add your first course to get started</p>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Upcoming Deadlines</span>
+            </div>
+            <div id="dash-deadlines">
+              <div class="empty-state">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                <h3>No upcoming deadlines</h3>
+                <p>Add assignments to your courses</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:1.25rem;">
+          <div class="card-header">
+            <span class="card-title">Quick AI Actions</span>
+            <span class="card-badge">Gemini Powered</span>
+          </div>
+          <div class="grid-3">
+            <button class="btn btn-ghost" style="padding:16px;justify-content:center;" onclick="quickAI('Generate a practice question for my weakest subject')">Practice Question</button>
+            <button class="btn btn-ghost" style="padding:16px;justify-content:center;" onclick="quickAI('Give me a cold-call simulation question')">Cold Call Prep</button>
+            <button class="btn btn-ghost" style="padding:16px;justify-content:center;" onclick="quickAI('Create a study schedule for this week')">Study Schedule</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════ COURSES PAGE ══════ -->
+      <div class="page" id="page-courses">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;">
+          <div>
+            <div style="font-size:0.82rem;color:var(--slate);">Manage your classes, upload materials, and track syllabus progress.</div>
+          </div>
+          <button class="btn btn-primary" onclick="openModal('add-course-modal')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M12 5v14M5 12h14"/></svg>
+            Add Course
+          </button>
+        </div>
+
+        <div class="grid-3" id="courses-grid">
+          <div class="empty-state" style="grid-column:1/-1;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+            <h3>No courses added</h3>
+            <p>Click "Add Course" to create your first class workspace</p>
+          </div>
+        </div>
+
+        <!-- Course Detail (hidden by default) -->
+        <div id="course-detail" style="display:none;">
+          <button class="btn btn-ghost" onclick="closeCourseDetail()" style="margin-bottom:1rem;">← Back to Courses</button>
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title" id="detail-course-name"></span>
+              <button class="btn btn-danger" onclick="deleteCourse()">Delete Course</button>
+            </div>
+            <div id="detail-course-prof" style="font-size:0.82rem;color:var(--slate);margin-bottom:1rem;"></div>
+
+            <div class="tabs">
+              <div class="tab active" data-ctab="materials" onclick="switchCourseTab('materials')">Materials</div>
+              <div class="tab" data-ctab="notes" onclick="switchCourseTab('notes')">Notes</div>
+              <div class="tab" data-ctab="assignments" onclick="switchCourseTab('assignments')">Assignments</div>
+              <div class="tab" data-ctab="ai-tools" onclick="switchCourseTab('ai-tools')">AI Tools</div>
+            </div>
+
+            <div id="ctab-materials">
+              <div class="upload-zone" onclick="document.getElementById('file-upload').click()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                <p>Upload syllabus, readings, notes, or past exams</p>
+                <div class="upload-hint">PDF, DOCX, TXT, PPTX — or drag and drop</div>
+              </div>
+              <input type="file" id="file-upload" style="display:none;" multiple accept=".pdf,.docx,.txt,.pptx,.md" onchange="handleFileUpload(event)">
+              <div id="materials-list" style="margin-top:1rem;"></div>
+            </div>
+
+            <div id="ctab-notes" style="display:none;">
+              <div class="form-group">
+                <label class="form-label">Add Class Note</label>
+                <textarea class="form-textarea" id="note-input" placeholder="Paste or type your class notes here..."></textarea>
+              </div>
+              <button class="btn btn-primary" onclick="saveNote()">Save Note</button>
+              <div id="notes-list" style="margin-top:1rem;"></div>
+            </div>
+
+            <div id="ctab-assignments" style="display:none;">
+              <div class="grid-2">
+                <div class="form-group">
+                  <label class="form-label">Assignment Name</label>
+                  <input class="form-input" id="assign-name" placeholder="e.g., Contracts Midterm">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Due Date</label>
+                  <input class="form-input" id="assign-date" type="date">
+                </div>
+              </div>
+              <button class="btn btn-primary" onclick="addAssignment()">Add Assignment</button>
+              <div id="assignments-list" style="margin-top:1rem;"></div>
+            </div>
+
+            <div id="ctab-ai-tools" style="display:none;">
+              <div class="grid-2">
+                <div class="card" style="cursor:pointer;" onclick="runAITool('practice-q')">
+                  <div class="card-title" style="font-size:0.95rem;">Generate Practice Questions</div>
+                  <div style="font-size:0.75rem;color:var(--slate);margin-top:4px;">MBE-style, short answer, and issue spotters based on your materials</div>
+                </div>
+                <div class="card" style="cursor:pointer;" onclick="runAITool('cold-call')">
+                  <div class="card-title" style="font-size:0.95rem;">Cold Call Simulation</div>
+                  <div style="font-size:0.75rem;color:var(--slate);margin-top:4px;">Prepare for class with Socratic-method style questions</div>
+                </div>
+                <div class="card" style="cursor:pointer;" onclick="runAITool('outline')">
+                  <div class="card-title" style="font-size:0.95rem;">Build Outline</div>
+                  <div style="font-size:0.75rem;color:var(--slate);margin-top:4px;">Extract rules and organize into a doctrinal outline</div>
+                </div>
+                <div class="card" style="cursor:pointer;" onclick="runAITool('exam-hypo')">
+                  <div class="card-title" style="font-size:0.95rem;">Exam Hypothetical</div>
+                  <div style="font-size:0.75rem;color:var(--slate);margin-top:4px;">Full-length exam-style fact pattern with model answer guidance</div>
+                </div>
+              </div>
+              <div id="ai-tool-output" style="margin-top:1.25rem;display:none;">
+                <div class="card">
+                  <div class="card-header">
+                    <span class="card-title" id="ai-tool-title">AI Output</span>
+                    <button class="btn btn-ghost" onclick="document.getElementById('ai-tool-output').style.display='none'">Close</button>
+                  </div>
+                  <div id="ai-tool-content" style="font-size:0.85rem;line-height:1.8;white-space:pre-wrap;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════ STUDY ENGINE PAGE ══════ -->
+      <div class="page" id="page-study">
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Adaptive Quiz</span>
+              <span class="card-badge">AI Powered</span>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Subject</label>
+              <select class="form-select" id="quiz-course-select">
+                <option value="">Select a course...</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Specific Topic <span style="font-size:0.7rem;color:var(--slate);font-weight:400;text-transform:none;letter-spacing:0;">(optional)</span></label>
+              <input class="form-input" type="text" id="quiz-topic" placeholder="e.g. consideration, hearsay exceptions, strict liability...">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Difficulty</label>
+              <select class="form-select" id="quiz-difficulty">
+                <option value="early">Early Semester — Comprehension</option>
+                <option value="mid">Midterm — Reinforcement</option>
+                <option value="final">Final Exam — Complex Analysis</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Question Type</label>
+              <select class="form-select" id="quiz-type">
+                <option value="mbe">Multiple Choice (MBE-style)</option>
+                <option value="short">Short Answer</option>
+                <option value="issue-spot">Issue Spotter</option>
+                <option value="hypo">Full Hypothetical</option>
+              </select>
+            </div>
+            <button class="btn btn-primary" onclick="generateQuiz()" style="width:100%;justify-content:center;">Generate Questions</button>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Performance Profile</span>
+            </div>
+            <div id="performance-profile">
+              <div class="empty-state">
+                <h3>No data yet</h3>
+                <p>Complete quizzes to build your performance profile</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" id="quiz-output-area" style="display:none;">
+          <div class="card-header">
+            <span class="card-title" id="quiz-output-title">Quiz</span>
+            <button class="btn btn-ghost" onclick="document.getElementById('quiz-output-area').style.display='none'">Close</button>
+          </div>
+
+          <!-- Quiz content (MBE renders interactive cards here; others render markdown) -->
+          <div id="quiz-content"></div>
+
+          <!-- MBE: submit row -->
+          <div id="quiz-mbe-submit-section" style="display:none;">
+            <div class="mbe-submit-row">
+              <button class="btn btn-primary" onclick="submitMBEQuiz()">Submit Quiz</button>
+              <span class="mbe-progress" id="mbe-progress-label"></span>
+            </div>
+          </div>
+
+          <!-- Short / Issue-spot / Hypo: submit row (individual answer cards rendered inside quiz-content above) -->
+          <div id="quiz-text-submit-section" style="display:none;">
+            <div class="mbe-submit-row">
+              <button class="btn btn-primary" onclick="submitTextQuiz()">Submit All Answers</button>
+              <span class="mbe-progress" id="text-progress-label"></span>
+            </div>
+          </div>
+
+          <!-- Shared feedback area -->
+          <div id="grade-output" style="margin-top:1.25rem;display:none;">
+            <div class="card" style="background:rgba(74,124,89,0.05);border-color:rgba(74,124,89,0.15);">
+              <div class="card-title" style="color:var(--success);font-size:0.95rem;margin-bottom:0.5rem;">Feedback</div>
+              <div id="grade-content" class="md-rendered"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════ OUTLINES PAGE ══════ -->
+      <div class="page" id="page-outlines">
+        <div class="grid-2" style="margin-bottom:1.25rem;">
+          <div class="form-group" style="margin:0;">
+            <select class="form-select" id="outline-course-select" onchange="loadOutline()">
+              <option value="">Select a course...</option>
+            </select>
+          </div>
+          <div style="display:flex;gap:8px;justify-content:flex-end;">
+            <button class="btn btn-ghost" onclick="generateOutline('full')">Full Outline</button>
+            <button class="btn btn-ghost" onclick="generateOutline('attack')">Attack Outline</button>
+            <button class="btn btn-ghost" onclick="generateOutline('checklist')">Exam Checklist</button>
+            <button class="btn btn-primary" onclick="generateOutline('auto')">Auto-Build</button>
+          </div>
+        </div>
+
+        <!-- Notes input card -->
+        <div class="card" style="margin-bottom:1.25rem;">
+          <div class="card-header">
+            <span class="card-title">Your Notes</span>
+            <span style="font-size:0.75rem;color:var(--slate);">Paste from Google Docs or upload a Word / text file</span>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:0.75rem;">
+            <label class="btn btn-ghost" style="cursor:pointer;margin:0;display:inline-flex;align-items:center;gap:6px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Upload .docx / .txt
+              <input type="file" id="notes-file-input" accept=".docx,.txt" style="display:none;" onchange="handleNotesFile(event)">
+            </label>
+            <span id="notes-file-name" style="font-size:0.75rem;color:var(--slate);font-style:italic;"></span>
+            <button class="btn btn-ghost" style="margin-left:auto;" onclick="clearOutlineNotes()">Clear Notes</button>
+          </div>
+          <textarea class="form-input" id="outline-notes-text" rows="7"
+            placeholder="Paste your class notes here (from Google Docs, a Word doc, or anywhere else)...&#10;&#10;These notes will be used as the primary source when building your outline."
+            style="resize:vertical;font-size:0.82rem;line-height:1.6;font-family:var(--font-body);"></textarea>
+          <div style="margin-top:0.5rem;font-size:0.72rem;color:var(--slate);">
+            Tip: In Google Docs, press <strong>Ctrl+A</strong> then <strong>Ctrl+C</strong> and paste here. For Word, upload the .docx file directly.
+          </div>
+        </div>
+
+        <div class="card" id="outline-display">
+          <div class="empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8m8 4H8m2-8H8"/></svg>
+            <h3>Select a course to view or build an outline</h3>
+            <p>Paste your notes above, then click a build button</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════ CALENDAR PAGE ══════ -->
+      <div class="page" id="page-calendar">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title" id="cal-month-title"></span>
+            <div style="display:flex;gap:6px;">
+              <button class="btn btn-ghost" onclick="changeMonth(-1)">←</button>
+              <button class="btn btn-ghost" onclick="changeMonth(1)">→</button>
+            </div>
+          </div>
+          <div class="cal-grid">
+            <div class="cal-header-cell">Sun</div>
+            <div class="cal-header-cell">Mon</div>
+            <div class="cal-header-cell">Tue</div>
+            <div class="cal-header-cell">Wed</div>
+            <div class="cal-header-cell">Thu</div>
+            <div class="cal-header-cell">Fri</div>
+            <div class="cal-header-cell">Sat</div>
+          </div>
+          <div class="cal-grid" id="cal-days"></div>
+        </div>
+
+        <div class="card" style="margin-top:1.25rem;">
+          <div class="card-header">
+            <span class="card-title">Smart Reminders</span>
+            <button class="btn btn-primary" onclick="generateStudyPlan()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+              Generate Study Plan
+            </button>
+          </div>
+          <div id="reminders-list" style="font-size:0.82rem;line-height:1.8;">
+            <p style="color:var(--slate);">Add courses and assignments to receive intelligent study reminders.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════ BAR ALIGNMENT PAGE ══════ -->
+      <div class="page" id="page-bar">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Bar Exam Alignment</span>
+          </div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Intended Bar Jurisdiction</label>
+              <select class="form-select" id="bar-jurisdiction">
+                <option value="">Select state...</option>
+                <option value="NY">New York</option>
+                <option value="CA">California</option>
+                <option value="TX">Texas</option>
+                <option value="FL">Florida</option>
+                <option value="IL">Illinois</option>
+                <option value="PA">Pennsylvania</option>
+                <option value="OH">Ohio</option>
+                <option value="GA">Georgia</option>
+                <option value="DC">District of Columbia</option>
+                <option value="MA">Massachusetts</option>
+                <option value="VA">Virginia</option>
+                <option value="NJ">New Jersey</option>
+                <option value="UBE">Uniform Bar Exam (UBE)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Current Year</label>
+              <select class="form-select" id="bar-year">
+                <option value="1L">1L</option>
+                <option value="2L">2L</option>
+                <option value="3L">3L</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="analyzeBarReadiness()">Analyze Bar Readiness</button>
+        </div>
+
+        <div id="bar-results" style="margin-top:1.25rem;display:none;">
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title" style="margin-bottom:1rem;">MBE Subject Coverage</div>
+              <div id="mbe-coverage"></div>
+            </div>
+            <div class="card">
+              <div class="card-title" style="margin-bottom:1rem;">Recommendations</div>
+              <div id="bar-recommendations" style="font-size:0.85rem;line-height:1.8;white-space:pre-wrap;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════ CAREER INTEL PAGE ══════ -->
+      <div class="page" id="page-career">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Career Intelligence</span>
+            <span class="card-badge">AI Powered</span>
+          </div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Classes You Enjoy</label>
+              <input class="form-input" id="career-classes" placeholder="e.g., Con Law, Crim, Corporations">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Work Style</label>
+              <select class="form-select" id="career-style">
+                <option value="litigation">Litigation / Courtroom</option>
+                <option value="transactional">Transactional / Deal-making</option>
+                <option value="policy">Policy / Regulatory</option>
+                <option value="mixed">Mixed / Flexible</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Work-Life Priority</label>
+              <select class="form-select" id="career-wlb">
+                <option value="balanced">Balanced lifestyle</option>
+                <option value="high-pay">High compensation priority</option>
+                <option value="mission">Mission-driven work</option>
+                <option value="flexible">Maximum flexibility</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Geographic Preference</label>
+              <input class="form-input" id="career-geo" placeholder="e.g., NYC, Chicago, remote">
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="analyzeCareer()">Get Career Matches</button>
+        </div>
+
+        <div id="career-results" style="margin-top:1.25rem;display:none;">
+          <div class="card">
+            <div class="card-title" style="margin-bottom:1rem;">Career Matches & Analysis</div>
+            <div id="career-output" style="font-size:0.85rem;line-height:1.8;white-space:pre-wrap;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════ BLUEBOOK PAGE ══════ -->
+      <div class="page" id="page-bluebook">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Bluebook Citation Assistant</span>
+            <span class="card-badge">AI Powered</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Citation Type</label>
+            <select class="form-select" id="cite-type">
+              <option value="case">Case</option>
+              <option value="statute">Statute</option>
+              <option value="journal">Journal Article</option>
+              <option value="book">Book</option>
+              <option value="website">Website / Online Source</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Source Information</label>
+            <textarea class="form-textarea" id="cite-input" placeholder="Paste the case info, article metadata, URL, etc. The AI will generate proper Bluebook citations."></textarea>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-primary" onclick="generateCitation()">Generate Citation</button>
+            <button class="btn btn-ghost" onclick="fixCitation()">Fix Existing Citation</button>
+          </div>
+        </div>
+
+        <div id="cite-output-area" style="margin-top:1.25rem;display:none;">
+          <div class="card">
+            <div class="card-title" style="margin-bottom:0.75rem;">Generated Citation</div>
+            <div class="citation-output" id="cite-output"></div>
+            <button class="btn btn-ghost" style="margin-top:0.75rem;" onclick="copyCitation()">Copy to Clipboard</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════ WELLNESS PAGE ══════ -->
+      <div class="page" id="page-wellness">
+
+        <!-- ROW 1: Timer + Mood Tracker -->
+        <div class="grid-2">
+
+          <!-- Study Timer -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Study Timer</span>
+              <span class="card-badge">Focus Mode</span>
+            </div>
+            <div style="margin-bottom:1rem;">
+              <div class="form-label">Subject</div>
+              <select class="form-select" id="timer-subject" style="text-align:center;">
+                <option value="">General study</option>
+              </select>
+            </div>
+            <div class="timer-presets">
+              <button class="timer-preset active" onclick="setTimerPreset(25,5,this)">25 / 5</button>
+              <button class="timer-preset" onclick="setTimerPreset(50,10,this)">50 / 10</button>
+              <button class="timer-preset" onclick="setTimerPreset(90,15,this)">90 / 15</button>
+              <button class="timer-preset" onclick="setTimerPreset(0,0,this)">Stopwatch</button>
+            </div>
+            <div class="timer-display" id="timer-display">25:00</div>
+            <div class="timer-phase-label idle" id="timer-phase">Ready</div>
+            <div class="timer-controls">
+              <button class="btn btn-primary" id="timer-start-btn" onclick="toggleTimer()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                Start
+              </button>
+              <button class="btn btn-ghost" onclick="skipTimerPhase()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
+                Skip
+              </button>
+              <button class="btn btn-ghost" onclick="resetTimer()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+                Reset
+              </button>
+            </div>
+            <div class="timer-session-info">
+              <div>Sessions today: <strong id="timer-sessions-today">0</strong></div>
+              <div>Focus time: <strong id="timer-focus-today">0h 0m</strong></div>
+              <div>Current streak: <strong id="timer-streak">0</strong> days</div>
+            </div>
+          </div>
+
+          <!-- Mood & Energy Tracker -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Mood & Energy</span>
+              <span class="card-badge">Daily Check-In</span>
+            </div>
+            <div style="margin-bottom:1rem;">
+              <div class="form-label">How are you feeling?</div>
+              <div class="mood-btn-row" id="mood-btn-row">
+                <button class="mood-btn" data-mood="great" onclick="selectMood(this)">
+                  <span class="mood-emoji">😊</span><span class="mood-label">Great</span>
+                </button>
+                <button class="mood-btn" data-mood="good" onclick="selectMood(this)">
+                  <span class="mood-emoji">🙂</span><span class="mood-label">Good</span>
+                </button>
+                <button class="mood-btn" data-mood="okay" onclick="selectMood(this)">
+                  <span class="mood-emoji">😐</span><span class="mood-label">Okay</span>
+                </button>
+                <button class="mood-btn" data-mood="low" onclick="selectMood(this)">
+                  <span class="mood-emoji">😔</span><span class="mood-label">Low</span>
+                </button>
+                <button class="mood-btn" data-mood="stressed" onclick="selectMood(this)">
+                  <span class="mood-emoji">😫</span><span class="mood-label">Stressed</span>
+                </button>
+              </div>
+            </div>
+            <div style="margin-bottom:1rem;">
+              <div class="form-label">Energy Level</div>
+              <div class="energy-slider-wrap">
+                <span style="font-size:0.7rem;color:var(--slate);">Low</span>
+                <input type="range" id="energy-slider" min="1" max="10" value="5" oninput="document.getElementById('energy-value').textContent=this.value">
+                <span style="font-size:0.7rem;color:var(--slate);">High</span>
+                <span class="energy-value" id="energy-value">5</span>
+              </div>
+            </div>
+            <div style="margin-bottom:1rem;">
+              <div class="form-label">Quick note <span style="text-transform:none;font-weight:400;letter-spacing:0;">(optional)</span></div>
+              <input class="form-input" id="mood-note" placeholder="e.g., Slept poorly, exam tomorrow...">
+            </div>
+            <button class="btn btn-primary" onclick="saveMoodEntry()" style="width:100%;justify-content:center;">Log Check-In</button>
+
+            <div style="margin-top:1.25rem;">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                <div style="font-size:0.72rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--slate);">Last 7 Days</div>
+                <button class="btn btn-ghost" onclick="openMoodHistory()" style="padding:4px 10px;font-size:0.68rem;">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                  View Full History
+                </button>
+              </div>
+              <div class="mood-history-row" id="mood-history-row">
+                <div class="mood-history-cell"><span class="mood-dot">—</span><span class="mood-date">No data</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ROW 2: Manual Log + Weekly Overview -->
+        <div class="grid-2" style="margin-top:1.25rem;">
+
+          <!-- Manual Study Log -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Manual Study Log</span>
+            </div>
+            <p style="font-size:0.78rem;color:var(--slate);margin-bottom:1rem;">Forgot to start the timer? Log your study hours here.</p>
+            <div class="manual-log-form">
+              <div class="form-group">
+                <label class="form-label">Hours</label>
+                <input class="form-input" id="manual-study-hours" type="number" min="0.25" step="0.25" placeholder="e.g., 2.5">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Subject</label>
+                <select class="form-select" id="manual-study-subject">
+                  <option value="">Select...</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Date</label>
+                <input class="form-input" id="manual-study-date" type="date">
+              </div>
+            </div>
+            <!-- Custom subject manager -->
+            <div style="margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid rgba(26,26,46,0.06);">
+              <div id="custom-subject-add" style="display:flex;gap:8px;align-items:flex-end;">
+                <div class="form-group" style="flex:1;margin-bottom:0;">
+                  <label class="form-label">Add Custom Subject</label>
+                  <input class="form-input" id="custom-subject-input" placeholder="e.g., Bar Prep, Internship Hours..." onkeydown="if(event.key==='Enter')addCustomSubject()">
+                </div>
+                <button class="btn btn-ghost" onclick="addCustomSubject()" style="height:38px;">+ Add</button>
+              </div>
+              <div id="custom-subject-list" style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;"></div>
+            </div>
+            <button class="btn btn-primary" onclick="manualLogHours()" style="width:100%;justify-content:center;margin-top:0.75rem;">Log Hours</button>
+            <div style="margin-top:1rem;">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                <div style="font-size:0.72rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--slate);">This Week</div>
+                <button class="btn btn-ghost" onclick="openStudyHistory()" style="padding:4px 10px;font-size:0.68rem;">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                  View Full History
+                </button>
+              </div>
+              <div id="weekly-study-chart" class="heat-map"></div>
+            </div>
+          </div>
+
+          <!-- Wellness Settings -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Wellness Settings</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;color:var(--slate);"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+            </div>
+
+            <div class="setting-row">
+              <div class="setting-left">
+                <div class="setting-title">Break Reminders</div>
+                <div class="setting-desc">Get a reminder to take a break during long study sessions</div>
+              </div>
+              <div class="setting-control">
+                <span class="setting-unit">every</span>
+                <input type="number" id="setting-break-interval" min="15" max="180" step="5" value="90">
+                <span class="setting-unit">min</span>
+                <div class="toggle on" id="toggle-break-reminders" onclick="toggleWellnessSetting(this,'breakReminders')"></div>
+              </div>
+            </div>
+
+            <div class="setting-row">
+              <div class="setting-left">
+                <div class="setting-title">Daily Study Limit Warning</div>
+                <div class="setting-desc">Alert when you exceed your daily study hour goal</div>
+              </div>
+              <div class="setting-control">
+                <input type="number" id="setting-daily-limit" min="1" max="24" step="1" value="10">
+                <span class="setting-unit">hrs</span>
+                <div class="toggle" id="toggle-daily-limit" onclick="toggleWellnessSetting(this,'dailyLimitWarning')"></div>
+              </div>
+            </div>
+
+            <div class="setting-row">
+              <div class="setting-left">
+                <div class="setting-title">Daily Mood Reminder</div>
+                <div class="setting-desc">Remind you to log your mood and energy each day</div>
+              </div>
+              <div class="setting-control">
+                <div class="toggle on" id="toggle-mood-reminder" onclick="toggleWellnessSetting(this,'moodReminder')"></div>
+              </div>
+            </div>
+
+            <div class="setting-row">
+              <div class="setting-left">
+                <div class="setting-title">Weekly Study Goal</div>
+                <div class="setting-desc">Set a target for total study hours per week</div>
+              </div>
+              <div class="setting-control">
+                <input type="number" id="setting-weekly-goal" min="1" max="100" step="1" value="30">
+                <span class="setting-unit">hrs</span>
+                <div class="toggle on" id="toggle-weekly-goal" onclick="toggleWellnessSetting(this,'weeklyGoal')"></div>
+              </div>
+            </div>
+
+            <div class="setting-row">
+              <div class="setting-left">
+                <div class="setting-title">Rest Day Suggestions</div>
+                <div class="setting-desc">Suggest a rest day after consecutive high-study days</div>
+              </div>
+              <div class="setting-control">
+                <span class="setting-unit">after</span>
+                <input type="number" id="setting-rest-day-threshold" min="2" max="10" step="1" value="5">
+                <span class="setting-unit">days</span>
+                <div class="toggle on" id="toggle-rest-day" onclick="toggleWellnessSetting(this,'restDaySuggestions')"></div>
+              </div>
+            </div>
+
+            <button class="btn btn-primary" onclick="saveWellnessSettings()" style="width:100%;justify-content:center;margin-top:1rem;">Save Settings</button>
+          </div>
+        </div>
+
+        <!-- ROW 3: AI Wellness Check-In (full width) -->
+        <div class="card" style="margin-top:1.25rem;">
+          <div class="card-header">
+            <span class="card-title">Wellness Check-In</span>
+            <span class="card-badge">AI Powered</span>
+          </div>
+          <p style="font-size:0.78rem;color:var(--slate);margin-bottom:1rem;">Get personalized wellness advice based on your study hours, mood history, energy levels, and upcoming deadlines.</p>
+          <button class="btn btn-primary" onclick="wellnessCheckIn()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            Get Personalized Wellness Report
+          </button>
+          <div id="wellness-output" style="margin-top:1rem;font-size:0.85rem;line-height:1.8;white-space:pre-wrap;"></div>
+        </div>
+      </div>
+
+      <!-- ══════ AI CHAT PAGE ══════ -->
+      <div class="page" id="page-ai-chat">
+        <div class="ai-panel" style="max-width:800px;">
+          <div class="ai-panel-header">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+            JURIS AI Assistant — Your Law School Companion
+          </div>
+          <div class="ai-messages" id="chat-messages">
+            <div class="ai-msg assistant">Hello! I'm your JURIS AI assistant. I can help you with anything related to law school — studying, outlines, bar prep, career planning, Bluebook citations, and more. What would you like to work on?</div>
+          </div>
+          <div class="ai-input-wrap">
+            <input type="text" id="chat-input" placeholder="Ask anything about law school..." onkeydown="if(event.key==='Enter')sendChat()">
+            <button onclick="sendChat()">Send</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ MODALS ═══════ -->
+<div class="modal-overlay" id="add-course-modal">
+  <div class="modal">
+    <div class="modal-title">Add New Course</div>
+    <div class="form-group">
+      <label class="form-label">Course Name</label>
+      <input class="form-input" id="new-course-name" placeholder="e.g., Constitutional Law I">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Professor</label>
+      <input class="form-input" id="new-course-prof" placeholder="e.g., Prof. Smith">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Credits</label>
+      <input class="form-input" id="new-course-credits" type="number" min="1" max="6" value="3">
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:1.5rem;">
+      <button class="btn btn-ghost" onclick="closeModal('add-course-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="addCourse()">Add Course</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="api-key-modal">
+  <div class="modal">
+    <div class="modal-title">API Key Settings</div>
+    <div class="form-group">
+      <label class="form-label">Gemini API Key</label>
+      <input class="form-input" id="settings-api-key" type="password">
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:1rem;">
+      <button class="btn btn-ghost" onclick="closeModal('api-key-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="updateApiKey()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ MOOD HISTORY MODAL ═══════ -->
+<div class="modal-overlay history-modal" id="mood-history-modal">
+  <div class="modal">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;">
+      <div class="modal-title" style="margin-bottom:0;">Mood & Energy History</div>
+      <button class="btn btn-ghost" onclick="closeModal('mood-history-modal')" style="padding:6px 12px;">✕</button>
+    </div>
+    <div class="history-summary" id="mood-history-summary"></div>
+    <div class="history-nav">
+      <button onclick="changeMoodHistoryMonth(-1)">← Prev</button>
+      <span class="history-nav-title" id="mood-history-month-title"></span>
+      <button onclick="changeMoodHistoryMonth(1)">Next →</button>
+    </div>
+    <div class="history-cal-grid">
+      <div class="history-cal-header">Sun</div>
+      <div class="history-cal-header">Mon</div>
+      <div class="history-cal-header">Tue</div>
+      <div class="history-cal-header">Wed</div>
+      <div class="history-cal-header">Thu</div>
+      <div class="history-cal-header">Fri</div>
+      <div class="history-cal-header">Sat</div>
+    </div>
+    <div class="history-cal-grid" id="mood-history-cal-days"></div>
+    <div class="history-detail" id="mood-history-detail">
+      <div class="history-detail-empty">Click a day to see details</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ STUDY HISTORY MODAL ═══════ -->
+<div class="modal-overlay history-modal" id="study-history-modal">
+  <div class="modal">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;">
+      <div class="modal-title" style="margin-bottom:0;">Study Hours History</div>
+      <button class="btn btn-ghost" onclick="closeModal('study-history-modal')" style="padding:6px 12px;">✕</button>
+    </div>
+    <div class="history-summary" id="study-history-summary"></div>
+    <div class="history-nav">
+      <button onclick="changeStudyHistoryMonth(-1)">← Prev</button>
+      <span class="history-nav-title" id="study-history-month-title"></span>
+      <button onclick="changeStudyHistoryMonth(1)">Next →</button>
+    </div>
+    <div class="history-cal-grid">
+      <div class="history-cal-header">Sun</div>
+      <div class="history-cal-header">Mon</div>
+      <div class="history-cal-header">Tue</div>
+      <div class="history-cal-header">Wed</div>
+      <div class="history-cal-header">Thu</div>
+      <div class="history-cal-header">Fri</div>
+      <div class="history-cal-header">Sat</div>
+    </div>
+    <div class="history-cal-grid" id="study-history-cal-days"></div>
+    <div class="history-detail" id="study-history-detail">
+      <div class="history-detail-empty">Click a day to see details</div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+// ═══════════════════════════════════════════
+//  STATE MANAGEMENT
+// ═══════════════════════════════════════════
+let API_KEY = '';
+let state = {
+  semester: 'Spring 2026',
+  courses: [],
+  studyLog: [],
+  chatHistory: [],
+  currentCourseId: null,
+  calMonth: new Date().getMonth(),
+  calYear: new Date().getFullYear(),
+  moodLog: [],
+  wellnessSettings: {
+    breakReminders: true,
+    breakInterval: 90,
+    dailyLimitWarning: false,
+    dailyLimit: 10,
+    moodReminder: true,
+    weeklyGoal: true,
+    weeklyGoalHours: 30,
+    restDaySuggestions: true,
+    restDayThreshold: 5
+  },
+  timerSessions: [],
+  customSubjects: [],
+};
+
+function saveState() {
+  try { localStorage.setItem('juris_state_' + btoa(API_KEY), JSON.stringify(state)); } catch(e) {}
+}
+function loadState() {
+  try {
+    const s = localStorage.getItem('juris_state_' + btoa(API_KEY));
+    if (s) state = { ...state, ...JSON.parse(s) };
+  } catch(e) {}
+}
+
+// ═══════════════════════════════════════════
+//  INITIALIZATION
+// ═══════════════════════════════════════════
+function enterApp() {
+  const key = document.getElementById('api-key-input').value.trim();
+  if (!key) return;
+  API_KEY = key;
+  ACTIVE_MODEL = null; // re-detect model for this key
+  document.getElementById('splash-screen').classList.add('hidden');
+  document.getElementById('app').classList.add('active');
+  loadState();
+  initApp();
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  // Responsive menu toggle
+  const mql = window.matchMedia('(max-width: 900px)');
+  const toggle = document.getElementById('menu-toggle');
+  function checkMobile(e) { toggle.style.display = e.matches ? 'flex' : 'none'; }
+  mql.addEventListener('change', checkMobile);
+  checkMobile(mql);
+});
+
+function initApp() {
+  document.getElementById('semester-label').textContent = state.semester;
+  refreshDashboard();
+  refreshCourseSelects();
+  renderCalendar();
+  renderWeeklyChart();
+  // Set default date for manual study log
+  const dateInput = document.getElementById('manual-study-date');
+  if (dateInput) dateInput.value = new Date().toISOString().split('T')[0];
+  // Render mood history if available
+  if (typeof renderMoodHistory === 'function') renderMoodHistory();
+  // Load wellness settings into UI
+  if (typeof loadWellnessSettingsUI === 'function') loadWellnessSettingsUI();
+  // Refresh timer stats
+  if (typeof refreshTimerStats === 'function') refreshTimerStats();
+  // Render custom subject tags
+  if (typeof renderCustomSubjectList === 'function') renderCustomSubjectList();
+}
+
+// ═══════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════
+function navigateTo(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const pageEl = document.getElementById('page-' + page);
+  if (pageEl) pageEl.classList.add('active');
+  const navItem = document.querySelector(`.nav-item[data-page="${page}"]`);
+  if (navItem) navItem.classList.add('active');
+  const titles = {
+    dashboard: 'Dashboard', courses: 'Courses', study: 'Study Engine',
+    outlines: 'Outline Builder', calendar: 'Calendar & Scheduling',
+    bar: 'Bar Alignment', career: 'Career Intelligence',
+    bluebook: 'Bluebook Citation Assistant', wellness: 'Work-Life Wellness',
+    'ai-chat': 'AI Assistant'
+  };
+  document.getElementById('page-title').textContent = titles[page] || page;
+  // Close sidebar on mobile
+  document.getElementById('sidebar').classList.remove('open');
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+// ═══════════════════════════════════════════
+//  MODALS
+// ═══════════════════════════════════════════
+function openModal(id) { document.getElementById(id).classList.add('active'); }
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+function showApiKeyModal() {
+  document.getElementById('settings-api-key').value = API_KEY;
+  openModal('api-key-modal');
+}
+function updateApiKey() {
+  const key = document.getElementById('settings-api-key').value.trim();
+  if (key) {
+    API_KEY = key;
+    ACTIVE_MODEL = null; // re-detect model for new key
+    toast('API key updated');
+  }
+  closeModal('api-key-modal');
+}
+
+// ═══════════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════════
+function toast(msg) {
+  const c = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  c.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+
+// ═══════════════════════════════════════════
+//  GEMINI API
+// ═══════════════════════════════════════════
+// Preferred models in order — first available one wins
+const PREFERRED_MODELS = [
+  'gemini-2.5-flash',
+  'gemini-2.5-flash-preview-04-17',
+  'gemini-2.0-flash',
+  'gemini-1.5-flash',
+];
+let ACTIVE_MODEL = null;
+
+async function resolveModel() {
+  if (ACTIVE_MODEL) return ACTIVE_MODEL;
+  try {
+    const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${API_KEY}`);
+    if (!resp.ok) throw new Error('Could not list models');
+    const data = await resp.json();
+    const available = (data.models || []).map(m => m.name.replace('models/', ''));
+    for (const preferred of PREFERRED_MODELS) {
+      if (available.includes(preferred)) {
+        ACTIVE_MODEL = preferred;
+        console.log('Using Gemini model:', ACTIVE_MODEL);
+        return ACTIVE_MODEL;
+      }
+    }
+    // Fallback: pick first generateContent-capable model
+    const fallback = (data.models || []).find(m =>
+      m.supportedGenerationMethods?.includes('generateContent') &&
+      m.name.includes('flash')
+    );
+    if (fallback) {
+      ACTIVE_MODEL = fallback.name.replace('models/', '');
+      console.log('Fallback Gemini model:', ACTIVE_MODEL);
+      return ACTIVE_MODEL;
+    }
+  } catch(e) {
+    console.warn('Model resolution failed, using default:', e);
+  }
+  ACTIVE_MODEL = 'gemini-2.5-flash';
+  return ACTIVE_MODEL;
+}
+
+async function callGemini(prompt, systemInstruction) {
+  const model = await resolveModel();
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${API_KEY}`;
+  const body = {
+    contents: [{ parts: [{ text: prompt }] }],
+  };
+  if (systemInstruction) {
+    body.systemInstruction = { parts: [{ text: systemInstruction }] };
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (!resp.ok) {
+      const err = await resp.json();
+      const msg = err.error?.message || `HTTP ${resp.status}`;
+      throw new Error(msg);
+    }
+    const data = await resp.json();
+    return data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response generated.';
+  } catch (e) {
+    console.error('Gemini error:', e);
+    if (e.message === 'Failed to fetch') {
+      return 'Error: Could not reach the Gemini API. Check your internet connection and make sure your API key is valid. If you are using a browser that blocks requests from local files, try opening this file in Chrome or Edge instead.';
+    }
+    return `Error: ${e.message}`;
+  }
+}
+
+// ═══════════════════════════════════════════
+//  COURSES
+// ═══════════════════════════════════════════
+function addCourse() {
+  const name = document.getElementById('new-course-name').value.trim();
+  const prof = document.getElementById('new-course-prof').value.trim();
+  const credits = parseInt(document.getElementById('new-course-credits').value) || 3;
+  if (!name) return toast('Please enter a course name');
+  state.courses.push({
+    id: Date.now().toString(36),
+    name, prof, credits,
+    materials: [],
+    notes: [],
+    assignments: [],
+    outlineData: null,
+    progress: 0
+  });
+  saveState();
+  closeModal('add-course-modal');
+  document.getElementById('new-course-name').value = '';
+  document.getElementById('new-course-prof').value = '';
+  refreshDashboard();
+  renderCoursesGrid();
+  refreshCourseSelects();
+  toast(`${name} added`);
+}
+
+function deleteCourse() {
+  if (!state.currentCourseId) return;
+  if (!confirm('Delete this course and all its materials?')) return;
+  state.courses = state.courses.filter(c => c.id !== state.currentCourseId);
+  state.currentCourseId = null;
+  saveState();
+  closeCourseDetail();
+  renderCoursesGrid();
+  refreshDashboard();
+  refreshCourseSelects();
+  toast('Course deleted');
+}
+
+function renderCoursesGrid() {
+  const grid = document.getElementById('courses-grid');
+  if (state.courses.length === 0) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+      <h3>No courses added</h3><p>Click "Add Course" to create your first class workspace</p></div>`;
+    return;
+  }
+  grid.innerHTML = state.courses.map(c => `
+    <div class="course-card" onclick="openCourseDetail('${c.id}')">
+      <div class="course-name">${esc(c.name)}</div>
+      <div class="course-prof">${esc(c.prof)} · ${c.credits} credits</div>
+      <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">
+        <span class="tag tag-gold">${c.materials.length} files</span>
+        <span class="tag tag-gold">${c.notes.length} notes</span>
+        <span class="tag tag-crimson">${c.assignments.length} assignments</span>
+      </div>
+      <div class="course-progress">
+        <div class="course-progress-label">
+          <span>Syllabus Progress</span><span>${c.progress}%</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${c.progress}%"></div></div>
+      </div>
+    </div>`).join('');
+}
+
+function openCourseDetail(id) {
+  state.currentCourseId = id;
+  const course = state.courses.find(c => c.id === id);
+  if (!course) return;
+  document.getElementById('courses-grid').style.display = 'none';
+  document.querySelector('#page-courses > div:first-child').style.display = 'none';
+  document.getElementById('course-detail').style.display = 'block';
+  document.getElementById('detail-course-name').textContent = course.name;
+  document.getElementById('detail-course-prof').textContent = `${course.prof} · ${course.credits} credits`;
+  renderMaterials(course);
+  renderNotes(course);
+  renderAssignments(course);
+  switchCourseTab('materials');
+}
+
+function closeCourseDetail() {
+  document.getElementById('course-detail').style.display = 'none';
+  document.getElementById('courses-grid').style.display = '';
+  document.querySelector('#page-courses > div:first-child').style.display = '';
+  state.currentCourseId = null;
+  renderCoursesGrid();
+}
+
+function switchCourseTab(tab) {
+  ['materials', 'notes', 'assignments', 'ai-tools'].forEach(t => {
+    document.getElementById('ctab-' + t).style.display = t === tab ? 'block' : 'none';
+  });
+  document.querySelectorAll('[data-ctab]').forEach(el => {
+    el.classList.toggle('active', el.dataset.ctab === tab);
+  });
+}
+
+// File upload
+function handleFileUpload(event) {
+  const course = state.courses.find(c => c.id === state.currentCourseId);
+  if (!course) return;
+  const files = event.target.files;
+  Array.from(files).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      course.materials.push({
+        id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        content: e.target.result.slice(0, 50000), // limit stored content
+        uploadedAt: new Date().toISOString()
+      });
+      saveState();
+      renderMaterials(course);
+      toast(`${file.name} uploaded`);
+    };
+    reader.readAsText(file);
+  });
+  event.target.value = '';
+}
+
+function renderMaterials(course) {
+  const list = document.getElementById('materials-list');
+  if (course.materials.length === 0) { list.innerHTML = ''; return; }
+  list.innerHTML = course.materials.map(m => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(26,26,46,0.04);">
+      <div>
+        <div style="font-size:0.82rem;font-weight:500;">${esc(m.name)}</div>
+        <div style="font-size:0.68rem;color:var(--slate);">${(m.size / 1024).toFixed(1)} KB · ${new Date(m.uploadedAt).toLocaleDateString()}</div>
+      </div>
+      <button class="btn btn-ghost" style="padding:4px 10px;font-size:0.7rem;" onclick="removeMaterial('${m.id}')">Remove</button>
+    </div>`).join('');
+}
+
+function removeMaterial(mid) {
+  const course = state.courses.find(c => c.id === state.currentCourseId);
+  if (!course) return;
+  course.materials = course.materials.filter(m => m.id !== mid);
+  saveState();
+  renderMaterials(course);
+}
+
+// Notes
+function saveNote() {
+  const course = state.courses.find(c => c.id === state.currentCourseId);
+  if (!course) return;
+  const text = document.getElementById('note-input').value.trim();
+  if (!text) return;
+  course.notes.push({
+    id: Date.now().toString(36),
+    text,
+    createdAt: new Date().toISOString()
+  });
+  saveState();
+  document.getElementById('note-input').value = '';
+  renderNotes(course);
+  toast('Note saved');
+}
+
+function renderNotes(course) {
+  const list = document.getElementById('notes-list');
+  if (course.notes.length === 0) { list.innerHTML = ''; return; }
+  list.innerHTML = course.notes.map(n => `
+    <div class="card" style="margin-bottom:0.75rem;">
+      <div style="font-size:0.68rem;color:var(--slate);margin-bottom:4px;">${new Date(n.createdAt).toLocaleString()}</div>
+      <div style="font-size:0.82rem;line-height:1.6;white-space:pre-wrap;">${esc(n.text).slice(0, 500)}${n.text.length > 500 ? '...' : ''}</div>
+    </div>`).join('');
+}
+
+// Assignments
+function addAssignment() {
+  const course = state.courses.find(c => c.id === state.currentCourseId);
+  if (!course) return;
+  const name = document.getElementById('assign-name').value.trim();
+  const date = document.getElementById('assign-date').value;
+  if (!name || !date) return toast('Fill in assignment name and date');
+  course.assignments.push({ id: Date.now().toString(36), name, date, completed: false });
+  saveState();
+  document.getElementById('assign-name').value = '';
+  document.getElementById('assign-date').value = '';
+  renderAssignments(course);
+  refreshDashboard();
+  toast('Assignment added');
+}
+
+function renderAssignments(course) {
+  const list = document.getElementById('assignments-list');
+  if (course.assignments.length === 0) { list.innerHTML = ''; return; }
+  list.innerHTML = `<table><thead><tr><th>Assignment</th><th>Due Date</th><th>Status</th></tr></thead><tbody>
+    ${course.assignments.sort((a,b) => new Date(a.date) - new Date(b.date)).map(a => `
+      <tr>
+        <td>${esc(a.name)}</td>
+        <td>${new Date(a.date).toLocaleDateString()}</td>
+        <td>
+          <span class="tag ${a.completed ? 'tag-success' : 'tag-crimson'}" style="cursor:pointer;" onclick="toggleAssignment('${a.id}')">
+            ${a.completed ? '✓ Done' : 'Pending'}
+          </span>
+        </td>
+      </tr>`).join('')}
+  </tbody></table>`;
+}
+
+function toggleAssignment(aid) {
+  const course = state.courses.find(c => c.id === state.currentCourseId);
+  if (!course) return;
+  const a = course.assignments.find(x => x.id === aid);
+  if (a) a.completed = !a.completed;
+  saveState();
+  renderAssignments(course);
+}
+
+// ═══════════════════════════════════════════
+//  AI TOOLS (per course)
+// ═══════════════════════════════════════════
+async function runAITool(type) {
+  const course = state.courses.find(c => c.id === state.currentCourseId);
+  if (!course) return;
+  const materialsContext = gatherCourseContext(course);
+  const outputEl = document.getElementById('ai-tool-output');
+  const contentEl = document.getElementById('ai-tool-content');
+  const titleEl = document.getElementById('ai-tool-title');
+  outputEl.style.display = 'block';
+  contentEl.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div> Generating...';
+
+  const prompts = {
+    'practice-q': {
+      title: 'Practice Questions',
+      prompt: `Based on the following course materials for "${course.name}", generate 3 practice questions: 1 MBE-style multiple choice, 1 short answer, and 1 issue spotter. Include answers and explanations.\n\nMaterials:\n${materialsContext}`
+    },
+    'cold-call': {
+      title: 'Cold Call Simulation',
+      prompt: `You are a law professor teaching "${course.name}". Based on the following materials, generate a realistic cold-call simulation with 5 Socratic-method questions that build on each other. Include the "correct" direction of analysis for each.\n\nMaterials:\n${materialsContext}`
+    },
+    'outline': {
+      title: 'Course Outline',
+      prompt: `Based on the following materials for "${course.name}", extract and organize all black-letter rules, case holdings, and key doctrines into a well-structured course outline. Group by topic and subtopic. Include rule statements and brief case references.\n\nMaterials:\n${materialsContext}`
+    },
+    'exam-hypo': {
+      title: 'Exam Hypothetical',
+      prompt: `Create a full-length, exam-quality hypothetical fact pattern for "${course.name}" that tests multiple doctrines from the materials below. After the fact pattern, provide a model answer outline identifying all issues, applicable rules, and analysis framework (IRAC).\n\nMaterials:\n${materialsContext}`
+    }
+  };
+
+  const p = prompts[type];
+  titleEl.textContent = p.title;
+  const system = `You are JURIS, an expert law school AI tutor. You help law students study effectively. Be thorough, accurate, and pedagogically sound. Format your responses clearly with proper structure.`;
+  const result = await callGemini(p.prompt, system);
+  contentEl.textContent = result;
+}
+
+function gatherCourseContext(course) {
+  let ctx = '';
+  course.materials.forEach(m => {
+    ctx += `\n--- File: ${m.name} ---\n${m.content?.slice(0, 8000) || '[binary file]'}\n`;
+  });
+  course.notes.forEach(n => {
+    ctx += `\n--- Note (${n.createdAt}) ---\n${n.text.slice(0, 3000)}\n`;
+  });
+  return ctx.slice(0, 30000) || 'No materials uploaded yet. Generate based on common topics for this type of law course.';
+}
+
+// ═══════════════════════════════════════════
+//  STUDY ENGINE
+// ═══════════════════════════════════════════
+
+// Holds parsed MBE questions during an active quiz: [{question, options:{A,B,C,D}}]
+let mbeQuestions = [];
+
+async function generateQuiz() {
+  const courseId = document.getElementById('quiz-course-select').value;
+  const difficulty = document.getElementById('quiz-difficulty').value;
+  const qtype = document.getElementById('quiz-type').value;
+  const topic = document.getElementById('quiz-topic').value.trim();
+  if (!courseId) return toast('Select a course first');
+  const course = state.courses.find(c => c.id === courseId);
+  if (!course) return;
+
+  const outputArea = document.getElementById('quiz-output-area');
+  const contentEl = document.getElementById('quiz-content');
+  outputArea.style.display = 'block';
+  contentEl.innerHTML = '<div style="text-align:center;padding:2rem;"><div class="loading-dots"><span></span><span></span><span></span></div><div style="margin-top:8px;font-size:0.82rem;color:var(--slate);">Generating quiz...</div></div>';
+  document.getElementById('quiz-mbe-submit-section').style.display = 'none';
+  document.getElementById('quiz-text-submit-section').style.display = 'none';
+  document.getElementById('grade-output').style.display = 'none';
+
+  const materialsContext = gatherCourseContext(course);
+  const diffLabels = { early: 'early-semester comprehension level', mid: 'midterm reinforcement level', final: 'final exam complexity level' };
+  const topicClause = topic ? ` focused specifically on the topic: "${topic}"` : '';
+
+  const system = 'You are JURIS, an expert law school quiz generator. Create challenging, pedagogically sound questions that test understanding of legal doctrines, rules, and analytical skills.';
+
+  if (qtype === 'mbe') {
+    document.getElementById('quiz-output-title').textContent = 'Multiple Choice Quiz';
+    const prompt = `Generate 5 MBE-style multiple choice questions at ${diffLabels[difficulty]} for the course "${course.name}"${topicClause}.
+
+IMPORTANT — format each question EXACTLY like this, with no deviations:
+QUESTION: [full question text, may include a fact pattern]
+A: [option text]
+B: [option text]
+C: [option text]
+D: [option text]
+===
+
+Do NOT include the correct answer or any explanation yet. The student will answer first.
+
+Base questions on these materials:\n${materialsContext}`;
+    const result = await callGemini(prompt, system);
+    mbeQuestions = parseMBEQuestions(result);
+    if (mbeQuestions.length === 0) {
+      // Fallback: AI didn't follow format, render as markdown
+      contentEl.innerHTML = `<div class="md-rendered">${marked.parse(result)}</div>`;
+      document.getElementById('quiz-text-answer-section').style.display = 'block';
+    } else {
+      renderMBEQuestions(mbeQuestions);
+      document.getElementById('quiz-mbe-submit-section').style.display = 'block';
+      updateMBEProgress();
+    }
+  } else {
+    const typeLabels = {
+      short: 'short answer questions',
+      'issue-spot': 'issue spotter questions with complex fact patterns',
+      hypo: 'a full exam hypothetical with multiple embedded issues'
+    };
+    const titleMap = { short: 'Short Answer Quiz', 'issue-spot': 'Issue Spotter', hypo: 'Exam Hypothetical' };
+    document.getElementById('quiz-output-title').textContent = titleMap[qtype];
+
+    const count = qtype === 'hypo' ? 1 : 3;
+    const prompt = `Generate ${count} ${typeLabels[qtype]} at ${diffLabels[difficulty]} for the course "${course.name}"${topicClause}.
+
+IMPORTANT — format each question EXACTLY like this, with no deviations:
+QUESTION: [full question text, may include a detailed fact pattern]
+===
+
+Do NOT include answers, rubrics, or explanations. The student will answer first.
+
+Base questions on these materials:\n${materialsContext}`;
+
+    const result = await callGemini(prompt, system);
+    textQuestions = parseTextQuestions(result);
+
+    if (textQuestions.length === 0) {
+      // Fallback: render as plain markdown if parsing fails
+      contentEl.innerHTML = `<div class="md-rendered">${marked.parse(result)}</div>`;
+      toast('Questions generated — use AI Chat to discuss your answers');
+    } else {
+      renderTextQuestions(textQuestions, qtype);
+      const label = document.getElementById('text-progress-label');
+      if (label) label.textContent = `0 of ${textQuestions.length} answered`;
+      document.getElementById('quiz-text-submit-section').style.display = 'block';
+    }
+  }
+}
+
+// ── Text question parsing ──
+let textQuestions = [];
+
+function parseTextQuestions(text) {
+  return text.split('===').map(block => {
+    block = block.trim();
+    if (!block) return null;
+    const qMatch = block.match(/QUESTION:\s*([\s\S]+)/i);
+    if (!qMatch) return null;
+    return { question: qMatch[1].trim() };
+  }).filter(Boolean);
+}
+
+// ── Text question rendering ──
+function renderTextQuestions(questions, qtype) {
+  const placeholders = {
+    short: 'Write your answer here...',
+    'issue-spot': 'Identify all legal issues, state the applicable rules, apply them to the facts, and reach a conclusion (IRAC)...',
+    hypo: 'Write your full analysis here, addressing every issue raised in the fact pattern...'
+  };
+  const ph = placeholders[qtype] || 'Write your answer here...';
+  const contentEl = document.getElementById('quiz-content');
+  contentEl.innerHTML = questions.map((q, i) => `
+    <div class="text-question-card">
+      <div class="mbe-question-num">Question ${i + 1} of ${questions.length}</div>
+      <div class="md-rendered" style="margin-bottom:1.25rem;">${marked.parse(q.question)}</div>
+      <div class="form-group" style="margin:0;">
+        <label class="form-label">Your Answer</label>
+        <textarea class="form-textarea" id="tq-answer-${i}" placeholder="${ph}"
+          oninput="updateTextProgress()" style="min-height:130px;"></textarea>
+      </div>
+    </div>
+  `).join('');
+}
+
+function updateTextProgress() {
+  const answered = textQuestions.filter((_, i) =>
+    document.getElementById(`tq-answer-${i}`)?.value.trim()
+  ).length;
+  const label = document.getElementById('text-progress-label');
+  if (label) label.textContent = `${answered} of ${textQuestions.length} answered`;
+}
+
+// ── Text quiz grading with rubric ──
+async function submitTextQuiz() {
+  const answers = textQuestions.map((q, i) => document.getElementById(`tq-answer-${i}`)?.value.trim() || '');
+  const unanswered = answers.filter(a => !a).length;
+  if (unanswered > 0) return toast(`Please answer all ${textQuestions.length} questions before submitting`);
+
+  const gradeEl = document.getElementById('grade-output');
+  const gradeContent = document.getElementById('grade-content');
+  gradeEl.style.display = 'block';
+  gradeContent.innerHTML = '<div style="text-align:center;padding:1.5rem;"><div class="loading-dots"><span></span><span></span><span></span></div><div style="margin-top:8px;font-size:0.82rem;color:var(--slate);">Grading your answers...</div></div>';
+  gradeEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  const qaText = textQuestions.map((q, i) =>
+    `--- QUESTION ${i + 1} ---\n${q.question}\n\n--- STUDENT ANSWER ${i + 1} ---\n${answers[i]}`
+  ).join('\n\n');
+
+  const prompt = `You are a law professor grading a student's written quiz. Grade EACH answer using a detailed rubric.
+
+For EACH question, provide:
+
+### Rubric
+List 4–5 specific grading criteria with point values that total 10 points. Example criteria: Issue Identification, Rule Statement, Application to Facts, Counter-arguments, Conclusion/IRAC Structure.
+
+### Scoring
+For each criterion: award points earned out of the max, with a one-sentence note explaining why.
+
+### Total Score
+**X / 10**
+
+### Feedback
+2–3 sentences on overall strengths and the most important area to improve.
+
+Use ## Question N — [brief topic] as the heading for each question.
+
+${qaText}`;
+
+  const system = 'You are JURIS, an expert law professor. Grade each answer rigorously but constructively. Always produce a rubric first, then score against it. Use clear markdown formatting.';
+  const result = await callGemini(prompt, system);
+  gradeContent.innerHTML = marked.parse(result);
+}
+
+async function gradeAnswer() {
+  // Legacy fallback — used only if MBE question parsing fails
+  const answer = document.getElementById('quiz-answer')?.value.trim();
+  if (!answer) return toast('Write your answer first');
+  const question = document.getElementById('quiz-content').textContent;
+  const gradeEl = document.getElementById('grade-output');
+  const gradeContent = document.getElementById('grade-content');
+  gradeEl.style.display = 'block';
+  gradeContent.innerHTML = '<div style="text-align:center;padding:1.5rem;"><div class="loading-dots"><span></span><span></span><span></span></div></div>';
+  const prompt = `Grade this law student answer.\n\nQuestion:\n${question}\n\nAnswer:\n${answer}\n\nProvide a rubric, score each criterion, give a total out of 10, and 2-3 sentences of feedback.`;
+  const system = 'You are JURIS, an expert law professor. Use markdown with clear headings.';
+  const result = await callGemini(prompt, system);
+  gradeContent.innerHTML = marked.parse(result);
+}
+
+// ── MBE parsing ──
+function parseMBEQuestions(text) {
+  return text.split('===').map(block => {
+    block = block.trim();
+    if (!block) return null;
+    const qMatch = block.match(/QUESTION:\s*([\s\S]+?)(?=\nA:)/i);
+    const aMatch = block.match(/^A:\s*(.+)/m);
+    const bMatch = block.match(/^B:\s*(.+)/m);
+    const cMatch = block.match(/^C:\s*(.+)/m);
+    const dMatch = block.match(/^D:\s*(.+)/m);
+    if (!qMatch || !aMatch || !bMatch || !cMatch || !dMatch) return null;
+    return {
+      question: qMatch[1].trim(),
+      options: { A: aMatch[1].trim(), B: bMatch[1].trim(), C: cMatch[1].trim(), D: dMatch[1].trim() },
+      selected: null
+    };
+  }).filter(Boolean);
+}
+
+// ── MBE rendering ──
+function renderMBEQuestions(questions) {
+  const contentEl = document.getElementById('quiz-content');
+  contentEl.innerHTML = questions.map((q, i) => `
+    <div class="mbe-question" id="mbe-q-${i}">
+      <div class="mbe-question-num">Question ${i + 1} of ${questions.length}</div>
+      <div class="mbe-question-text">${esc(q.question)}</div>
+      <div class="mbe-options">
+        ${['A','B','C','D'].map(letter => `
+          <button class="mbe-option" id="mbe-q${i}-${letter}" onclick="selectMBEOption(${i},'${letter}')">
+            <span class="mbe-option-letter">${letter}</span>
+            <span>${esc(q.options[letter])}</span>
+          </button>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+function selectMBEOption(qIdx, letter) {
+  // Deselect all options for this question
+  ['A','B','C','D'].forEach(l => {
+    document.getElementById(`mbe-q${qIdx}-${l}`)?.classList.remove('selected');
+  });
+  // Select chosen
+  document.getElementById(`mbe-q${qIdx}-${letter}`)?.classList.add('selected');
+  mbeQuestions[qIdx].selected = letter;
+  updateMBEProgress();
+}
+
+function updateMBEProgress() {
+  const answered = mbeQuestions.filter(q => q.selected).length;
+  const total = mbeQuestions.length;
+  const label = document.getElementById('mbe-progress-label');
+  if (label) label.textContent = `${answered} of ${total} answered`;
+  const btn = document.querySelector('#quiz-mbe-submit-section .btn-primary');
+  if (btn) btn.disabled = answered < total;
+}
+
+// ── MBE grading ──
+async function submitMBEQuiz() {
+  const unanswered = mbeQuestions.filter(q => !q.selected).length;
+  if (unanswered > 0) return toast(`Please answer all ${mbeQuestions.length} questions first`);
+
+  const gradeEl = document.getElementById('grade-output');
+  const gradeContent = document.getElementById('grade-content');
+  gradeEl.style.display = 'block';
+  gradeContent.innerHTML = '<div style="text-align:center;padding:1.5rem;"><div class="loading-dots"><span></span><span></span><span></span></div><div style="margin-top:8px;font-size:0.82rem;color:var(--slate);">Grading your answers...</div></div>';
+  gradeEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  const answersText = mbeQuestions.map((q, i) =>
+    `Question ${i+1}: ${q.question}\nStudent selected: (${q.selected}) ${q.options[q.selected]}`
+  ).join('\n\n');
+
+  const prompt = `A law student just completed a multiple choice quiz. Grade their answers.\n\nFor EACH question:\n1. State whether they were CORRECT or INCORRECT\n2. Reveal the correct answer and letter\n3. Briefly explain the controlling rule and why the correct answer is right\n4. If wrong, explain why their choice was incorrect\n\nEnd with a total score (X out of ${mbeQuestions.length}) and 1-2 sentences of overall feedback.\n\nStudent's answers:\n${answersText}`;
+  const system = 'You are JURIS, an expert law professor. Grade MBE answers clearly and educationally. Use markdown with ## for each question heading.';
+  const result = await callGemini(prompt, system);
+  gradeContent.innerHTML = marked.parse(result);
+}
+
+async function gradeAnswer() {
+  const answer = document.getElementById('quiz-answer').value.trim();
+  if (!answer) return toast('Write your answer first');
+  const question = document.getElementById('quiz-content').textContent;
+
+  const gradeEl = document.getElementById('grade-output');
+  const gradeContent = document.getElementById('grade-content');
+  gradeEl.style.display = 'block';
+  gradeContent.innerHTML = '<div style="text-align:center;padding:1.5rem;"><div class="loading-dots"><span></span><span></span><span></span></div><div style="margin-top:8px;font-size:0.82rem;color:var(--slate);">Grading...</div></div>';
+
+  const prompt = `You are grading a law student's answer. Here is the question:\n\n${question}\n\nHere is the student's answer:\n\n${answer}\n\nProvide detailed feedback including:\n1. Score (out of 10)\n2. Issues correctly identified\n3. Missing issues or rules\n4. Quality of rule articulation\n5. IRAC structure assessment\n6. Specific suggestions for improvement`;
+  const system = 'You are JURIS, an expert law professor grading student work. Be constructive, thorough, and specific. Use markdown with clear headings for each section of feedback.';
+  const result = await callGemini(prompt, system);
+  gradeContent.innerHTML = marked.parse(result);
+}
+
+// ═══════════════════════════════════════════
+//  OUTLINE NOTES IMPORT
+// ═══════════════════════════════════════════
+async function handleNotesFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  document.getElementById('notes-file-name').textContent = file.name;
+
+  if (file.name.endsWith('.txt')) {
+    const text = await file.text();
+    document.getElementById('outline-notes-text').value = text;
+    toast('Notes loaded from ' + file.name);
+  } else if (file.name.endsWith('.docx')) {
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      const result = await mammoth.extractRawText({ arrayBuffer });
+      document.getElementById('outline-notes-text').value = result.value;
+      toast('Notes extracted from ' + file.name);
+    } catch(e) {
+      console.error(e);
+      toast('Could not read .docx — try pasting your text instead');
+    }
+  }
+  // Reset input so the same file can be re-uploaded if needed
+  event.target.value = '';
+}
+
+function clearOutlineNotes() {
+  document.getElementById('outline-notes-text').value = '';
+  document.getElementById('notes-file-name').textContent = '';
+  toast('Notes cleared');
+}
+
+// ═══════════════════════════════════════════
+//  OUTLINES
+// ═══════════════════════════════════════════
+function loadOutline() {
+  const courseId = document.getElementById('outline-course-select').value;
+  const display = document.getElementById('outline-display');
+  if (!courseId) {
+    display.innerHTML = '<div class="empty-state"><h3>Select a course</h3></div>';
+    return;
+  }
+  const course = state.courses.find(c => c.id === courseId);
+  if (course?.outlineData) {
+    display.innerHTML = `<div class="md-rendered">${marked.parse(course.outlineData)}</div>`;
+  } else {
+    display.innerHTML = '<div class="empty-state"><h3>No outline yet</h3><p>Click "Auto-Build" to generate one from your materials</p></div>';
+  }
+}
+
+async function generateOutline(type) {
+  const courseId = document.getElementById('outline-course-select').value;
+  if (!courseId) return toast('Select a course first');
+  const course = state.courses.find(c => c.id === courseId);
+  if (!course) return;
+
+  const display = document.getElementById('outline-display');
+  display.innerHTML = '<div style="text-align:center;padding:2rem;"><div class="loading-dots"><span></span><span></span><span></span></div><div style="margin-top:8px;font-size:0.82rem;color:var(--slate);">Building outline...</div></div>';
+
+  const materialsContext = gatherCourseContext(course);
+  const userNotes = document.getElementById('outline-notes-text').value.trim();
+  const typeInstructions = {
+    full: 'Create a comprehensive, detailed course outline with all black-letter rules, case holdings, policy rationales, and multi-step doctrine flowcharts.',
+    attack: 'Create a concise attack outline — just the key rules, elements, and analysis frameworks needed for quick exam reference.',
+    checklist: 'Create a one-page exam checklist with every issue to spot, organized by topic, with brief rule triggers.',
+    auto: 'Create a well-organized course outline extracting all rules, cases, and doctrines. Include rule statements, case holdings, and policy rationales organized by topic and subtopic.'
+  };
+
+  let prompt;
+  if (userNotes) {
+    const hasOtherMaterials = materialsContext && !materialsContext.startsWith('No materials');
+    prompt = `For the course "${course.name}", ${typeInstructions[type]}\n\nPRIMARY SOURCE — Student's own notes:\n${userNotes.slice(0, 25000)}${hasOtherMaterials ? `\n\nSUPPLEMENTAL COURSE MATERIALS:\n${materialsContext}` : ''}`;
+  } else {
+    prompt = `For the course "${course.name}", ${typeInstructions[type]}\n\nBase this on the following materials:\n${materialsContext}`;
+  }
+  const system = 'You are JURIS, an expert law school outline builder. Create clear, well-organized, accurate legal outlines that would help a student prepare for exams.';
+  const result = await callGemini(prompt, system);
+  course.outlineData = result;
+  saveState();
+  display.innerHTML = `<div class="md-rendered">${marked.parse(result)}</div>`;
+}
+
+// ═══════════════════════════════════════════
+//  CALENDAR
+// ═══════════════════════════════════════════
+function renderCalendar() {
+  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('cal-month-title').textContent = `${monthNames[state.calMonth]} ${state.calYear}`;
+
+  const firstDay = new Date(state.calYear, state.calMonth, 1).getDay();
+  const daysInMonth = new Date(state.calYear, state.calMonth + 1, 0).getDate();
+  const today = new Date();
+
+  // Gather all assignment dates
+  const assignDates = new Set();
+  state.courses.forEach(c => {
+    c.assignments.forEach(a => {
+      const d = new Date(a.date);
+      if (d.getMonth() === state.calMonth && d.getFullYear() === state.calYear) {
+        assignDates.add(d.getDate());
+      }
+    });
+  });
+
+  let html = '';
+  for (let i = 0; i < firstDay; i++) html += '<div class="cal-cell empty"></div>';
+  for (let d = 1; d <= daysInMonth; d++) {
+    const isToday = d === today.getDate() && state.calMonth === today.getMonth() && state.calYear === today.getFullYear();
+    const hasEvent = assignDates.has(d);
+    html += `<div class="cal-cell${isToday ? ' today' : ''}${hasEvent ? ' has-event' : ''}">${d}</div>`;
+  }
+  document.getElementById('cal-days').innerHTML = html;
+}
+
+function changeMonth(delta) {
+  state.calMonth += delta;
+  if (state.calMonth > 11) { state.calMonth = 0; state.calYear++; }
+  if (state.calMonth < 0) { state.calMonth = 11; state.calYear--; }
+  renderCalendar();
+}
+
+async function generateStudyPlan() {
+  const courses = state.courses.map(c => ({
+    name: c.name,
+    assignments: c.assignments.filter(a => !a.completed).map(a => ({ name: a.name, date: a.date }))
+  }));
+  if (courses.length === 0) return toast('Add courses and assignments first');
+
+  const el = document.getElementById('reminders-list');
+  el.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div> Generating study plan...';
+
+  const prompt = `Create a detailed weekly study plan based on these courses and upcoming assignments:\n\n${JSON.stringify(courses, null, 2)}\n\nToday is ${new Date().toLocaleDateString()}. Include spaced repetition, break reminders, and prioritize upcoming deadlines.`;
+  const system = 'You are JURIS, a law school study planning assistant. Create practical, time-blocked study plans that incorporate spaced repetition and prevent burnout.';
+  const result = await callGemini(prompt, system);
+  el.innerHTML = `<div style="white-space:pre-wrap;">${esc(result)}</div>`;
+}
+
+// ═══════════════════════════════════════════
+//  BAR ALIGNMENT
+// ═══════════════════════════════════════════
+async function analyzeBarReadiness() {
+  const jurisdiction = document.getElementById('bar-jurisdiction').value;
+  const year = document.getElementById('bar-year').value;
+  if (!jurisdiction) return toast('Select a jurisdiction');
+
+  const resultsEl = document.getElementById('bar-results');
+  resultsEl.style.display = 'block';
+  document.getElementById('mbe-coverage').innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div>';
+  document.getElementById('bar-recommendations').textContent = 'Analyzing...';
+
+  const courseList = state.courses.map(c => c.name).join(', ') || 'No courses added yet';
+  const prompt = `I am a ${year} law student planning to take the bar in ${jurisdiction}. My current courses are: ${courseList}.
+
+Analyze my bar readiness:
+1. List all MBE subjects and rate my coverage (0-100%) based on my courses
+2. Identify gaps in required subjects
+3. Suggest electives for remaining semesters
+4. Provide a bar readiness score (0-100)
+5. Create a suggested timeline for bar prep
+
+Format the MBE coverage as a simple list with percentages.`;
+
+  const system = 'You are JURIS, an expert bar exam preparation advisor. Provide accurate, jurisdiction-specific bar exam guidance.';
+  const result = await callGemini(prompt, system);
+
+  // Parse and display
+  const mbeEl = document.getElementById('mbe-coverage');
+  const recsEl = document.getElementById('bar-recommendations');
+
+  // Simple display
+  const parts = result.split('\n\n');
+  const mbeSection = parts.find(p => p.toLowerCase().includes('mbe') || p.toLowerCase().includes('coverage')) || parts[0];
+  mbeEl.innerHTML = `<div style="font-size:0.85rem;line-height:1.8;white-space:pre-wrap;">${esc(mbeSection)}</div>`;
+  recsEl.textContent = parts.slice(1).join('\n\n');
+}
+
+// ═══════════════════════════════════════════
+//  CAREER INTELLIGENCE
+// ═══════════════════════════════════════════
+async function analyzeCareer() {
+  const classes = document.getElementById('career-classes').value;
+  const style = document.getElementById('career-style').value;
+  const wlb = document.getElementById('career-wlb').value;
+  const geo = document.getElementById('career-geo').value;
+
+  const resultsEl = document.getElementById('career-results');
+  const outputEl = document.getElementById('career-output');
+  resultsEl.style.display = 'block';
+  outputEl.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div> Analyzing career matches...';
+
+  const prompt = `Based on the following law student profile, provide comprehensive career intelligence:
+
+Classes enjoyed: ${classes || 'Not specified'}
+Work style preference: ${style}
+Work-life priority: ${wlb}
+Geographic preference: ${geo || 'Flexible'}
+
+Provide:
+1. Top 5 career path matches with explanations
+2. For each path, include:
+   - Typical daily schedule
+   - Average hours per week
+   - Compensation range (entry to senior)
+   - Stress level (1-10)
+   - Advancement timeline
+   - Geographic salary comparison if relevant
+3. A comparison table of the top 3 paths
+4. Recommended next steps (internships, clinics, networking)`;
+
+  const system = 'You are JURIS, an expert legal career counselor. Provide realistic, data-informed career guidance for law students. Be specific about compensation ranges and lifestyle realities.';
+  const result = await callGemini(prompt, system);
+  outputEl.textContent = result;
+}
+
+// ═══════════════════════════════════════════
+//  BLUEBOOK
+// ═══════════════════════════════════════════
+async function generateCitation() {
+  const type = document.getElementById('cite-type').value;
+  const input = document.getElementById('cite-input').value.trim();
+  if (!input) return toast('Enter source information');
+
+  const outputArea = document.getElementById('cite-output-area');
+  const outputEl = document.getElementById('cite-output');
+  outputArea.style.display = 'block';
+  outputEl.textContent = 'Generating citation...';
+
+  const prompt = `Generate a proper Bluebook citation for the following ${type}:\n\n${input}\n\nProvide:\n1. Full citation\n2. Short form\n3. If a case: proper parenthetical\n4. Explanation of any formatting rules applied`;
+  const system = 'You are JURIS, an expert in Bluebook citation format (21st edition). Generate perfectly formatted legal citations. Be precise about italics (indicated with *asterisks*), small caps, and punctuation.';
+  const result = await callGemini(prompt, system);
+  outputEl.textContent = result;
+}
+
+async function fixCitation() {
+  const input = document.getElementById('cite-input').value.trim();
+  if (!input) return toast('Paste the citation to fix');
+
+  const outputArea = document.getElementById('cite-output-area');
+  const outputEl = document.getElementById('cite-output');
+  outputArea.style.display = 'block';
+  outputEl.textContent = 'Analyzing citation...';
+
+  const prompt = `Analyze and fix this Bluebook citation:\n\n${input}\n\nIdentify all errors, explain the Bluebook rules violated, and provide the corrected citation.`;
+  const system = 'You are JURIS, an expert Bluebook citation checker. Identify errors precisely and explain the relevant Bluebook rules.';
+  const result = await callGemini(prompt, system);
+  outputEl.textContent = result;
+}
+
+function copyCitation() {
+  const text = document.getElementById('cite-output').textContent;
+  navigator.clipboard.writeText(text).then(() => toast('Copied to clipboard'));
+}
+
+// ═══════════════════════════════════════════
+//  WELLNESS — STUDY TIMER
+// ═══════════════════════════════════════════
+let timerState = {
+  running: false,
+  phase: 'idle',        // idle | work | break
+  mode: 'pomodoro',     // pomodoro | stopwatch
+  workMinutes: 25,
+  breakMinutes: 5,
+  secondsLeft: 25 * 60,
+  elapsed: 0,           // seconds of work accumulated this session
+  intervalId: null,
+  sessionsCompleted: 0,
+};
+
+function setTimerPreset(work, brk, btn) {
+  if (timerState.running) return toast('Stop the timer first');
+  document.querySelectorAll('.timer-preset').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (work === 0 && brk === 0) {
+    timerState.mode = 'stopwatch';
+    timerState.workMinutes = 0;
+    timerState.breakMinutes = 0;
+    timerState.secondsLeft = 0;
+    timerState.elapsed = 0;
+  } else {
+    timerState.mode = 'pomodoro';
+    timerState.workMinutes = work;
+    timerState.breakMinutes = brk;
+    timerState.secondsLeft = work * 60;
+  }
+  timerState.phase = 'idle';
+  updateTimerDisplay();
+  updateTimerPhaseLabel();
+}
+
+function updateTimerDisplay() {
+  const el = document.getElementById('timer-display');
+  if (timerState.mode === 'stopwatch') {
+    const s = timerState.elapsed;
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const sec = s % 60;
+    el.textContent = h > 0
+      ? `${h}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`
+      : `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+  } else {
+    const m = Math.floor(timerState.secondsLeft / 60);
+    const s = timerState.secondsLeft % 60;
+    el.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  }
+}
+
+function updateTimerPhaseLabel() {
+  const el = document.getElementById('timer-phase');
+  el.className = 'timer-phase-label';
+  if (timerState.phase === 'work') { el.textContent = 'Focus Time'; el.classList.add('work'); }
+  else if (timerState.phase === 'break') { el.textContent = 'Break Time'; el.classList.add('break'); }
+  else { el.textContent = 'Ready'; el.classList.add('idle'); }
+}
+
+function updateTimerButton() {
+  const btn = document.getElementById('timer-start-btn');
+  if (timerState.running) {
+    btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg> Pause`;
+  } else {
+    btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg> ${timerState.phase === 'idle' ? 'Start' : 'Resume'}`;
+  }
+}
+
+function toggleTimer() {
+  if (timerState.running) {
+    // Pause
+    clearInterval(timerState.intervalId);
+    timerState.running = false;
+    updateTimerButton();
+    return;
+  }
+  // Start / Resume
+  if (timerState.phase === 'idle') {
+    timerState.phase = 'work';
+    if (timerState.mode === 'pomodoro') timerState.secondsLeft = timerState.workMinutes * 60;
+    timerState.elapsed = 0;
+    updateTimerPhaseLabel();
+  }
+  timerState.running = true;
+  updateTimerButton();
+
+  timerState.intervalId = setInterval(() => {
+    if (timerState.mode === 'stopwatch') {
+      timerState.elapsed++;
+      updateTimerDisplay();
+      // Check break reminder from settings
+      checkBreakReminder();
+    } else {
+      timerState.secondsLeft--;
+      if (timerState.phase === 'work') timerState.elapsed++;
+      updateTimerDisplay();
+
+      if (timerState.secondsLeft <= 0) {
+        clearInterval(timerState.intervalId);
+        timerState.running = false;
+        if (timerState.phase === 'work') {
+          // Work phase done — log it and switch to break
+          timerState.sessionsCompleted++;
+          logTimerSession(timerState.workMinutes);
+          timerState.phase = 'break';
+          timerState.secondsLeft = timerState.breakMinutes * 60;
+          updateTimerPhaseLabel();
+          updateTimerButton();
+          toast('Focus session complete! Time for a break.');
+          tryNotification('Break time!', 'Your focus session is done. Take a breather.');
+        } else {
+          // Break done — reset to work
+          timerState.phase = 'work';
+          timerState.secondsLeft = timerState.workMinutes * 60;
+          timerState.elapsed = 0;
+          updateTimerPhaseLabel();
+          updateTimerButton();
+          toast('Break over — ready for another session!');
+          tryNotification('Break over!', 'Ready for another focus session?');
+        }
+        updateTimerDisplay();
+        refreshTimerStats();
+      }
+    }
+  }, 1000);
+}
+
+function checkBreakReminder() {
+  const ws = state.wellnessSettings;
+  if (!ws.breakReminders) return;
+  const intervalSec = (ws.breakInterval || 90) * 60;
+  if (timerState.elapsed > 0 && timerState.elapsed % intervalSec === 0) {
+    toast(`You've been studying for ${timerState.elapsed / 60} minutes — consider a break!`);
+    tryNotification('Break reminder', `You've been studying for ${timerState.elapsed / 60} minutes.`);
+  }
+}
+
+function tryNotification(title, body) {
+  if ('Notification' in window && Notification.permission === 'granted') {
+    new Notification(title, { body, icon: '⚖️' });
+  }
+}
+
+function skipTimerPhase() {
+  if (timerState.phase === 'idle') return;
+  clearInterval(timerState.intervalId);
+  timerState.running = false;
+  if (timerState.phase === 'work' && timerState.elapsed > 0) {
+    // Log partial work
+    logTimerSession(Math.round(timerState.elapsed / 60 * 100) / 100);
+    timerState.sessionsCompleted++;
+  }
+  if (timerState.mode === 'stopwatch') {
+    timerState.phase = 'idle';
+    timerState.elapsed = 0;
+  } else if (timerState.phase === 'work') {
+    timerState.phase = 'break';
+    timerState.secondsLeft = timerState.breakMinutes * 60;
+  } else {
+    timerState.phase = 'work';
+    timerState.secondsLeft = timerState.workMinutes * 60;
+    timerState.elapsed = 0;
+  }
+  updateTimerDisplay();
+  updateTimerPhaseLabel();
+  updateTimerButton();
+  refreshTimerStats();
+}
+
+function resetTimer() {
+  clearInterval(timerState.intervalId);
+  if (timerState.phase === 'work' && timerState.elapsed > 60) {
+    // Log any meaningful work (>1 min)
+    logTimerSession(Math.round(timerState.elapsed / 60 * 100) / 100);
+  }
+  timerState.running = false;
+  timerState.phase = 'idle';
+  timerState.elapsed = 0;
+  if (timerState.mode === 'pomodoro') {
+    timerState.secondsLeft = timerState.workMinutes * 60;
+  } else {
+    timerState.secondsLeft = 0;
+  }
+  updateTimerDisplay();
+  updateTimerPhaseLabel();
+  updateTimerButton();
+}
+
+function logTimerSession(minutes) {
+  const hours = Math.round(minutes / 60 * 100) / 100;
+  if (hours <= 0) return;
+  const subjectEl = document.getElementById('timer-subject');
+  const subject = (subjectEl && subjectEl.value) ? subjectEl.value : 'General study';
+  state.timerSessions.push({ date: new Date().toISOString(), minutes, subject });
+  state.studyLog.push({ hours, subject, date: new Date().toISOString(), source: 'timer' });
+  saveState();
+  refreshDashboard();
+  renderWeeklyChart();
+  checkDailyLimit();
+}
+
+function checkDailyLimit() {
+  const ws = state.wellnessSettings;
+  if (!ws.dailyLimitWarning) return;
+  const todayStr = new Date().toDateString();
+  const todayHrs = state.studyLog
+    .filter(l => new Date(l.date).toDateString() === todayStr)
+    .reduce((s, l) => s + l.hours, 0);
+  if (todayHrs >= (ws.dailyLimit || 10)) {
+    toast(`You've hit ${todayHrs.toFixed(1)} study hours today — your limit is ${ws.dailyLimit}. Consider stopping for the day!`);
+  }
+}
+
+function refreshTimerStats() {
+  const todayStr = new Date().toDateString();
+  const todaySessions = state.timerSessions.filter(s => new Date(s.date).toDateString() === todayStr);
+  const todayMinutes = todaySessions.reduce((s, t) => s + t.minutes, 0);
+  const h = Math.floor(todayMinutes / 60);
+  const m = Math.round(todayMinutes % 60);
+
+  document.getElementById('timer-sessions-today').textContent = todaySessions.length;
+  document.getElementById('timer-focus-today').textContent = `${h}h ${m}m`;
+
+  // Calculate streak: consecutive days with at least one timer session
+  let streak = 0;
+  const d = new Date();
+  d.setHours(0,0,0,0);
+  while (true) {
+    const dayStr = d.toDateString();
+    const hasSession = state.timerSessions.some(s => new Date(s.date).toDateString() === dayStr) ||
+                       state.studyLog.some(l => new Date(l.date).toDateString() === dayStr);
+    if (hasSession) { streak++; d.setDate(d.getDate() - 1); }
+    else break;
+  }
+  document.getElementById('timer-streak').textContent = streak;
+}
+
+// ═══════════════════════════════════════════
+//  WELLNESS — MOOD & ENERGY TRACKER
+// ═══════════════════════════════════════════
+let selectedMood = null;
+
+function selectMood(btn) {
+  document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  selectedMood = btn.dataset.mood;
+}
+
+function saveMoodEntry() {
+  if (!selectedMood) return toast('Select a mood first');
+  const energy = parseInt(document.getElementById('energy-slider').value);
+  const note = document.getElementById('mood-note').value.trim();
+
+  // Check if already logged today — update instead of duplicate
+  const todayStr = new Date().toDateString();
+  const existingIdx = state.moodLog.findIndex(m => new Date(m.date).toDateString() === todayStr);
+  const entry = { mood: selectedMood, energy, note, date: new Date().toISOString() };
+
+  if (existingIdx >= 0) {
+    state.moodLog[existingIdx] = entry;
+    toast('Today\'s check-in updated!');
+  } else {
+    state.moodLog.push(entry);
+    toast('Mood logged!');
+  }
+
+  saveState();
+  renderMoodHistory();
+  // Reset form
+  document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
+  selectedMood = null;
+  document.getElementById('energy-slider').value = 5;
+  document.getElementById('energy-value').textContent = '5';
+  document.getElementById('mood-note').value = '';
+}
+
+const moodEmojis = { great: '😊', good: '🙂', okay: '😐', low: '😔', stressed: '😫' };
+
+function renderMoodHistory() {
+  const container = document.getElementById('mood-history-row');
+  if (!container) return;
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const today = new Date();
+  let html = '';
+
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const dayStr = d.toDateString();
+    const entry = state.moodLog.find(m => new Date(m.date).toDateString() === dayStr);
+    const dayLabel = i === 0 ? 'Today' : days[d.getDay()];
+
+    if (entry) {
+      const emoji = moodEmojis[entry.mood] || '—';
+      html += `<div class="mood-history-cell" title="${entry.mood}, energy ${entry.energy}/10${entry.note ? ': ' + entry.note : ''}">
+        <span class="mood-dot">${emoji}</span>
+        <span style="font-size:0.55rem;color:var(--gold-dark);">⚡${entry.energy}</span>
+        <span class="mood-date">${dayLabel}</span>
+      </div>`;
+    } else {
+      html += `<div class="mood-history-cell">
+        <span class="mood-dot" style="color:var(--mist);">—</span>
+        <span style="font-size:0.55rem;color:transparent;">⚡0</span>
+        <span class="mood-date">${dayLabel}</span>
+      </div>`;
+    }
+  }
+  container.innerHTML = html;
+}
+
+// ═══════════════════════════════════════════
+//  WELLNESS — MANUAL STUDY LOG
+// ═══════════════════════════════════════════
+function manualLogHours() {
+  const hours = parseFloat(document.getElementById('manual-study-hours').value);
+  const subject = document.getElementById('manual-study-subject').value;
+  const dateVal = document.getElementById('manual-study-date').value;
+  if (!hours || hours <= 0) return toast('Enter valid hours');
+  if (!dateVal) return toast('Select a date');
+
+  const date = new Date(dateVal + 'T12:00:00').toISOString();
+  state.studyLog.push({ hours, subject: subject || 'General study', date, source: 'manual' });
+  saveState();
+  document.getElementById('manual-study-hours').value = '';
+  refreshDashboard();
+  renderWeeklyChart();
+  refreshTimerStats();
+  checkDailyLimit();
+  toast(`${hours} hours logged`);
+}
+
+// ═══════════════════════════════════════════
+//  WELLNESS — CUSTOM SUBJECTS
+// ═══════════════════════════════════════════
+function addCustomSubject() {
+  const input = document.getElementById('custom-subject-input');
+  const name = input.value.trim();
+  if (!name) return toast('Enter a subject name');
+  if (!state.customSubjects) state.customSubjects = [];
+  // Check for duplicates (case-insensitive) against both custom subjects and courses
+  const lower = name.toLowerCase();
+  if (state.customSubjects.some(s => s.toLowerCase() === lower)) return toast('Subject already exists');
+  if (state.courses.some(c => c.name.toLowerCase() === lower)) return toast('This is already one of your courses');
+
+  state.customSubjects.push(name);
+  saveState();
+  input.value = '';
+  refreshCourseSelects();
+  renderCustomSubjectList();
+  toast(`"${name}" added`);
+}
+
+function removeCustomSubject(name) {
+  if (!state.customSubjects) return;
+  state.customSubjects = state.customSubjects.filter(s => s !== name);
+  saveState();
+  refreshCourseSelects();
+  renderCustomSubjectList();
+  toast(`"${name}" removed`);
+}
+
+function renderCustomSubjectList() {
+  const container = document.getElementById('custom-subject-list');
+  if (!container || !state.customSubjects) return;
+  if (state.customSubjects.length === 0) {
+    container.innerHTML = '';
+    return;
+  }
+  container.innerHTML = state.customSubjects.map(s => `
+    <span class="tag tag-gold" style="cursor:default;">
+      ${esc(s)}
+      <span onclick="removeCustomSubject('${s.replace(/'/g, "\\'")}')" style="cursor:pointer;margin-left:4px;opacity:0.6;font-size:0.8em;" title="Remove">&times;</span>
+    </span>
+  `).join('');
+}
+
+// ═══════════════════════════════════════════
+//  WELLNESS — MOOD HISTORY CALENDAR
+// ═══════════════════════════════════════════
+let moodHistoryMonth = new Date().getMonth();
+let moodHistoryYear = new Date().getFullYear();
+
+function openMoodHistory() {
+  moodHistoryMonth = new Date().getMonth();
+  moodHistoryYear = new Date().getFullYear();
+  renderMoodHistoryCalendar();
+  openModal('mood-history-modal');
+}
+
+function changeMoodHistoryMonth(delta) {
+  moodHistoryMonth += delta;
+  if (moodHistoryMonth > 11) { moodHistoryMonth = 0; moodHistoryYear++; }
+  if (moodHistoryMonth < 0) { moodHistoryMonth = 11; moodHistoryYear--; }
+  renderMoodHistoryCalendar();
+}
+
+function renderMoodHistoryCalendar() {
+  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('mood-history-month-title').textContent = `${monthNames[moodHistoryMonth]} ${moodHistoryYear}`;
+
+  const firstDay = new Date(moodHistoryYear, moodHistoryMonth, 1).getDay();
+  const daysInMonth = new Date(moodHistoryYear, moodHistoryMonth + 1, 0).getDate();
+  const today = new Date();
+
+  // Monthly summary
+  const monthEntries = state.moodLog.filter(m => {
+    const d = new Date(m.date);
+    return d.getMonth() === moodHistoryMonth && d.getFullYear() === moodHistoryYear;
+  });
+  const daysLogged = monthEntries.length;
+  const avgEnergy = daysLogged > 0 ? (monthEntries.reduce((s, m) => s + m.energy, 0) / daysLogged).toFixed(1) : '—';
+  const moodCounts = {};
+  monthEntries.forEach(m => { moodCounts[m.mood] = (moodCounts[m.mood] || 0) + 1; });
+  const topMood = Object.keys(moodCounts).sort((a, b) => moodCounts[b] - moodCounts[a])[0];
+  const topMoodEmoji = topMood ? (moodEmojis[topMood] || '') + ' ' + topMood : '—';
+
+  document.getElementById('mood-history-summary').innerHTML = `
+    <div class="history-summary-stat">
+      <div class="stat-value">${daysLogged}</div>
+      <div class="stat-label">Days Logged</div>
+    </div>
+    <div class="history-summary-stat">
+      <div class="stat-value">${avgEnergy}</div>
+      <div class="stat-label">Avg Energy</div>
+    </div>
+    <div class="history-summary-stat">
+      <div class="stat-value" style="font-size:1rem;">${topMoodEmoji}</div>
+      <div class="stat-label">Most Common</div>
+    </div>
+  `;
+
+  // Calendar grid
+  let html = '';
+  for (let i = 0; i < firstDay; i++) html += '<div class="history-cal-cell empty"></div>';
+  for (let d = 1; d <= daysInMonth; d++) {
+    const cellDate = new Date(moodHistoryYear, moodHistoryMonth, d);
+    const isToday = d === today.getDate() && moodHistoryMonth === today.getMonth() && moodHistoryYear === today.getFullYear();
+    const entry = state.moodLog.find(m => new Date(m.date).toDateString() === cellDate.toDateString());
+    const emoji = entry ? (moodEmojis[entry.mood] || '?') : '';
+    const energyDot = entry ? `<span style="font-size:0.5rem;color:var(--gold-dark);">⚡${entry.energy}</span>` : '';
+
+    html += `<div class="history-cal-cell${isToday ? ' today' : ''}" onclick="showMoodDetail(${moodHistoryYear},${moodHistoryMonth},${d})">
+      <span class="cell-day">${d}</span>
+      ${emoji ? `<span class="cell-emoji">${emoji}</span>` : ''}
+      ${energyDot}
+    </div>`;
+  }
+  document.getElementById('mood-history-cal-days').innerHTML = html;
+
+  // Reset detail panel
+  document.getElementById('mood-history-detail').innerHTML = '<div class="history-detail-empty">Click a day to see details</div>';
+}
+
+function showMoodDetail(year, month, day) {
+  const cellDate = new Date(year, month, day);
+  const entry = state.moodLog.find(m => new Date(m.date).toDateString() === cellDate.toDateString());
+  const detail = document.getElementById('mood-history-detail');
+  const dateStr = cellDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+
+  // Highlight selected cell
+  document.querySelectorAll('#mood-history-cal-days .history-cal-cell').forEach(c => c.classList.remove('selected'));
+  const cells = document.querySelectorAll('#mood-history-cal-days .history-cal-cell:not(.empty)');
+  if (cells[day - 1]) cells[day - 1].classList.add('selected');
+
+  if (!entry) {
+    detail.innerHTML = `<div class="history-detail-title">${dateStr}</div><div class="history-detail-empty">No mood logged for this day.</div>`;
+    return;
+  }
+
+  const emoji = moodEmojis[entry.mood] || '';
+  detail.innerHTML = `
+    <div class="history-detail-title">${dateStr}</div>
+    <div class="history-detail-row">
+      <span>Mood</span>
+      <span>${emoji} <strong>${entry.mood.charAt(0).toUpperCase() + entry.mood.slice(1)}</strong></span>
+    </div>
+    <div class="history-detail-row">
+      <span>Energy Level</span>
+      <span><strong>${entry.energy}</strong> / 10</span>
+    </div>
+    ${entry.note ? `<div style="margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid rgba(26,26,46,0.06);">
+      <div style="font-size:0.68rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--slate);margin-bottom:4px;">Note</div>
+      <div style="font-size:0.82rem;color:var(--ink);line-height:1.6;">${esc(entry.note)}</div>
+    </div>` : ''}
+    <div style="font-size:0.65rem;color:var(--slate);margin-top:0.5rem;">Logged at ${new Date(entry.date).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}</div>
+  `;
+}
+
+// ═══════════════════════════════════════════
+//  WELLNESS — STUDY HOURS HISTORY CALENDAR
+// ═══════════════════════════════════════════
+let studyHistoryMonth = new Date().getMonth();
+let studyHistoryYear = new Date().getFullYear();
+
+function openStudyHistory() {
+  studyHistoryMonth = new Date().getMonth();
+  studyHistoryYear = new Date().getFullYear();
+  renderStudyHistoryCalendar();
+  openModal('study-history-modal');
+}
+
+function changeStudyHistoryMonth(delta) {
+  studyHistoryMonth += delta;
+  if (studyHistoryMonth > 11) { studyHistoryMonth = 0; studyHistoryYear++; }
+  if (studyHistoryMonth < 0) { studyHistoryMonth = 11; studyHistoryYear--; }
+  renderStudyHistoryCalendar();
+}
+
+function renderStudyHistoryCalendar() {
+  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('study-history-month-title').textContent = `${monthNames[studyHistoryMonth]} ${studyHistoryYear}`;
+
+  const firstDay = new Date(studyHistoryYear, studyHistoryMonth, 1).getDay();
+  const daysInMonth = new Date(studyHistoryYear, studyHistoryMonth + 1, 0).getDate();
+  const today = new Date();
+
+  // Get all entries for this month
+  const monthEntries = state.studyLog.filter(l => {
+    const d = new Date(l.date);
+    return d.getMonth() === studyHistoryMonth && d.getFullYear() === studyHistoryYear;
+  });
+
+  // Monthly summary
+  const totalHrs = monthEntries.reduce((s, l) => s + l.hours, 0);
+  const daysStudied = new Set(monthEntries.map(l => new Date(l.date).toDateString())).size;
+  const subjectBreakdown = {};
+  monthEntries.forEach(l => {
+    const subj = l.subject || 'Unspecified';
+    subjectBreakdown[subj] = (subjectBreakdown[subj] || 0) + l.hours;
+  });
+  const topSubject = Object.keys(subjectBreakdown).sort((a, b) => subjectBreakdown[b] - subjectBreakdown[a])[0] || '—';
+  const avgPerDay = daysStudied > 0 ? (totalHrs / daysStudied).toFixed(1) : '—';
+
+  // Find max daily hours for heat coloring
+  const dailyTotals = {};
+  monthEntries.forEach(l => {
+    const dayStr = new Date(l.date).toDateString();
+    dailyTotals[dayStr] = (dailyTotals[dayStr] || 0) + l.hours;
+  });
+
+  document.getElementById('study-history-summary').innerHTML = `
+    <div class="history-summary-stat">
+      <div class="stat-value">${totalHrs.toFixed(1)}</div>
+      <div class="stat-label">Total Hours</div>
+    </div>
+    <div class="history-summary-stat">
+      <div class="stat-value">${daysStudied}</div>
+      <div class="stat-label">Days Studied</div>
+    </div>
+    <div class="history-summary-stat">
+      <div class="stat-value">${avgPerDay}</div>
+      <div class="stat-label">Avg hrs/day</div>
+    </div>
+    <div class="history-summary-stat">
+      <div class="stat-value" style="font-size:0.85rem;">${esc(topSubject)}</div>
+      <div class="stat-label">Top Subject</div>
+    </div>
+  `;
+
+  // Calendar grid
+  let html = '';
+  for (let i = 0; i < firstDay; i++) html += '<div class="history-cal-cell empty"></div>';
+  for (let d = 1; d <= daysInMonth; d++) {
+    const cellDate = new Date(studyHistoryYear, studyHistoryMonth, d);
+    const isToday = d === today.getDate() && studyHistoryMonth === today.getMonth() && studyHistoryYear === today.getFullYear();
+    const dayStr = cellDate.toDateString();
+    const hrs = dailyTotals[dayStr] || 0;
+
+    // Color intensity based on hours
+    let barColor = 'transparent';
+    if (hrs > 0 && hrs <= 2) barColor = 'rgba(197,165,90,0.35)';
+    else if (hrs <= 4) barColor = 'rgba(197,165,90,0.55)';
+    else if (hrs <= 6) barColor = 'var(--gold)';
+    else if (hrs > 6) barColor = 'var(--gold-dark)';
+
+    html += `<div class="history-cal-cell${isToday ? ' today' : ''}" onclick="showStudyDetail(${studyHistoryYear},${studyHistoryMonth},${d})">
+      <span class="cell-day">${d}</span>
+      ${hrs > 0 ? `<span class="cell-hours">${hrs.toFixed(1)}h</span>` : ''}
+      ${hrs > 0 ? `<span class="cell-bar" style="background:${barColor};"></span>` : ''}
+    </div>`;
+  }
+  document.getElementById('study-history-cal-days').innerHTML = html;
+
+  // Reset detail panel
+  document.getElementById('study-history-detail').innerHTML = '<div class="history-detail-empty">Click a day to see a breakdown</div>';
+}
+
+function showStudyDetail(year, month, day) {
+  const cellDate = new Date(year, month, day);
+  const dayStr = cellDate.toDateString();
+  const entries = state.studyLog.filter(l => new Date(l.date).toDateString() === dayStr);
+  const detail = document.getElementById('study-history-detail');
+  const dateStr = cellDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+
+  // Highlight selected cell
+  document.querySelectorAll('#study-history-cal-days .history-cal-cell').forEach(c => c.classList.remove('selected'));
+  const cells = document.querySelectorAll('#study-history-cal-days .history-cal-cell:not(.empty)');
+  if (cells[day - 1]) cells[day - 1].classList.add('selected');
+
+  if (entries.length === 0) {
+    detail.innerHTML = `<div class="history-detail-title">${dateStr}</div><div class="history-detail-empty">No study hours logged for this day.</div>`;
+    return;
+  }
+
+  const totalDay = entries.reduce((s, l) => s + l.hours, 0);
+
+  // Group by subject
+  const bySubject = {};
+  entries.forEach(l => {
+    const subj = l.subject || 'Unspecified';
+    if (!bySubject[subj]) bySubject[subj] = { hours: 0, sessions: 0 };
+    bySubject[subj].hours += l.hours;
+    bySubject[subj].sessions++;
+  });
+
+  let rowsHtml = Object.keys(bySubject).map(subj => {
+    const data = bySubject[subj];
+    const source = entries.find(l => (l.subject || 'Unspecified') === subj);
+    const sourceTag = source && source.source === 'timer'
+      ? '<span class="tag tag-gold" style="font-size:0.55rem;padding:1px 6px;">Timer</span>'
+      : source && source.source === 'manual'
+        ? '<span class="tag tag-success" style="font-size:0.55rem;padding:1px 6px;">Manual</span>'
+        : '';
+    return `<div class="history-detail-row">
+      <span>${esc(subj)} ${sourceTag}</span>
+      <span><strong>${data.hours.toFixed(1)}h</strong> <span style="font-size:0.7rem;color:var(--slate);">(${data.sessions} session${data.sessions > 1 ? 's' : ''})</span></span>
+    </div>`;
+  }).join('');
+
+  detail.innerHTML = `
+    <div class="history-detail-title">${dateStr}</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem;">
+      <span style="font-size:0.78rem;color:var(--slate);">Total</span>
+      <span style="font-family:var(--font-display);font-size:1.1rem;font-weight:600;color:var(--gold-dark);">${totalDay.toFixed(1)} hours</span>
+    </div>
+    ${rowsHtml}
+  `;
+}
+
+function renderWeeklyChart() {
+  const chart = document.getElementById('weekly-study-chart');
+  if (!chart) return;
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const today = new Date();
+  const startOfWeek = new Date(today);
+  startOfWeek.setDate(today.getDate() - today.getDay());
+  startOfWeek.setHours(0,0,0,0);
+
+  // Calculate weekly goal progress
+  const ws = state.wellnessSettings;
+  let weekTotal = 0;
+
+  let html = '';
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(startOfWeek);
+    d.setDate(d.getDate() + i);
+    const dayStr = d.toDateString();
+    const hrs = state.studyLog
+      .filter(l => new Date(l.date).toDateString() === dayStr)
+      .reduce((sum, l) => sum + l.hours, 0);
+    weekTotal += hrs;
+    const level = hrs === 0 ? 0 : hrs <= 2 ? 1 : hrs <= 4 ? 2 : hrs <= 6 ? 3 : 4;
+    html += `<div class="heat-cell" data-level="${level}" title="${days[i]}: ${hrs.toFixed(1)}h" style="flex:1;height:36px;font-size:0.65rem;">${days[i]}<br>${hrs.toFixed(1)}h</div>`;
+  }
+
+  // Add weekly goal progress bar if enabled
+  if (ws.weeklyGoal && ws.weeklyGoalHours > 0) {
+    const pct = Math.min(100, Math.round(weekTotal / ws.weeklyGoalHours * 100));
+    html += `<div style="width:100%;margin-top:10px;">
+      <div style="display:flex;justify-content:space-between;font-size:0.68rem;color:var(--slate);">
+        <span>Weekly goal</span>
+        <span>${weekTotal.toFixed(1)} / ${ws.weeklyGoalHours}h (${pct}%)</span>
+      </div>
+      <div class="progress-bar" style="margin-top:4px;">
+        <div class="progress-fill" style="width:${pct}%;${pct >= 100 ? 'background:var(--success);' : ''}"></div>
+      </div>
+    </div>`;
+  }
+
+  chart.innerHTML = html;
+}
+
+// ═══════════════════════════════════════════
+//  WELLNESS — SETTINGS
+// ═══════════════════════════════════════════
+function toggleWellnessSetting(el, key) {
+  el.classList.toggle('on');
+}
+
+function saveWellnessSettings() {
+  const ws = state.wellnessSettings;
+  ws.breakReminders = document.getElementById('toggle-break-reminders').classList.contains('on');
+  ws.breakInterval = parseInt(document.getElementById('setting-break-interval').value) || 90;
+  ws.dailyLimitWarning = document.getElementById('toggle-daily-limit').classList.contains('on');
+  ws.dailyLimit = parseInt(document.getElementById('setting-daily-limit').value) || 10;
+  ws.moodReminder = document.getElementById('toggle-mood-reminder').classList.contains('on');
+  ws.weeklyGoal = document.getElementById('toggle-weekly-goal').classList.contains('on');
+  ws.weeklyGoalHours = parseInt(document.getElementById('setting-weekly-goal').value) || 30;
+  ws.restDaySuggestions = document.getElementById('toggle-rest-day').classList.contains('on');
+  ws.restDayThreshold = parseInt(document.getElementById('setting-rest-day-threshold').value) || 5;
+  saveState();
+  renderWeeklyChart();
+  toast('Wellness settings saved!');
+}
+
+function loadWellnessSettingsUI() {
+  const ws = state.wellnessSettings;
+  if (!ws) return;
+
+  const setToggle = (id, val) => {
+    const el = document.getElementById(id);
+    if (el) { if (val) el.classList.add('on'); else el.classList.remove('on'); }
+  };
+  const setVal = (id, val) => {
+    const el = document.getElementById(id);
+    if (el) el.value = val;
+  };
+
+  setToggle('toggle-break-reminders', ws.breakReminders);
+  setVal('setting-break-interval', ws.breakInterval || 90);
+  setToggle('toggle-daily-limit', ws.dailyLimitWarning);
+  setVal('setting-daily-limit', ws.dailyLimit || 10);
+  setToggle('toggle-mood-reminder', ws.moodReminder);
+  setToggle('toggle-weekly-goal', ws.weeklyGoal);
+  setVal('setting-weekly-goal', ws.weeklyGoalHours || 30);
+  setToggle('toggle-rest-day', ws.restDaySuggestions);
+  setVal('setting-rest-day-threshold', ws.restDayThreshold || 5);
+}
+
+// ═══════════════════════════════════════════
+//  WELLNESS — AI CHECK-IN (ENHANCED)
+// ═══════════════════════════════════════════
+async function wellnessCheckIn() {
+  const el = document.getElementById('wellness-output');
+  el.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div> Analyzing your wellness data...';
+
+  const totalHrs = state.studyLog.reduce((s, l) => s + l.hours, 0);
+  const recentLog = state.studyLog.slice(-14);
+  const courseCt = state.courses.length;
+  const assignCt = state.courses.reduce((s, c) => s + c.assignments.filter(a => !a.completed).length, 0);
+
+  // Upcoming deadlines
+  const upcoming = [];
+  state.courses.forEach(c => {
+    c.assignments.filter(a => !a.completed).forEach(a => {
+      const daysLeft = Math.ceil((new Date(a.date) - new Date()) / 86400000);
+      if (daysLeft <= 14 && daysLeft >= 0) upcoming.push({ name: a.name, course: c.name, daysLeft });
+    });
+  });
+  upcoming.sort((a, b) => a.daysLeft - b.daysLeft);
+
+  // Mood data
+  const recentMoods = state.moodLog.slice(-7);
+  const moodSummary = recentMoods.length > 0
+    ? recentMoods.map(m => `${new Date(m.date).toLocaleDateString()}: mood=${m.mood}, energy=${m.energy}/10${m.note ? ', note: "' + m.note + '"' : ''}`).join('\n  ')
+    : 'No mood data logged yet.';
+  const avgEnergy = recentMoods.length > 0
+    ? (recentMoods.reduce((s, m) => s + m.energy, 0) / recentMoods.length).toFixed(1)
+    : 'N/A';
+
+  // Study pattern analysis
+  const last7DaysHrs = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const dayStr = d.toDateString();
+    const hrs = state.studyLog.filter(l => new Date(l.date).toDateString() === dayStr).reduce((s, l) => s + l.hours, 0);
+    last7DaysHrs.push({ day: d.toLocaleDateString('en-US', { weekday: 'short' }), hours: hrs });
+  }
+
+  // Consecutive study days
+  let consecDays = 0;
+  const d = new Date();
+  d.setHours(0,0,0,0);
+  while (true) {
+    const dayStr = d.toDateString();
+    const hrs = state.studyLog.filter(l => new Date(l.date).toDateString() === dayStr).reduce((s, l) => s + l.hours, 0);
+    if (hrs > 0) { consecDays++; d.setDate(d.getDate() - 1); }
+    else break;
+  }
+
+  // Wellness settings context
+  const ws = state.wellnessSettings;
+
+  const prompt = `As a wellness advisor for a law student, provide a thorough personalized wellness report based on this data:
+
+STUDY DATA:
+- Total study hours logged (all time): ${totalHrs.toFixed(1)}
+- Recent 2-week sessions: ${recentLog.length} sessions
+- Last 7 days (daily hours): ${JSON.stringify(last7DaysHrs)}
+- Consecutive study days: ${consecDays}
+- Active courses: ${courseCt}
+- Pending assignments: ${assignCt}
+
+UPCOMING DEADLINES (next 2 weeks):
+${upcoming.length > 0 ? upcoming.map(u => `  - ${u.name} (${u.course}) — ${u.daysLeft} day(s) away`).join('\n') : '  None tracked.'}
+
+MOOD & ENERGY (last 7 days):
+  ${moodSummary}
+  Average energy level: ${avgEnergy}/10
+
+STUDENT'S WELLNESS GOALS:
+- Weekly study goal: ${ws.weeklyGoal ? ws.weeklyGoalHours + ' hours' : 'not set'}
+- Daily study limit: ${ws.dailyLimitWarning ? ws.dailyLimit + ' hours' : 'not set'}
+- Rest day threshold: ${ws.restDaySuggestions ? 'after ' + ws.restDayThreshold + ' consecutive days' : 'not set'}
+
+Provide:
+1. Overall wellness assessment (how they're doing, patterns you notice)
+2. Burnout risk level (low/moderate/high) with specific reasoning
+3. Mood and energy trend analysis (if mood data is available)
+4. 4-5 specific, actionable tips tailored to their actual data
+5. Schedule suggestions considering upcoming deadlines
+6. One encouraging observation about something they're doing well
+
+Be warm, specific, and constructive. Reference their actual numbers and patterns — don't be generic.`;
+
+  const system = 'You are JURIS wellness advisor. You help law students maintain healthy study habits, manage stress, and prevent burnout. Be warm, supportive, practical, and specific. Always reference the student\'s actual data in your advice.';
+  const result = await callGemini(prompt, system);
+  el.textContent = result;
+}
+
+// Request notification permission for timer alerts
+if ('Notification' in window && Notification.permission === 'default') {
+  // Will ask on first timer start
+  document.getElementById('timer-start-btn')?.addEventListener('click', () => {
+    if (Notification.permission === 'default') Notification.requestPermission();
+  }, { once: true });
+}
+
+// ═══════════════════════════════════════════
+//  AI CHAT
+// ═══════════════════════════════════════════
+async function sendChat() {
+  const input = document.getElementById('chat-input');
+  const msg = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+
+  const msgsEl = document.getElementById('chat-messages');
+  msgsEl.innerHTML += `<div class="ai-msg user">${esc(msg)}</div>`;
+  msgsEl.innerHTML += `<div class="ai-msg assistant" id="chat-loading"><div class="loading-dots"><span></span><span></span><span></span></div></div>`;
+  msgsEl.scrollTop = msgsEl.scrollHeight;
+
+  state.chatHistory.push({ role: 'user', content: msg });
+
+  // Build context
+  const courseSummary = state.courses.map(c => `${c.name} (${c.prof}, ${c.materials.length} files, ${c.notes.length} notes)`).join('; ');
+  const contextPrompt = `Student context: Courses: [${courseSummary || 'none'}]. Semester: ${state.semester}.\n\nConversation so far:\n${state.chatHistory.map(m => `${m.role}: ${m.content}`).join('\n')}\n\nRespond to the student's latest message.`;
+
+  const system = `You are JURIS, an intelligent law school AI assistant. You help with studying, outlines, bar prep, career planning, Bluebook citations, and general law school advice. Be knowledgeable, supportive, and thorough. Reference the student's actual courses and materials when relevant.`;
+  const result = await callGemini(contextPrompt, system);
+
+  state.chatHistory.push({ role: 'assistant', content: result });
+  if (state.chatHistory.length > 20) state.chatHistory = state.chatHistory.slice(-20);
+
+  const loadingEl = document.getElementById('chat-loading');
+  if (loadingEl) loadingEl.remove();
+  msgsEl.innerHTML += `<div class="ai-msg assistant">${esc(result)}</div>`;
+  msgsEl.scrollTop = msgsEl.scrollHeight;
+}
+
+async function quickAI(prompt) {
+  navigateTo('ai-chat');
+  document.getElementById('chat-input').value = prompt;
+  sendChat();
+}
+
+// ═══════════════════════════════════════════
+//  DASHBOARD REFRESH
+// ═══════════════════════════════════════════
+function refreshDashboard() {
+  document.getElementById('stat-courses').textContent = state.courses.length;
+
+  const totalAssign = state.courses.reduce((s, c) => s + c.assignments.length, 0);
+  document.getElementById('stat-assignments').textContent = totalAssign;
+
+  const totalHrs = state.studyLog.reduce((s, l) => s + l.hours, 0);
+  document.getElementById('stat-study-hrs').textContent = totalHrs.toFixed(1);
+
+  // Dashboard course cards
+  const dashList = document.getElementById('dash-courses-list');
+  if (state.courses.length > 0) {
+    dashList.innerHTML = state.courses.slice(0, 4).map(c => `
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(26,26,46,0.04);cursor:pointer;" onclick="navigateTo('courses');setTimeout(()=>openCourseDetail('${c.id}'),100)">
+        <div>
+          <div style="font-size:0.85rem;font-weight:500;">${esc(c.name)}</div>
+          <div style="font-size:0.7rem;color:var(--slate);">${esc(c.prof)}</div>
+        </div>
+        <span class="tag tag-gold">${c.materials.length + c.notes.length} items</span>
+      </div>`).join('');
+  }
+
+  // Deadlines
+  const allAssigns = [];
+  state.courses.forEach(c => {
+    c.assignments.filter(a => !a.completed).forEach(a => {
+      allAssigns.push({ ...a, course: c.name });
+    });
+  });
+  allAssigns.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+  const deadlinesEl = document.getElementById('dash-deadlines');
+  if (allAssigns.length > 0) {
+    deadlinesEl.innerHTML = allAssigns.slice(0, 5).map(a => {
+      const daysLeft = Math.ceil((new Date(a.date) - new Date()) / 86400000);
+      return `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(26,26,46,0.04);">
+        <div>
+          <div style="font-size:0.85rem;font-weight:500;">${esc(a.name)}</div>
+          <div style="font-size:0.7rem;color:var(--slate);">${esc(a.course)}</div>
+        </div>
+        <span class="tag ${daysLeft <= 3 ? 'tag-crimson' : daysLeft <= 7 ? 'tag-gold' : 'tag-success'}">${daysLeft <= 0 ? 'Overdue' : daysLeft + 'd left'}</span>
+      </div>`;
+    }).join('');
+  }
+
+  renderCoursesGrid();
+}
+
+function refreshCourseSelects() {
+  const idSelects = ['quiz-course-select', 'outline-course-select'];
+  const nameSelects = ['manual-study-subject', 'timer-subject'];
+
+  // Course selects that use course ID as value
+  idSelects.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const currentVal = el.value;
+    const firstOption = el.options[0];
+    el.innerHTML = '';
+    el.appendChild(firstOption);
+    state.courses.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c.id;
+      opt.textContent = c.name;
+      el.appendChild(opt);
+    });
+    el.value = currentVal;
+  });
+
+  // Subject selects that use course name as value + custom subjects
+  nameSelects.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const currentVal = el.value;
+    const firstOption = el.options[0];
+    el.innerHTML = '';
+    el.appendChild(firstOption);
+    if (state.courses.length > 0) {
+      const courseGroup = document.createElement('optgroup');
+      courseGroup.label = 'Courses';
+      state.courses.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.name;
+        opt.textContent = c.name;
+        courseGroup.appendChild(opt);
+      });
+      el.appendChild(courseGroup);
+    }
+    if (state.customSubjects && state.customSubjects.length > 0) {
+      const customGroup = document.createElement('optgroup');
+      customGroup.label = 'Custom Subjects';
+      state.customSubjects.forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s;
+        opt.textContent = s;
+        customGroup.appendChild(opt);
+      });
+      el.appendChild(customGroup);
+    }
+    el.value = currentVal;
+  });
+}
+
+// ═══════════════════════════════════════════
+//  UTILITIES
+// ═══════════════════════════════════════════
+function esc(str) {
+  if (!str) return '';
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>
