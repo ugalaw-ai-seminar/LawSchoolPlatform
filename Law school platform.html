@@ -623,40 +623,65 @@ tr:hover td { background: rgba(197,165,90,0.03); }
 }
 
 /* Rendered markdown (shared by outline + quiz) */
-.md-rendered { font-size: 0.875rem; line-height: 1.8; color: var(--ink); }
+.md-rendered { font-size: 0.875rem; line-height: 1.85; color: var(--ink); }
+
+/* H1 — Major topic (e.g. I. CONTRACTS) */
 .md-rendered h1 {
   font-family: var(--font-display);
-  font-size: 1.75rem; font-weight: 600; color: var(--ink);
-  border-bottom: 2px solid var(--gold);
-  padding-bottom: 0.4rem; margin: 1.5rem 0 0.75rem;
+  font-size: 1.6rem; font-weight: 700; color: var(--navy);
+  border-bottom: 2.5px solid var(--gold);
+  padding-bottom: 0.45rem; margin: 2rem 0 0.85rem;
+  letter-spacing: 0.01em;
 }
+/* H2 — Subtopic (e.g. A. Offer) */
 .md-rendered h2 {
   font-family: var(--font-display);
-  font-size: 1.3rem; font-weight: 600; color: var(--navy);
-  border-left: 3px solid var(--gold);
-  padding-left: 0.75rem; margin: 1.25rem 0 0.5rem;
+  font-size: 1.2rem; font-weight: 600; color: var(--navy);
+  background: rgba(197,165,90,0.08);
+  border-left: 4px solid var(--gold);
+  padding: 0.3rem 0.75rem; margin: 1.4rem 0 0.55rem;
+  border-radius: 0 4px 4px 0;
 }
+/* H3 — Sub-doctrine / Rule (e.g. 1. Consideration) */
 .md-rendered h3 {
   font-family: var(--font-display);
   font-size: 1.05rem; font-weight: 600; color: var(--crimson);
-  margin: 1rem 0 0.35rem;
+  border-left: 2px solid rgba(139,38,53,0.3);
+  padding-left: 0.6rem; margin: 1.1rem 0 0.35rem;
 }
+/* H4 — Sub-element / Exception (e.g. a. Illusory Promise) */
 .md-rendered h4 {
-  font-size: 0.875rem; font-weight: 600; color: var(--slate);
-  text-transform: uppercase; letter-spacing: 0.06em;
-  margin: 0.75rem 0 0.25rem;
+  font-size: 0.82rem; font-weight: 700; color: var(--slate);
+  text-transform: uppercase; letter-spacing: 0.08em;
+  margin: 0.85rem 0 0.25rem;
 }
-.md-rendered p { margin: 0.4rem 0; }
-.md-rendered ul, .md-rendered ol { padding-left: 1.5rem; margin: 0.35rem 0 0.5rem; }
-.md-rendered li { margin-bottom: 0.25rem; }
-.md-rendered li > ul, .md-rendered li > ol { margin-top: 0.2rem; }
-.md-rendered strong { color: var(--ink); font-weight: 600; }
-.md-rendered em { color: var(--slate); }
-.md-rendered hr { border: none; border-top: 1px solid var(--mist); margin: 1.25rem 0; }
+.md-rendered p { margin: 0.45rem 0; }
+.md-rendered ul { padding-left: 1.6rem; margin: 0.4rem 0 0.6rem; list-style-type: disc; }
+.md-rendered ol { padding-left: 1.6rem; margin: 0.4rem 0 0.6rem; }
+.md-rendered li { margin-bottom: 0.3rem; line-height: 1.7; }
+.md-rendered li > ul { margin-top: 0.25rem; list-style-type: circle; }
+.md-rendered li > ul > li > ul { list-style-type: square; }
+.md-rendered strong { color: var(--ink); font-weight: 700; }
+.md-rendered em { color: var(--slate); font-style: italic; }
+.md-rendered hr {
+  border: none; border-top: 1.5px solid var(--mist);
+  margin: 2rem 0;
+}
 .md-rendered blockquote {
-  border-left: 3px solid var(--gold-light);
-  padding-left: 1rem; color: var(--slate);
+  border-left: 4px solid var(--gold-light);
+  padding: 0.5rem 1rem; color: var(--slate);
   margin: 0.75rem 0; font-style: italic;
+  background: rgba(197,165,90,0.05); border-radius: 0 6px 6px 0;
+}
+/* Inline code used for rule restatements */
+.md-rendered code {
+  font-family: var(--font-mono); font-size: 0.8rem;
+  background: rgba(26,26,46,0.05); padding: 1px 5px;
+  border-radius: 3px; color: var(--navy);
+}
+/* Case name styling — em inside strong */
+.md-rendered strong em, .md-rendered em strong {
+  color: var(--crimson); font-style: italic; font-weight: 600;
 }
 
 /* Per-question text answer cards (short / issue-spot / hypo) */
@@ -841,6 +866,102 @@ tr:hover td { background: rgba(197,165,90,0.03); }
   margin-bottom: 0.5rem;
 }
 .empty-state p { font-size: 0.82rem; }
+
+/* ── Performance Profile ── */
+#performance-profile { display: flex; flex-direction: column; gap: 1rem; }
+.perf-subject-card {
+  background: var(--warm-white);
+  border: 1px solid rgba(26,26,46,0.07);
+  border-radius: var(--radius);
+  padding: 1rem 1.1rem;
+}
+.perf-subject-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 0.55rem; gap: 0.5rem;
+}
+.perf-subject-name {
+  font-family: var(--font-display);
+  font-size: 1.05rem; font-weight: 600;
+  color: var(--ink);
+}
+.perf-avg-badge {
+  font-size: 0.72rem; font-weight: 600;
+  padding: 2px 10px; border-radius: 20px;
+  letter-spacing: 0.04em;
+}
+.perf-score-bar-wrap {
+  height: 5px; background: var(--mist); border-radius: 99px;
+  margin-bottom: 0.55rem; overflow: hidden;
+}
+.perf-score-bar {
+  height: 100%; border-radius: 99px;
+  transition: width 0.6s cubic-bezier(.4,0,.2,1);
+}
+.perf-quiz-count {
+  font-size: 0.72rem; color: var(--slate);
+  margin-bottom: 0.7rem;
+}
+.perf-section-label {
+  font-size: 0.62rem; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--slate);
+  margin: 0.6rem 0 0.35rem; font-weight: 600;
+}
+.perf-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 0.25rem; }
+.perf-tag {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 0.74rem; padding: 3px 10px; border-radius: 20px;
+  font-weight: 500;
+}
+.perf-tag.strength {
+  background: rgba(74,124,89,0.1); color: var(--success);
+  border: 1px solid rgba(74,124,89,0.25);
+}
+.perf-tag.weakness {
+  background: rgba(139,38,53,0.08); color: var(--crimson);
+  border: 1px solid rgba(139,38,53,0.2);
+}
+.perf-tag.neutral {
+  background: rgba(197,165,90,0.1); color: var(--gold-dark);
+  border: 1px solid rgba(197,165,90,0.25);
+}
+.perf-tag-score { font-weight: 700; font-size: 0.7rem; opacity: 0.85; }
+.perf-history { display: flex; flex-direction: column; gap: 4px; }
+.perf-history-item {
+  display: grid;
+  grid-template-columns: 100px 1fr auto auto;
+  gap: 8px; align-items: center;
+  font-size: 0.75rem; padding: 4px 6px;
+  border-radius: 5px; background: rgba(26,26,46,0.03);
+}
+.perf-history-type { font-weight: 600; color: var(--ink); white-space: nowrap; }
+.perf-history-topic { color: var(--slate); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.perf-history-date { color: var(--slate); font-size: 0.7rem; white-space: nowrap; }
+.perf-history-score { font-weight: 700; font-size: 0.78rem; white-space: nowrap; min-width: 36px; text-align: right; }
+.perf-clear-btn {
+  margin-top: 0.75rem; font-size: 0.72rem;
+  color: var(--slate); background: none; border: none;
+  cursor: pointer; text-decoration: underline; padding: 0;
+}
+.perf-clear-btn:hover { color: var(--crimson); }
+
+/* ── Google Docs Sync ── */
+.gdoc-card { border-color: rgba(66,133,244,0.22) !important; background: rgba(66,133,244,0.025) !important; }
+.gdoc-badge {
+  background: rgba(66,133,244,0.1); color: #4285f4;
+  border: 1px solid rgba(66,133,244,0.25);
+  font-size: 0.68rem; padding: 2px 9px; border-radius: 20px;
+  font-weight: 600; letter-spacing: 0.05em;
+}
+.gdoc-url-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.gdoc-url-row .form-input { flex: 1; min-width: 180px; font-size: 0.82rem; }
+.gdoc-status {
+  font-size: 0.74rem; margin-top: 0.6rem;
+  line-height: 1.5; padding: 6px 10px;
+  border-radius: 6px;
+}
+.gdoc-status.success { color: var(--success); background: rgba(74,124,89,0.07); }
+.gdoc-status.error   { color: var(--crimson); background: rgba(139,38,53,0.07); }
+.gdoc-status.info    { color: var(--slate);   background: rgba(58,58,92,0.06); }
 
 /* Specific components */
 .course-card {
@@ -1235,6 +1356,7 @@ tr:hover td { background: rgba(197,165,90,0.03); }
           <div class="card">
             <div class="card-header">
               <span class="card-title">Performance Profile</span>
+              <button class="btn btn-ghost" style="font-size:0.72rem;padding:4px 10px;" onclick="clearPerformanceData()">Clear Data</button>
             </div>
             <div id="performance-profile">
               <div class="empty-state">
@@ -1282,18 +1404,40 @@ tr:hover td { background: rgba(197,165,90,0.03); }
 
       <!-- ══════ OUTLINES PAGE ══════ -->
       <div class="page" id="page-outlines">
-        <div class="grid-2" style="margin-bottom:1.25rem;">
+        <div style="margin-bottom:1.25rem;">
           <div class="form-group" style="margin:0;">
+            <label class="form-label">Course</label>
             <select class="form-select" id="outline-course-select" onchange="loadOutline()">
               <option value="">Select a course...</option>
             </select>
           </div>
-          <div style="display:flex;gap:8px;justify-content:flex-end;">
-            <button class="btn btn-ghost" onclick="generateOutline('full')">Full Outline</button>
-            <button class="btn btn-ghost" onclick="generateOutline('attack')">Attack Outline</button>
-            <button class="btn btn-ghost" onclick="generateOutline('checklist')">Exam Checklist</button>
-            <button class="btn btn-primary" onclick="generateOutline('auto')">Auto-Build</button>
+        </div>
+
+        <!-- Google Docs Sync card -->
+        <div class="card gdoc-card" style="margin-bottom:1.25rem;" id="gdoc-sync-card">
+          <div class="card-header">
+            <span class="card-title">Google Docs Live Sync</span>
+            <span class="gdoc-badge">Google Docs</span>
           </div>
+          <p style="font-size:0.8rem;color:var(--slate);margin-bottom:0.9rem;line-height:1.6;">
+            Paste your Google Doc link and click <strong>Sync &amp; Build</strong> — JURIS will pull all your notes (including every tab) and build a comprehensive outline automatically. Or click <strong>Sync Notes Only</strong> to load the notes first and build manually.
+            <br><span style="font-size:0.71rem;opacity:0.75;">⚠️ Your Google Doc must be set to <strong>"Anyone with the link can view"</strong> (Share → General Access).</span>
+          </p>
+          <div class="gdoc-url-row">
+            <input class="form-input" id="gdoc-url-input" type="url"
+              placeholder="Paste Google Doc link here... (e.g. https://docs.google.com/document/d/...)">
+            <button class="btn btn-ghost" onclick="saveGoogleDocUrl()" style="white-space:nowrap;">Save Link</button>
+            <button class="btn btn-ghost" onclick="syncFromGoogleDoc(false)" id="gdoc-sync-btn" style="white-space:nowrap;display:inline-flex;align-items:center;gap:6px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+              Sync Notes Only
+            </button>
+            <button class="btn btn-primary" onclick="syncFromGoogleDoc(true)" id="gdoc-sync-build-btn" style="white-space:nowrap;display:inline-flex;align-items:center;gap:6px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+              Sync &amp; Build Outline
+            </button>
+          </div>
+          <div id="gdoc-status" class="gdoc-status" style="display:none;"></div>
+
         </div>
 
         <!-- Notes input card -->
@@ -1309,7 +1453,8 @@ tr:hover td { background: rgba(197,165,90,0.03); }
               <input type="file" id="notes-file-input" accept=".docx,.txt" style="display:none;" onchange="handleNotesFile(event)">
             </label>
             <span id="notes-file-name" style="font-size:0.75rem;color:var(--slate);font-style:italic;"></span>
-            <button class="btn btn-ghost" style="margin-left:auto;" onclick="clearOutlineNotes()">Clear Notes</button>
+            <button class="btn btn-ghost" style="margin-left:auto;" title="Paste clipboard content after existing notes (for multi-tab Google Docs)" onclick="appendTabNotes()">+ Append Tab</button>
+            <button class="btn btn-ghost" onclick="clearOutlineNotes()">Clear Notes</button>
           </div>
           <textarea class="form-input" id="outline-notes-text" rows="7"
             placeholder="Paste your class notes here (from Google Docs, a Word doc, or anywhere else)...&#10;&#10;These notes will be used as the primary source when building your outline."
@@ -1317,13 +1462,35 @@ tr:hover td { background: rgba(197,165,90,0.03); }
           <div style="margin-top:0.5rem;font-size:0.72rem;color:var(--slate);">
             Tip: In Google Docs, press <strong>Ctrl+A</strong> then <strong>Ctrl+C</strong> and paste here. For Word, upload the .docx file directly.
           </div>
+          <div style="display:flex;align-items:center;justify-content:flex-end;margin-top:1rem;padding-top:0.85rem;border-top:1px solid var(--mist);gap:10px;">
+            <span style="font-size:0.75rem;color:var(--slate);">Builds a <strong>Comprehensive Outline</strong> from your notes</span>
+            <button class="btn btn-primary" onclick="generateOutline(getOutlineType())" style="display:inline-flex;align-items:center;gap:7px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+              Build Outline from Notes
+            </button>
+          </div>
         </div>
 
-        <div class="card" id="outline-display">
-          <div class="empty-state">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8m8 4H8m2-8H8"/></svg>
-            <h3>Select a course to view or build an outline</h3>
-            <p>Paste your notes above, then click a build button</p>
+        <div class="card" id="outline-display-wrapper">
+          <div class="card-header" id="outline-display-header" style="display:none;">
+            <span class="card-title" id="outline-display-title">Your Outline</span>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <button class="btn btn-ghost" onclick="downloadOutlineAsDoc()" style="font-size:0.75rem;color:var(--success);display:inline-flex;align-items:center;gap:5px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Download as Word Doc
+              </button>
+              <button class="btn btn-ghost" onclick="clearSavedOutline()" style="font-size:0.75rem;color:var(--crimson);display:inline-flex;align-items:center;gap:5px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6m4-6v6"/><path d="M9 6V4h6v2"/></svg>
+                Clear Outline
+              </button>
+            </div>
+          </div>
+          <div id="outline-display">
+            <div class="empty-state">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8m8 4H8m2-8H8"/></svg>
+              <h3>Select a course to view or build an outline</h3>
+              <p>Choose your outline type above, paste or sync your notes, then click Build</p>
+            </div>
           </div>
         </div>
       </div>
@@ -1628,7 +1795,11 @@ let state = {
   currentCourseId: null,
   calMonth: new Date().getMonth(),
   calYear: new Date().getFullYear(),
+  quizResults: [],
 };
+
+// Tracks the quiz currently in progress for performance logging
+let currentQuizMeta = { courseId: '', courseName: '', topic: '', questionType: '' };
 
 function saveState() {
   try { localStorage.setItem('juris_state_' + btoa(API_KEY), JSON.stringify(state)); } catch(e) {}
@@ -1674,6 +1845,185 @@ function initApp() {
   refreshCourseSelects();
   renderCalendar();
   renderWeeklyChart();
+  renderPerformanceProfile();
+
+  // Keep "Building as:" label in Notes card synced with the outline type dropdown
+  const typeSelect = document.getElementById('outline-type-select');
+  if (typeSelect) {
+    typeSelect.addEventListener('change', updateNotesTypeLabel);
+    updateNotesTypeLabel();
+  }
+}
+
+// ═══════════════════════════════════════════
+//  PERFORMANCE PROFILE
+// ═══════════════════════════════════════════
+
+function extractMBEScore(text, total) {
+  // Look for patterns like "4 out of 5", "4/5", "**4/5**", "Score: 4/5"
+  const patterns = [
+    /(\d+)\s*out\s*of\s*(\d+)/i,
+    /\*\*(\d+)\s*\/\s*(\d+)\*\*/,
+    /score[:\s]+(\d+)\s*\/\s*(\d+)/i,
+    /(\d+)\s*\/\s*(\d+)/,
+  ];
+  for (const rx of patterns) {
+    const m = text.match(rx);
+    if (m) {
+      const raw = parseInt(m[1]);
+      const max = parseInt(m[2]);
+      if (max === total && raw <= max) return { raw, max };
+    }
+  }
+  return { raw: null, max: total };
+}
+
+function extractTextScore(text, numQuestions) {
+  // Match bolded "X / 10" totals (### Total Score blocks)
+  const matches = [...text.matchAll(/\*\*(\d+(?:\.\d+)?)\s*\/\s*10\*\*/gi)];
+  if (matches.length >= numQuestions) {
+    const scores = matches.slice(0, numQuestions).map(m => parseFloat(m[1]));
+    const total = scores.reduce((a, b) => a + b, 0);
+    return { raw: Math.round(total), max: numQuestions * 10 };
+  }
+  // Fallback: plain "X / 10" or "X/10"
+  const fallback = [...text.matchAll(/(\d+(?:\.\d+)?)\s*\/\s*10/gi)];
+  if (fallback.length >= numQuestions) {
+    const scores = fallback.slice(0, numQuestions).map(m => parseFloat(m[1]));
+    const total = scores.reduce((a, b) => a + b, 0);
+    return { raw: Math.round(total), max: numQuestions * 10 };
+  }
+  return { raw: null, max: numQuestions * 10 };
+}
+
+function saveQuizResult({ raw, max }) {
+  if (!currentQuizMeta.courseId) return;
+  state.quizResults = state.quizResults || [];
+  const pct = (raw !== null && max > 0) ? Math.round((raw / max) * 100) : null;
+  state.quizResults.push({
+    courseId: currentQuizMeta.courseId,
+    courseName: currentQuizMeta.courseName,
+    topic: currentQuizMeta.topic || currentQuizMeta.courseName,
+    questionType: currentQuizMeta.questionType,
+    date: new Date().toISOString(),
+    rawScore: raw,
+    maxScore: max,
+    pct,
+  });
+  saveState();
+  renderPerformanceProfile();
+}
+
+function clearPerformanceData() {
+  if (!confirm('Clear all performance data? This cannot be undone.')) return;
+  state.quizResults = [];
+  saveState();
+  renderPerformanceProfile();
+  toast('Performance data cleared');
+}
+
+function renderPerformanceProfile() {
+  const container = document.getElementById('performance-profile');
+  if (!container) return;
+  const results = state.quizResults || [];
+
+  if (results.length === 0) {
+    container.innerHTML = '<div class="empty-state"><h3>No data yet</h3><p>Complete quizzes to build your performance profile</p></div>';
+    return;
+  }
+
+  // Group by courseId
+  const bySubject = {};
+  results.forEach(r => {
+    if (!bySubject[r.courseId]) bySubject[r.courseId] = { name: r.courseName, results: [] };
+    bySubject[r.courseId].results.push(r);
+  });
+
+  const typeLabel = { mbe: 'Multiple Choice', short: 'Short Answer', 'issue-spot': 'Issue Spotter', hypo: 'Hypothetical' };
+
+  let html = '';
+  Object.values(bySubject).forEach(subject => {
+    const scored = subject.results.filter(r => r.pct !== null);
+    const avgPct = scored.length > 0 ? Math.round(scored.reduce((a, r) => a + r.pct, 0) / scored.length) : null;
+
+    // Per-topic averages (only topics that differ from the course name = specific topic was entered)
+    const byTopic = {};
+    subject.results.forEach(r => {
+      const key = r.topic || r.courseName;
+      if (!byTopic[key]) byTopic[key] = [];
+      byTopic[key].push(r);
+    });
+    const topicAvgs = Object.entries(byTopic)
+      .map(([topic, rs]) => {
+        const s = rs.filter(r => r.pct !== null);
+        const avg = s.length > 0 ? Math.round(s.reduce((a, r) => a + r.pct, 0) / s.length) : null;
+        return { topic, avg, count: rs.length };
+      })
+      .filter(t => t.avg !== null && t.topic !== subject.name);
+
+    const strengths  = topicAvgs.filter(t => t.avg >= 75).sort((a, b) => b.avg - a.avg).slice(0, 4);
+    const weaknesses = topicAvgs.filter(t => t.avg < 60).sort((a, b) => a.avg - b.avg).slice(0, 4);
+    const middle     = topicAvgs.filter(t => t.avg >= 60 && t.avg < 75).sort((a, b) => b.avg - a.avg).slice(0, 3);
+
+    const barColor = avgPct === null ? 'var(--gold)' : avgPct >= 75 ? 'var(--success)' : avgPct >= 60 ? 'var(--warning)' : 'var(--crimson)';
+
+    html += `<div class="perf-subject-card">
+      <div class="perf-subject-header">
+        <span class="perf-subject-name">${subject.name}</span>
+        ${avgPct !== null
+          ? `<span class="perf-avg-badge" style="background:${barColor}20;color:${barColor};border:1px solid ${barColor}40;">${avgPct}% avg</span>`
+          : `<span class="perf-avg-badge" style="background:rgba(58,58,92,0.08);color:var(--slate);border:1px solid rgba(58,58,92,0.15);">In progress</span>`
+        }
+      </div>
+      ${avgPct !== null
+        ? `<div class="perf-score-bar-wrap"><div class="perf-score-bar" style="width:${avgPct}%;background:${barColor};"></div></div>`
+        : ''}
+      <div class="perf-quiz-count">${subject.results.length} session${subject.results.length !== 1 ? 's' : ''} completed · ${scored.length} scored</div>`;
+
+    if (strengths.length > 0) {
+      html += `<div class="perf-section-label">Strengths</div><div class="perf-tags">`;
+      strengths.forEach(t => {
+        html += `<span class="perf-tag strength">${t.topic}<span class="perf-tag-score" style="margin-left:4px;">${t.avg}%</span></span>`;
+      });
+      html += `</div>`;
+    }
+
+    if (weaknesses.length > 0) {
+      html += `<div class="perf-section-label">Needs Work</div><div class="perf-tags">`;
+      weaknesses.forEach(t => {
+        html += `<span class="perf-tag weakness">${t.topic}<span class="perf-tag-score" style="margin-left:4px;">${t.avg}%</span></span>`;
+      });
+      html += `</div>`;
+    }
+
+    if (middle.length > 0) {
+      html += `<div class="perf-section-label">Developing</div><div class="perf-tags">`;
+      middle.forEach(t => {
+        html += `<span class="perf-tag neutral">${t.topic}<span class="perf-tag-score" style="margin-left:4px;">${t.avg}%</span></span>`;
+      });
+      html += `</div>`;
+    }
+
+    // Recent history — last 4 sessions
+    const recent = [...subject.results].reverse().slice(0, 4);
+    html += `<div class="perf-section-label">Recent Sessions</div><div class="perf-history">`;
+    recent.forEach(r => {
+      const dateStr = new Date(r.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      const tl = typeLabel[r.questionType] || r.questionType;
+      const topicDisplay = r.topic && r.topic !== r.courseName ? r.topic : '—';
+      const pctStr = r.pct !== null ? `${r.pct}%` : '—';
+      const pctColor = r.pct === null ? 'var(--slate)' : r.pct >= 75 ? 'var(--success)' : r.pct >= 60 ? 'var(--warning)' : 'var(--crimson)';
+      html += `<div class="perf-history-item">
+        <span class="perf-history-type">${tl}</span>
+        <span class="perf-history-topic" title="${topicDisplay}">${topicDisplay}</span>
+        <span class="perf-history-date">${dateStr}</span>
+        <span class="perf-history-score" style="color:${pctColor};">${pctStr}</span>
+      </div>`;
+    });
+    html += `</div></div>`;
+  });
+
+  container.innerHTML = html;
 }
 
 // ═══════════════════════════════════════════
@@ -1737,75 +2087,89 @@ function toast(msg) {
 // ═══════════════════════════════════════════
 //  GEMINI API
 // ═══════════════════════════════════════════
-// Preferred models in order — first available one wins
+// Models in priority order — stable/available ones first, newest (high-demand) ones as fallback
 const PREFERRED_MODELS = [
-  'gemini-2.5-flash',
-  'gemini-2.5-flash-preview-04-17',
-  'gemini-2.0-flash',
-  'gemini-1.5-flash',
+  'gemini-3-flash-preview',         // Gemini 3 Flash — fast, low demand, try first
+  'gemini-3-pro-preview',           // Gemini 3 Pro — highest quality
+  'gemini-2.0-flash',               // stable Gemini 2 fallback
+  'gemini-1.5-flash',               // reliable older fallback
+  'gemini-2.5-flash',               // high demand but available
+  'gemini-2.5-flash-preview-04-17', // last resort
 ];
 let ACTIVE_MODEL = null;
 
-async function resolveModel() {
-  if (ACTIVE_MODEL) return ACTIVE_MODEL;
-  try {
-    const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${API_KEY}`);
-    if (!resp.ok) throw new Error('Could not list models');
-    const data = await resp.json();
-    const available = (data.models || []).map(m => m.name.replace('models/', ''));
-    for (const preferred of PREFERRED_MODELS) {
-      if (available.includes(preferred)) {
-        ACTIVE_MODEL = preferred;
-        console.log('Using Gemini model:', ACTIVE_MODEL);
-        return ACTIVE_MODEL;
-      }
-    }
-    // Fallback: pick first generateContent-capable model
-    const fallback = (data.models || []).find(m =>
-      m.supportedGenerationMethods?.includes('generateContent') &&
-      m.name.includes('flash')
-    );
-    if (fallback) {
-      ACTIVE_MODEL = fallback.name.replace('models/', '');
-      console.log('Fallback Gemini model:', ACTIVE_MODEL);
-      return ACTIVE_MODEL;
-    }
-  } catch(e) {
-    console.warn('Model resolution failed, using default:', e);
-  }
-  ACTIVE_MODEL = 'gemini-2.5-flash';
-  return ACTIVE_MODEL;
-}
+// callGemini tries each model in order and automatically falls through
+// to the next one whenever it hits an overload / high-demand / quota error.
+// options = { maxOutputTokens: number, temperature: number }
+async function callGemini(prompt, systemInstruction, options = {}) {
+  // Build the ordered list to try: cached model first, then the rest
+  const modelsToTry = ACTIVE_MODEL
+    ? [ACTIVE_MODEL, ...PREFERRED_MODELS.filter(m => m !== ACTIVE_MODEL)]
+    : [...PREFERRED_MODELS];
 
-async function callGemini(prompt, systemInstruction) {
-  const model = await resolveModel();
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${API_KEY}`;
-  const body = {
-    contents: [{ parts: [{ text: prompt }] }],
+  const body = { contents: [{ parts: [{ text: prompt }] }] };
+  if (systemInstruction) body.systemInstruction = { parts: [{ text: systemInstruction }] };
+
+  // Always set generationConfig so outlines and long tasks get enough output space
+  body.generationConfig = {
+    maxOutputTokens: options.maxOutputTokens || 8192,
+    temperature:     options.temperature     !== undefined ? options.temperature : 0.3
   };
-  if (systemInstruction) {
-    body.systemInstruction = { parts: [{ text: systemInstruction }] };
-  }
-  try {
-    const resp = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
-    if (!resp.ok) {
-      const err = await resp.json();
-      const msg = err.error?.message || `HTTP ${resp.status}`;
-      throw new Error(msg);
+
+  let lastError;
+
+  for (const model of modelsToTry) {
+    try {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${API_KEY}`;
+      const resp = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+
+      if (!resp.ok) {
+        const errData = await resp.json().catch(() => ({}));
+        const msg = errData.error?.message || `HTTP ${resp.status}`;
+        const isOverload = resp.status === 503 || resp.status === 429 ||
+          msg.toLowerCase().includes('overload') ||
+          msg.toLowerCase().includes('high demand') ||
+          msg.toLowerCase().includes('quota') ||
+          msg.toLowerCase().includes('resource exhausted');
+
+        if (isOverload) {
+          console.warn(`Model ${model} busy (${resp.status}) — trying next model...`);
+          lastError = new Error(msg);
+          ACTIVE_MODEL = null; // clear cache so next call also skips this model
+          continue;            // try next model in list
+        }
+        throw new Error(msg); // non-overload error — don't retry
+      }
+
+      const data = await resp.json();
+      ACTIVE_MODEL = model; // cache the model that actually worked
+      console.log('Gemini response from:', model);
+      return data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response generated.';
+
+    } catch (e) {
+      if (e.message?.includes('Failed to fetch') || e.name === 'TypeError') {
+        return 'Error: Could not reach the Gemini API. Check your internet connection and make sure your API key is valid.';
+      }
+      lastError = e;
     }
-    const data = await resp.json();
-    return data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response generated.';
-  } catch (e) {
-    console.error('Gemini error:', e);
-    if (e.message === 'Failed to fetch') {
-      return 'Error: Could not reach the Gemini API. Check your internet connection and make sure your API key is valid.';
-    }
-    return `Error: ${e.message}`;
   }
+
+  // All models failed
+  const errMsg = lastError?.message || 'Unknown error';
+  const isDemand = errMsg.toLowerCase().includes('demand') ||
+    errMsg.toLowerCase().includes('overload') ||
+    errMsg.toLowerCase().includes('quota') ||
+    errMsg.toLowerCase().includes('503') ||
+    errMsg.toLowerCase().includes('429');
+
+  if (isDemand) {
+    return 'Error: All Gemini models are currently experiencing high demand. Please wait 1–2 minutes and try again — this is a temporary issue on Google\'s side.';
+  }
+  return `Error: ${errMsg}`;
 }
 
 // ═══════════════════════════════════════════
@@ -2087,6 +2451,9 @@ async function generateQuiz() {
   const course = state.courses.find(c => c.id === courseId);
   if (!course) return;
 
+  // Store meta for performance profile logging
+  currentQuizMeta = { courseId: course.id, courseName: course.name, topic: topic || course.name, questionType: qtype };
+
   const outputArea = document.getElementById('quiz-output-area');
   const contentEl = document.getElementById('quiz-content');
   outputArea.style.display = 'block';
@@ -2245,6 +2612,9 @@ ${qaText}`;
   const system = 'You are JURIS, an expert law professor. Grade each answer rigorously but constructively. Always produce a rubric first, then score against it. Use clear markdown formatting.';
   const result = await callGemini(prompt, system);
   gradeContent.innerHTML = marked.parse(result);
+
+  // Save to performance profile
+  saveQuizResult(extractTextScore(result, textQuestions.length));
 }
 
 async function gradeAnswer() {
@@ -2339,6 +2709,9 @@ async function submitMBEQuiz() {
   const system = 'You are JURIS, an expert law professor. Grade MBE answers clearly and educationally. Use markdown with ## for each question heading.';
   const result = await callGemini(prompt, system);
   gradeContent.innerHTML = marked.parse(result);
+
+  // Save to performance profile
+  saveQuizResult(extractMBEScore(result, mbeQuestions.length));
 }
 
 async function gradeAnswer() {
@@ -2390,22 +2763,384 @@ function clearOutlineNotes() {
   toast('Notes cleared');
 }
 
+async function appendTabNotes() {
+  try {
+    const clipText = await navigator.clipboard.readText();
+    if (!clipText || !clipText.trim()) return toast('Clipboard is empty — copy your tab\'s content first (Ctrl+A then Ctrl+C in Google Docs)');
+    const ta = document.getElementById('outline-notes-text');
+    const existing = ta.value.trim();
+    const separator = existing
+      ? `\n\n${'─'.repeat(40)}\n[TAB ${(existing.match(/─{40}/g) || []).length + 2}]\n${'─'.repeat(40)}\n\n`
+      : '';
+    ta.value = existing + separator + clipText.trim();
+    const tabCount = (ta.value.match(/─{40}/g) || []).length + 1;
+    toast(`Tab ${tabCount} appended — ${ta.value.length.toLocaleString()} total characters`);
+  } catch (e) {
+    toast('Could not read clipboard — please paste manually into the notes box using Ctrl+V');
+  }
+}
+
+// ═══════════════════════════════════════════
+//  GOOGLE DOCS SYNC
+// ═══════════════════════════════════════════
+
+function extractGoogleDocId(url) {
+  const match = url.match(/\/document\/d\/([a-zA-Z0-9_-]+)/);
+  return match ? match[1] : null;
+}
+
+// Read the shared outline type selector
+function getOutlineType() {
+  return 'full'; // Always comprehensive
+}
+
+// Keep the "Building as:" label in the Notes card in sync
+function updateNotesTypeLabel() {
+  const labels = { auto: 'Auto-Build', full: 'Comprehensive Outline', attack: 'Attack Outline', checklist: 'Issue-Spotter Checklist' };
+  const el = document.getElementById('notes-type-label');
+  if (el) el.textContent = labels[getOutlineType()] || 'Auto-Build';
+}
+
+// Fetch a URL through multiple CORS proxies in sequence until one works
+async function fetchWithProxy(url) {
+  const proxies = [
+    `https://corsproxy.io/?${encodeURIComponent(url)}`,
+    `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
+  ];
+  let lastError;
+  for (const proxyUrl of proxies) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 18000);
+    try {
+      const res = await fetch(proxyUrl, { signal: controller.signal });
+      clearTimeout(timer);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const text = await res.text();
+      if (text && text.trim().length > 20) return text;
+      throw new Error('Empty response');
+    } catch (e) {
+      clearTimeout(timer);
+      lastError = e;
+    }
+  }
+  throw lastError || new Error('All proxy attempts failed');
+}
+
+// Fetches a Google Doc as plain text (all tabs included) via multiple CORS proxies.
+// Uses only the export?format=txt endpoint which returns the full document including all tabs.
+async function fetchGoogleDocContent(docId, onStatus) {
+  const exportUrl = `https://docs.google.com/document/d/${docId}/export?format=txt`;
+
+  const proxies = [
+    { label: 'server 1', url: `https://corsproxy.io/?${encodeURIComponent(exportUrl)}` },
+    { label: 'server 2', url: `https://api.allorigins.win/raw?url=${encodeURIComponent(exportUrl)}` },
+    { label: 'server 3', url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(exportUrl)}` },
+    { label: 'server 4', url: `https://corsproxy.org/?${encodeURIComponent(exportUrl)}` },
+    { label: 'server 5', url: `https://api.allorigins.win/get?url=${encodeURIComponent(exportUrl)}` },
+  ];
+
+  let lastError;
+  for (let i = 0; i < proxies.length; i++) {
+    const { label, url } = proxies[i];
+    onStatus(`⏳ Connecting to Google Docs via ${label} of ${proxies.length}…`);
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 20000);
+    try {
+      const res = await fetch(url, { signal: controller.signal });
+      clearTimeout(timer);
+      if (!res.ok) { lastError = new Error(`HTTP ${res.status}`); continue; }
+      let text = await res.text();
+      // allorigins /get returns JSON wrapper — unwrap it
+      if (url.includes('/get?url=')) {
+        try { text = JSON.parse(text).contents || text; } catch (_) {}
+      }
+      text = text.trim();
+      if (text.length < 30) { lastError = new Error('Empty response'); continue; }
+      // Detect accidental Google login page
+      const preview = text.toLowerCase().slice(0, 400);
+      const loginHits = ['sign in','forgot email','create account','email or phone'].filter(s => preview.includes(s)).length;
+      if (loginHits >= 2) { lastError = new Error('ACCESS_DENIED'); continue; }
+      return { text };
+    } catch (e) {
+      clearTimeout(timer);
+      lastError = e;
+    }
+  }
+
+  // All proxies failed — surface a clear error
+  const msg = (lastError?.message || '').toLowerCase();
+  if (msg === 'access_denied' || msg.includes('400') || msg.includes('401') || msg.includes('403')) {
+    throw new Error('ACCESS_DENIED');
+  }
+  throw lastError || new Error('All proxy servers failed');
+}
+
+function setGdocStatus(type, message) {
+  const el = document.getElementById('gdoc-status');
+  if (!el) return;
+  el.className = `gdoc-status ${type}`;
+  el.textContent = message;
+  el.style.display = 'block';
+}
+
+function saveGoogleDocUrl() {
+  const courseId = document.getElementById('outline-course-select').value;
+  if (!courseId) return toast('Select a course first');
+  const url = document.getElementById('gdoc-url-input').value.trim();
+  if (!url) return toast('Paste a Google Doc link first');
+  if (!extractGoogleDocId(url)) return toast('That doesn\'t look like a valid Google Doc link — copy it from your browser\'s address bar');
+  const course = state.courses.find(c => c.id === courseId);
+  if (!course) return;
+  course.googleDocUrl = url;
+  saveState();
+  setGdocStatus('success', '✓ Link saved for ' + course.name + '. Click "Sync Notes" or "Sync & Build" whenever you want to pull in your latest edits.');
+  toast('Google Doc link saved for ' + course.name);
+}
+
+async function syncFromGoogleDoc(autoRebuild = false) {
+  const courseId = document.getElementById('outline-course-select').value;
+  if (!courseId) return toast('Select a course first');
+  const course = state.courses.find(c => c.id === courseId);
+  if (!course) return;
+
+  const rawUrl = (document.getElementById('gdoc-url-input').value.trim()) || (course.googleDocUrl || '');
+  if (!rawUrl) return toast('Paste and save a Google Doc link first');
+
+  const docId = extractGoogleDocId(rawUrl);
+  if (!docId) return toast('Invalid Google Doc link — copy it directly from your browser\'s address bar');
+
+  // Persist URL if new
+  if (course.googleDocUrl !== rawUrl) {
+    course.googleDocUrl = rawUrl;
+    saveState();
+  }
+
+  const syncBtn  = document.getElementById('gdoc-sync-btn');
+  const buildBtn = document.getElementById('gdoc-sync-build-btn');
+  if (syncBtn)  syncBtn.disabled  = true;
+  if (buildBtn) buildBtn.disabled = true;
+  try {
+    const { text, method } = await fetchGoogleDocContent(docId, msg => setGdocStatus('info', msg));
+
+    document.getElementById('outline-notes-text').value = text;
+    const charCount = text.length.toLocaleString();
+    const timeStr   = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    setGdocStatus('success', `✓ Synced ${charCount} characters from Google Docs at ${timeStr} (all tabs included). ${autoRebuild ? 'Building comprehensive outline…' : 'Click "Build Outline from Notes" below to generate your outline.'}`);
+    toast('Notes synced from Google Docs' + (autoRebuild ? ' — building outline...' : ''));
+
+    if (autoRebuild) {
+      setTimeout(() => generateOutline(getOutlineType()), 400);
+    }
+
+  } catch (err) {
+    console.error('Google Docs sync error:', err);
+    const msg = (err.message || '').toLowerCase();
+
+    if (err.message === 'ACCESS_DENIED' || msg.includes('400') || msg.includes('401') || msg.includes('403')) {
+      setGdocStatus('error',
+        '✗ Google is blocking external access to this document. Make sure your sharing is set correctly:\n\n' +
+        '1. Open your Google Doc\n' +
+        '2. Click Share (top right)\n' +
+        '3. Under "General access" → change to "Anyone with the link"\n' +
+        '4. Make sure the role is set to "Viewer"\n' +
+        '5. Click Done, then come back and click Sync again\n\n' +
+        'If you are using a school or work Google account and the above does not work, copy-paste your notes directly into the notes box below — that always works.'
+      );
+    } else if (msg.includes('abort') || msg.includes('timeout')) {
+      setGdocStatus('error', '✗ Connection timed out. Your document may be very large or your connection was slow. Try again, or copy-paste your notes into the box below.');
+    } else if (msg.includes('failed to fetch') || msg.includes('networkerror') || msg.includes('load')) {
+      setGdocStatus('error', '✗ Network error — check your internet connection and try again. If it keeps failing, copy-paste your notes into the box below.');
+    } else {
+      setGdocStatus('error', `✗ Sync failed: ${err.message || 'Unknown error'}. You can always copy-paste your notes directly into the box below as a reliable fallback.`);
+    }
+    toast('Google Docs sync failed — see the status message for details');
+  } finally {
+    if (syncBtn)  syncBtn.disabled  = false;
+    if (buildBtn) buildBtn.disabled = false;
+  }
+}
+
 // ═══════════════════════════════════════════
 //  OUTLINES
 // ═══════════════════════════════════════════
 function loadOutline() {
   const courseId = document.getElementById('outline-course-select').value;
   const display = document.getElementById('outline-display');
+
+  // Populate the Google Doc URL input with any saved link for this course
+  const urlInput = document.getElementById('gdoc-url-input');
+  const statusEl = document.getElementById('gdoc-status');
+  if (urlInput) urlInput.value = '';
+  if (statusEl) statusEl.style.display = 'none';
   if (!courseId) {
     display.innerHTML = '<div class="empty-state"><h3>Select a course</h3></div>';
     return;
   }
   const course = state.courses.find(c => c.id === courseId);
-  if (course?.outlineData) {
-    display.innerHTML = `<div class="md-rendered">${marked.parse(course.outlineData)}</div>`;
-  } else {
-    display.innerHTML = '<div class="empty-state"><h3>No outline yet</h3><p>Click "Auto-Build" to generate one from your materials</p></div>';
+
+  // Restore saved Google Doc URL for this course
+  if (urlInput && course?.googleDocUrl) {
+    urlInput.value = course.googleDocUrl;
+    setGdocStatus('success', '✓ Google Doc linked — click "Sync Notes" to pull your latest edits, or "Sync & Build" to update your outline automatically.');
   }
+
+  if (course?.outlineData) {
+    showOutlineContent(`<div class="md-rendered">${marked.parse(course.outlineData)}</div>`, course.name);
+  } else {
+    document.getElementById('outline-display').innerHTML = '<div class="empty-state"><h3>No outline yet</h3><p>Choose an outline type above, add your notes, then click "Build Outline from Notes"</p></div>';
+    document.getElementById('outline-display-header').style.display = 'none';
+  }
+}
+
+function showOutlineContent(html, courseName) {
+  document.getElementById('outline-display').innerHTML = html;
+  const header = document.getElementById('outline-display-header');
+  if (header) {
+    header.style.display = 'flex';
+    const title = document.getElementById('outline-display-title');
+    if (title && courseName) title.textContent = courseName + ' — Outline';
+  }
+}
+
+function downloadOutlineAsDoc() {
+  const courseId = document.getElementById('outline-course-select').value;
+  const course = state.courses.find(c => c.id === courseId);
+  if (!course?.outlineData) return toast('No outline to download — build one first');
+
+  const contentEl = document.querySelector('#outline-display .md-rendered');
+  if (!contentEl) return toast('No outline content found');
+
+  const fileName = `${course.name} — Outline`;
+  const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+  const wordHtml = `<!DOCTYPE html>
+<html xmlns:o="urn:schemas-microsoft-com:office:office"
+      xmlns:w="urn:schemas-microsoft-com:office:word"
+      xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+  <meta charset="UTF-8">
+  <title>${course.name} — Outline</title>
+  <!--[if gte mso 9]>
+  <xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom></w:WordDocument></xml>
+  <![endif]-->
+  <style>
+    body {
+      font-family: 'Times New Roman', serif;
+      font-size: 11pt;
+      margin: 1in;
+      color: #1a1a2e;
+      line-height: 1.65;
+    }
+    .doc-title {
+      font-family: Georgia, serif;
+      font-size: 22pt;
+      font-weight: bold;
+      color: #16213e;
+      border-bottom: 3px solid #c5a55a;
+      padding-bottom: 6pt;
+      margin-bottom: 4pt;
+    }
+    .doc-meta {
+      font-size: 9.5pt;
+      color: #3a3a5c;
+      font-style: italic;
+      margin-bottom: 24pt;
+    }
+    h1 {
+      font-family: Georgia, serif;
+      font-size: 16pt;
+      font-weight: bold;
+      color: #16213e;
+      border-bottom: 2px solid #c5a55a;
+      padding-bottom: 3pt;
+      margin-top: 22pt;
+      margin-bottom: 8pt;
+      page-break-after: avoid;
+    }
+    h2 {
+      font-family: Georgia, serif;
+      font-size: 13pt;
+      font-weight: bold;
+      color: #16213e;
+      border-left: 4px solid #c5a55a;
+      padding-left: 8pt;
+      margin-top: 16pt;
+      margin-bottom: 6pt;
+      page-break-after: avoid;
+    }
+    h3 {
+      font-family: Georgia, serif;
+      font-size: 11.5pt;
+      font-weight: bold;
+      color: #8b2635;
+      margin-top: 12pt;
+      margin-bottom: 4pt;
+      page-break-after: avoid;
+    }
+    h4 {
+      font-size: 9.5pt;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.8pt;
+      color: #3a3a5c;
+      margin-top: 10pt;
+      margin-bottom: 3pt;
+      page-break-after: avoid;
+    }
+    p { margin: 3pt 0 5pt; }
+    ul { margin: 3pt 0 6pt; padding-left: 18pt; }
+    ol { margin: 3pt 0 6pt; padding-left: 18pt; }
+    li { margin-bottom: 3pt; }
+    li > ul { margin-top: 2pt; }
+    strong { font-weight: bold; }
+    em { font-style: italic; }
+    hr { border: none; border-top: 1px solid #e8e4dc; margin: 14pt 0; }
+    blockquote {
+      border-left: 3px solid #dbc88e;
+      padding-left: 10pt;
+      color: #3a3a5c;
+      font-style: italic;
+      margin: 6pt 0 6pt 8pt;
+    }
+    code {
+      font-family: 'Courier New', monospace;
+      font-size: 9.5pt;
+      background: #f5f0e8;
+      padding: 1pt 3pt;
+    }
+  </style>
+</head>
+<body>
+  <div class="doc-title">${esc(course.name)}</div>
+  <div class="doc-meta">Course Outline · Generated by JURIS · ${date}</div>
+  ${contentEl.innerHTML}
+</body>
+</html>`;
+
+  const blob = new Blob(['\ufeff', wordHtml], { type: 'application/msword' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${fileName}.doc`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  toast(`Downloaded: ${fileName}.doc`);
+}
+
+function clearSavedOutline() {
+  const courseId = document.getElementById('outline-course-select').value;
+  if (!courseId) return;
+  if (!confirm('Clear the saved outline for this course? This cannot be undone.')) return;
+  const course = state.courses.find(c => c.id === courseId);
+  if (!course) return;
+  course.outlineData = null;
+  saveState();
+  document.getElementById('outline-display').innerHTML = '<div class="empty-state"><h3>Outline cleared</h3><p>Choose an outline type above, add your notes, then click "Build Outline from Notes"</p></div>';
+  document.getElementById('outline-display-header').style.display = 'none';
+  toast('Outline cleared');
 }
 
 async function generateOutline(type) {
@@ -2414,30 +3149,205 @@ async function generateOutline(type) {
   const course = state.courses.find(c => c.id === courseId);
   if (!course) return;
 
+  // Use the shared type selector if no type passed directly
+  if (!type) type = getOutlineType();
+
   const display = document.getElementById('outline-display');
-  display.innerHTML = '<div style="text-align:center;padding:2rem;"><div class="loading-dots"><span></span><span></span><span></span></div><div style="margin-top:8px;font-size:0.82rem;color:var(--slate);">Building outline...</div></div>';
+  document.getElementById('outline-display-header').style.display = 'none';
+  display.innerHTML = `<div style="text-align:center;padding:2rem;"><div class="loading-dots"><span></span><span></span><span></span></div><div style="margin-top:10px;font-size:0.82rem;color:var(--slate);">Building <strong>Comprehensive Outline</strong> for ${esc(course.name)}…</div></div>`;
 
   const materialsContext = gatherCourseContext(course);
   const userNotes = document.getElementById('outline-notes-text').value.trim();
+
   const typeInstructions = {
-    full: 'Create a comprehensive, detailed course outline with all black-letter rules, case holdings, policy rationales, and multi-step doctrine flowcharts.',
-    attack: 'Create a concise attack outline — just the key rules, elements, and analysis frameworks needed for quick exam reference.',
-    checklist: 'Create a one-page exam checklist with every issue to spot, organized by topic, with brief rule triggers.',
-    auto: 'Create a well-organized course outline extracting all rules, cases, and doctrines. Include rule statements, case holdings, and policy rationales organized by topic and subtopic.'
+    full: `Create a COMPREHENSIVE, DETAILED course outline based EXCLUSIVELY on the student's notes provided below. Every rule, element, sub-element, test, exception, case, statute, and policy rationale mentioned anywhere in the notes MUST appear in the outline. If the notes define a legal relationship or doctrine with specific elements (e.g., elements of agency, elements of a contract, elements of a fiduciary duty), list EVERY element explicitly. Do not summarize, condense, or skip any doctrine. This is the student's primary exam study document — total completeness is required.`,
+    attack: `Create a CONCISE ATTACK OUTLINE based EXCLUSIVELY on the student's notes. List every key rule, element, and test from the notes in a format optimized for quick exam reference. Every multi-part test and every element-based doctrine from the notes must appear. Do not add anything not in the notes.`,
+    checklist: `Create an EXAM ISSUE-SPOTTER CHECKLIST based EXCLUSIVELY on the student's notes. For every topic in the notes, list every issue to check for with a one-line rule trigger. Every doctrine, rule, and exception in the notes must appear as a checklist item. Do not add anything not in the notes.`,
+    auto: `Create a COMPREHENSIVE, WELL-ORGANIZED course outline based EXCLUSIVELY on the student's notes. Every topic, rule, element, case, statute, and policy rationale in the notes must be captured. If a doctrine has specific elements (e.g., elements of agency, elements of consideration), list all of them. This is the student's primary exam study document — nothing from the notes may be omitted.`
   };
 
-  let prompt;
+  const formattingRules = `
+ABSOLUTE RULES — VIOLATIONS ARE NOT ACCEPTABLE:
+
+⚠️ RULE 0 — SKIP ADMINISTRATIVE CONTENT: Do NOT include any syllabus information, course schedules, grading breakdowns, professor contact info, attendance policies, reading lists, or any other administrative or logistical content. Only include substantive legal doctrine, rules, elements, cases, statutes, and policy rationales.
+
+⚠️ RULE 1 — NOTES-ONLY: You MUST work EXCLUSIVELY from the student's notes provided below. Do NOT add any cases, rules, statutes, legal doctrines, or legal principles from your training data or general legal knowledge. If a case, rule, or doctrine does not appear in the notes, it does not go in the outline. Every case name, every rule statement, and every element must come directly from the notes. Inventing or "helpfully adding" content that is not in the notes is strictly forbidden.
+
+⚠️ RULE 2 — TOTAL COMPLETENESS: You must include EVERY piece of substantive content from the notes. Read through the entire notes document from start to finish. Every major topic, every subtopic, every rule, every element of every test or doctrine, every exception, every case, every statute, and every policy rationale must appear. If the notes define a legal relationship or doctrine with a list of elements (e.g., "to form an agency relationship, there must be: (1)..., (2)..., (3)..."), reproduce ALL elements. Do not compress, skip, or summarize away any part of the notes.
+
+⚠️ RULE 3 — STRUCTURE: Use this exact Markdown heading hierarchy:
+   # I. MAIN TOPIC (Roman numeral, ALL CAPS)
+   ## A. Subtopic (letter, title case)
+   ### 1. Rule / Element / Sub-doctrine (number, title case)
+   #### a. Sub-element or exception (lowercase letter)
+
+⚠️ RULE 4 — BULLETS: Use "- " (dash space) for all bullet points. NEVER use asterisks (*) as bullets.
+
+⚠️ RULE 5 — CASES: Only cite cases that appear in the student's notes. Bold the case name: **Case v. Party**. Follow with the holding and the rule it illustrates (max 8 sentences). Do not write full briefs. Do NOT invent or add cases not found in the notes.
+
+⚠️ RULE 6 — RULES & ELEMENTS: State every rule, element, and statute from the notes in clear language under the most relevant heading. Bold key legal terms. When a doctrine has numbered or lettered elements, list each one as a separate bullet.
+
+⚠️ RULE 7 — TESTS: Break every multi-part test into explicit numbered steps:
+   - **Step 1:** [element from the notes]
+   - **Step 2:** [element from the notes]
+
+⚠️ RULE 8 — NO DIAGRAMS: No mermaid diagrams, ASCII art, or code blocks. Use numbered steps for flowcharts.
+
+⚠️ RULE 9 — POLICY: Include any policy rationales mentioned in the notes under a "**Policy:**" line after the relevant rule.
+
+⚠️ RULE 10 — SEPARATORS: Use --- between each top-level # section.
+`;
+
+  const system = `You are JURIS, an expert law school outline builder. Your outlines are used by law students to prepare for final exams.
+
+Your three non-negotiable qualities:
+1. SOURCE FIDELITY — You work ONLY from what is in the student's notes. You never add cases, rules, elements, or doctrines from your own legal knowledge. If it is not in the notes, it is not in the outline. This is the most important rule.
+2. TOTAL COMPLETENESS — You include every single piece of content from the notes: every topic, every rule, every element of every test or doctrine, every exception, every case, every policy rationale. You never skip, compress, or omit anything.
+3. VISUAL CLARITY — Strict heading hierarchy (#, ##, ###, ####), clean dash bullets, bold key terms, horizontal rules between major sections.
+
+You never use asterisks as bullets. You never generate mermaid diagrams or code blocks. You always use proper Markdown headings.`;
+
+  const SINGLE_PASS_LIMIT = 40000; // ~10k tokens — keeps single-pass fast & reliable; longer docs chunk automatically
+  let result;
+
   if (userNotes) {
     const hasOtherMaterials = materialsContext && !materialsContext.startsWith('No materials');
-    prompt = `For the course "${course.name}", ${typeInstructions[type]}\n\nPRIMARY SOURCE — Student's own notes:\n${userNotes.slice(0, 25000)}${hasOtherMaterials ? `\n\nSUPPLEMENTAL COURSE MATERIALS:\n${materialsContext}` : ''}`;
+
+    if (userNotes.length > SINGLE_PASS_LIMIT) {
+      // Long notes — use chunked multi-pass approach
+      result = await runChunkedOutline(course, typeInstructions[type], formattingRules, system);
+    } else {
+      // Short enough for a single pass
+      const prompt = `You are building an exam outline for the law school course: "${course.name}".
+
+TASK: ${typeInstructions[type]}
+
+${formattingRules}
+---
+STUDENT'S NOTES — This is your ONLY source. Process every section, every paragraph, every rule, every case, every element list. Do not skip anything.
+${userNotes}${hasOtherMaterials ? `\n\n---\nCOURSE MATERIALS (supplemental only — still do not add content not in either source):\n${materialsContext}` : ''}
+
+---
+REMINDER: Do not add a single case, rule, or doctrine not in the notes above. Every element of every doctrine mentioned in the notes must be listed explicitly and completely.`;
+      result = await callGemini(prompt, system, { maxOutputTokens: 65536 });
+    }
   } else {
-    prompt = `For the course "${course.name}", ${typeInstructions[type]}\n\nBase this on the following materials:\n${materialsContext}`;
+    const prompt = `You are building an exam outline for the law school course: "${course.name}".
+
+TASK: ${typeInstructions[type]}
+
+${formattingRules}
+---
+SOURCE MATERIALS — Your ONLY source:
+${materialsContext}
+
+---
+REMINDER: Do not add any case, rule, or doctrine not found in the source materials above.`;
+    result = await callGemini(prompt, system, { maxOutputTokens: 65536 });
   }
-  const system = 'You are JURIS, an expert law school outline builder. Create clear, well-organized, accurate legal outlines that would help a student prepare for exams.';
-  const result = await callGemini(prompt, system);
+
   course.outlineData = result;
   saveState();
-  display.innerHTML = `<div class="md-rendered">${marked.parse(result)}</div>`;
+  showOutlineContent(`<div class="md-rendered">${marked.parse(result)}</div>`, course.name);
+}
+
+// ─── Chunked outline builder for long documents ───
+async function runChunkedOutline(course, typeInstruction, formattingRules, systemPrompt) {
+  const CHUNK_SIZE = 50000; // ~12k tokens input per chunk — leaves ample room for 65k token output
+  const display = document.getElementById('outline-display');
+  const userNotes = document.getElementById('outline-notes-text').value.trim();
+
+  // Split notes at natural section boundaries where possible
+  const chunks = [];
+  let remaining = userNotes;
+  while (remaining.length > 0) {
+    if (remaining.length <= CHUNK_SIZE) {
+      chunks.push(remaining);
+      break;
+    }
+    // Try to split at a paragraph boundary near the chunk limit
+    let splitAt = CHUNK_SIZE;
+    const boundary = remaining.lastIndexOf('\n\n', CHUNK_SIZE);
+    if (boundary > CHUNK_SIZE * 0.6) splitAt = boundary;
+    chunks.push(remaining.slice(0, splitAt));
+    remaining = remaining.slice(splitAt).trimStart();
+  }
+
+  const partialOutlines = [];
+
+  for (let i = 0; i < chunks.length; i++) {
+    // Progress indicator
+    const pct = Math.round((i / (chunks.length + 1)) * 100);
+    display.innerHTML = `
+      <div style="text-align:center;padding:2.5rem;">
+        <div class="loading-dots"><span></span><span></span><span></span></div>
+        <div style="margin-top:14px;font-size:0.88rem;color:var(--ink);font-weight:600;">
+          Processing section ${i + 1} of ${chunks.length}
+        </div>
+        <div style="margin-top:6px;font-size:0.78rem;color:var(--slate);line-height:1.5;">
+          Your notes are long — processing in sections so every topic is captured.<br>
+          Please keep this tab open and don't navigate away.
+        </div>
+        <div style="margin-top:16px;max-width:320px;margin-left:auto;margin-right:auto;">
+          <div style="display:flex;justify-content:space-between;font-size:0.7rem;color:var(--slate);margin-bottom:4px;">
+            <span>Progress</span><span>${pct}%</span>
+          </div>
+          <div style="background:var(--mist);border-radius:6px;height:7px;overflow:hidden;">
+            <div style="height:100%;background:var(--gold);border-radius:6px;width:${pct}%;transition:width 0.4s;"></div>
+          </div>
+        </div>
+      </div>`;
+
+    const chunkPrompt = `You are building part ${i + 1} of ${chunks.length} of an exam outline for the law school course: "${course.name}".
+
+TASK: ${typeInstruction}
+
+${formattingRules}
+---
+NOTES — SECTION ${i + 1} OF ${chunks.length} (This is your ONLY source for this part. Process every topic present):
+${chunks[i]}
+
+---
+IMPORTANT: Generate outline content ONLY for topics present in the notes section above. Do not add any content not found in these notes. Do not include syllabus, schedule, or administrative content.`;
+
+    const result = await callGemini(chunkPrompt, systemPrompt, { maxOutputTokens: 65536 });
+    partialOutlines.push(result);
+  }
+
+  // Merge pass
+  display.innerHTML = `
+    <div style="text-align:center;padding:2.5rem;">
+      <div class="loading-dots"><span></span><span></span><span></span></div>
+      <div style="margin-top:14px;font-size:0.88rem;color:var(--ink);font-weight:600;">
+        Merging all ${chunks.length} sections into your complete outline…
+      </div>
+      <div style="margin-top:6px;font-size:0.78rem;color:var(--slate);">Almost done — combining and organizing everything.</div>
+      <div style="margin-top:16px;max-width:320px;margin-left:auto;margin-right:auto;">
+        <div style="display:flex;justify-content:space-between;font-size:0.7rem;color:var(--slate);margin-bottom:4px;">
+          <span>Progress</span><span>90%</span>
+        </div>
+        <div style="background:var(--mist);border-radius:6px;height:7px;overflow:hidden;">
+          <div style="height:100%;background:var(--gold);border-radius:6px;width:90%;"></div>
+        </div>
+      </div>
+    </div>`;
+
+  const mergePrompt = `Merge the following ${chunks.length} partial outline sections into ONE single, complete, well-organized exam outline for the law school course: "${course.name}".
+
+MERGE RULES — FOLLOW EXACTLY:
+1. Include ALL content from every section — do not drop, skip, or summarize away any topic
+2. Merge duplicate headings by combining their content under one heading (do not repeat)
+3. Maintain consistent heading hierarchy: # Roman numeral main topics, ## lettered subtopics, ### numbered rules/elements, #### lowercase sub-elements
+4. Use --- between each top-level # section
+5. Do NOT add any new legal content — only organize and merge what is already provided
+6. Do NOT include syllabus or administrative content
+7. Use "- " (dash space) for all bullet points — never asterisks (*)
+8. Bold all key legal terms and case names
+
+SECTIONS TO MERGE:
+${partialOutlines.map((o, i) => `\n=== SECTION ${i + 1} ===\n${o}`).join('\n\n')}`;
+
+  return await callGemini(mergePrompt, systemPrompt, { maxOutputTokens: 65536 });
 }
 
 // ═══════════════════════════════════════════
