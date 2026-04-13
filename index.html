@@ -743,9 +743,14 @@ tr:hover td { background: rgba(42,127,127,0.04); }
   transition: all 0.2s;
   background: var(--teal-soft);
 }
-.upload-zone:hover {
+.upload-zone:hover, .upload-zone.drag-active {
   border-color: var(--teal);
   background: rgba(42,127,127,0.12);
+}
+.upload-zone.drag-active {
+  border-color: var(--teal-light);
+  background: rgba(42,127,127,0.18);
+  box-shadow: 0 0 0 4px rgba(42,127,127,0.1);
 }
 .upload-zone svg { width: 32px; height: 32px; color: var(--teal); margin-bottom: 8px; }
 .upload-zone p { font-size: 0.82rem; color: var(--slate); }
@@ -2811,7 +2816,7 @@ body.dark-mode .reading-name { color: #e8e4dc; }
             </div>
 
             <div id="ctab-materials">
-              <div class="upload-zone" onclick="document.getElementById('file-upload').click()">
+              <div class="upload-zone" id="materials-drop-zone" onclick="document.getElementById('file-upload').click()">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                 <p>Upload syllabus, readings, notes, or past exams</p>
                 <div class="upload-hint">PDF, DOCX, TXT, PPTX — or drag and drop</div>
@@ -4253,10 +4258,54 @@ function initApp() {
   if (pdfInput) pdfInput.addEventListener('change', function(e) { if (e.target.files[0]) processPDFFile(e.target.files[0]); });
   if (pdfDrop) {
     pdfDrop.addEventListener('click', function() { pdfInput.click(); });
-    pdfDrop.addEventListener('dragover', function(e) { e.preventDefault(); pdfDrop.style.borderColor = 'var(--teal)'; });
-    pdfDrop.addEventListener('dragleave', function() { pdfDrop.style.borderColor = ''; });
-    pdfDrop.addEventListener('drop', function(e) { e.preventDefault(); pdfDrop.style.borderColor = ''; if (e.dataTransfer.files[0]) processPDFFile(e.dataTransfer.files[0]); });
+    pdfDrop.addEventListener('dragover', function(e) { e.preventDefault(); pdfDrop.classList.add('drag-active'); });
+    pdfDrop.addEventListener('dragleave', function() { pdfDrop.classList.remove('drag-active'); });
+    pdfDrop.addEventListener('drop', function(e) { e.preventDefault(); pdfDrop.classList.remove('drag-active'); if (e.dataTransfer.files[0]) processPDFFile(e.dataTransfer.files[0]); });
   }
+
+  // Course materials drag-and-drop
+  const matDrop = document.getElementById('materials-drop-zone');
+  const matInput = document.getElementById('file-upload');
+  if (matDrop && matInput) {
+    matDrop.addEventListener('dragover', function(e) { e.preventDefault(); e.stopPropagation(); matDrop.classList.add('drag-active'); });
+    matDrop.addEventListener('dragleave', function(e) { e.preventDefault(); matDrop.classList.remove('drag-active'); });
+    matDrop.addEventListener('drop', function(e) {
+      e.preventDefault(); e.stopPropagation();
+      matDrop.classList.remove('drag-active');
+      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        handleDroppedFiles(e.dataTransfer.files);
+      }
+    });
+  }
+
+  // Outline notes drag-and-drop on textarea
+  const notesTextarea = document.getElementById('outline-notes-text');
+  if (notesTextarea) {
+    notesTextarea.addEventListener('dragover', function(e) { e.preventDefault(); notesTextarea.style.borderColor = 'var(--teal)'; });
+    notesTextarea.addEventListener('dragleave', function() { notesTextarea.style.borderColor = ''; });
+    notesTextarea.addEventListener('drop', function(e) {
+      e.preventDefault(); notesTextarea.style.borderColor = '';
+      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+        // Trigger the notes file handler with the dropped file
+        const file = e.dataTransfer.files[0];
+        if (file.name.endsWith('.docx') || file.name.endsWith('.txt')) {
+          const fakeEvent = { target: { files: [file] } };
+          handleNotesFile(fakeEvent);
+        } else {
+          toast('Only .docx and .txt files are supported for notes');
+        }
+      }
+    });
+  }
+
+  // Global drag prevention (prevent browser from opening dropped files)
+  document.addEventListener('dragover', function(e) { e.preventDefault(); });
+  document.addEventListener('drop', function(e) {
+    // Only prevent default if not on a designated drop zone
+    if (!e.target.closest('.upload-zone') && !e.target.closest('#outline-notes-text')) {
+      e.preventDefault();
+    }
+  });
 
   // Restore parsed transcript if saved
   if (state.transcript && state.transcript.parsed && state.transcript.parsed.length > 0) {
@@ -4613,6 +4662,35 @@ function handleFileUpload(event) {
     reader.readAsText(file);
   });
   event.target.value = '';
+}
+
+// Handle files from drag-and-drop (uses same logic as handleFileUpload but accepts a FileList directly)
+function handleDroppedFiles(fileList) {
+  const course = state.courses.find(c => c.id === state.currentCourseId);
+  if (!course) { toast('Open a course first to upload materials'); return; }
+  const allowed = ['.pdf', '.docx', '.txt', '.pptx', '.md'];
+  Array.from(fileList).forEach(file => {
+    const ext = '.' + file.name.split('.').pop().toLowerCase();
+    if (!allowed.includes(ext)) {
+      toast(`${file.name}: unsupported file type`);
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      course.materials.push({
+        id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        content: e.target.result.slice(0, 50000),
+        uploadedAt: new Date().toISOString()
+      });
+      saveState();
+      renderMaterials(course);
+      toast(`${file.name} uploaded`);
+    };
+    reader.readAsText(file);
+  });
 }
 
 function renderMaterials(course) {
@@ -8225,4 +8303,3 @@ function initCardTilt() {
 </script>
 </body>
 </html>
-
