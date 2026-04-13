@@ -907,7 +907,7 @@ tr:hover td { background: rgba(42,127,127,0.04); }
 }
 
 /* Rendered markdown (shared by outline + quiz) */
-.md-rendered { font-size: 0.875rem; line-height: 1.8; color: var(--ink); }
+.md-rendered { font-size: 0.875rem; line-height: 1.8; color: var(--ink); overflow-wrap: break-word; word-break: break-word; min-width: 0; }
 .md-rendered h1 {
   font-family: var(--font-display);
   font-size: 1.75rem; font-weight: 900; color: var(--ink);
@@ -1153,6 +1153,8 @@ tr:hover td { background: rgba(42,127,127,0.04); }
   background: #f3faf5;
   border: 1.5px solid rgba(42,100,70,0.18);
   box-shadow: 0 2px 12px rgba(42,100,70,0.07);
+  overflow-x: hidden;
+  min-width: 0;
 }
 #page-outlines .card-header {
   background: linear-gradient(135deg, #d4edde 0%, #c4e4d0 100%);
@@ -2976,56 +2978,44 @@ body.dark-mode .reading-name { color: #e8e4dc; }
           </div>
         </div>
 
-        <!-- Google Docs Sync card -->
-        <div class="card gdoc-card" style="margin-bottom:1.25rem;" id="gdoc-sync-card">
-          <div class="card-header">
-            <span class="card-title">Google Docs Live Sync</span>
-            <span class="gdoc-badge">Google Docs</span>
-          </div>
-          <p style="font-size:0.8rem;color:var(--slate);margin-bottom:0.9rem;line-height:1.6;">
-            Paste your Google Doc link and click <strong>Sync &amp; Build</strong> — JURIS will pull all your notes (including every tab) and build a comprehensive outline automatically. Or click <strong>Sync Notes Only</strong> to load the notes first and build manually.
-            <br><span style="font-size:0.71rem;opacity:0.75;">⚠️ Your Google Doc must be set to <strong>"Anyone with the link can view"</strong> (Share → General Access).</span>
-          </p>
-          <div class="gdoc-url-row">
-            <input class="form-input" id="gdoc-url-input" type="url"
-              placeholder="Paste Google Doc link here... (e.g. https://docs.google.com/document/d/...)">
-            <button class="btn btn-ghost" onclick="saveGoogleDocUrl()" style="white-space:nowrap;">Save Link</button>
-            <button class="btn btn-ghost" onclick="syncFromGoogleDoc(false)" id="gdoc-sync-btn" style="white-space:nowrap;display:inline-flex;align-items:center;gap:6px;">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
-              Sync Notes Only
-            </button>
-            <button class="btn btn-primary" onclick="syncFromGoogleDoc(true)" id="gdoc-sync-build-btn" style="white-space:nowrap;display:inline-flex;align-items:center;gap:6px;">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
-              Sync &amp; Build Outline
-            </button>
-          </div>
-          <div id="gdoc-status" class="gdoc-status" style="display:none;"></div>
-        </div>
-
         <!-- Notes input card -->
         <div class="card" style="margin-bottom:1.25rem;">
           <div class="card-header">
             <span class="card-title">Your Notes</span>
-            <span style="font-size:0.75rem;color:var(--slate);">Paste from Google Docs or upload a Word / text file</span>
+            <span style="font-size:0.75rem;color:var(--slate);">Type your notes or upload a Word doc / PDF</span>
+          </div>
+          <!-- Outline type selector -->
+          <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:0.9rem;padding:0.65rem 0.75rem;background:var(--mist);border-radius:8px;">
+            <span style="font-size:0.78rem;font-weight:600;color:var(--navy);margin-right:4px;">Outline Type:</span>
+            <label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer;font-size:0.8rem;padding:4px 10px;border-radius:6px;transition:background 0.15s;" onmouseover="this.style.background='rgba(42,100,70,0.08)'" onmouseout="this.style.background='transparent'">
+              <input type="radio" name="outline-type" value="full" checked style="accent-color:var(--teal);">
+              Comprehensive
+            </label>
+            <label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer;font-size:0.8rem;padding:4px 10px;border-radius:6px;transition:background 0.15s;" onmouseover="this.style.background='rgba(42,100,70,0.08)'" onmouseout="this.style.background='transparent'">
+              <input type="radio" name="outline-type" value="attack" style="accent-color:var(--teal);">
+              Attack Outline
+            </label>
+            <label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer;font-size:0.8rem;padding:4px 10px;border-radius:6px;transition:background 0.15s;" onmouseover="this.style.background='rgba(42,100,70,0.08)'" onmouseout="this.style.background='transparent'">
+              <input type="radio" name="outline-type" value="checklist" style="accent-color:var(--teal);">
+              Issue-Spotter Checklist
+            </label>
           </div>
           <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:0.75rem;">
             <label class="btn btn-ghost" style="cursor:pointer;margin:0;display:inline-flex;align-items:center;gap:6px;">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-              Upload .docx / .txt
-              <input type="file" id="notes-file-input" accept=".docx,.txt" style="display:none;" onchange="handleNotesFile(event)">
+              Upload .docx / .pdf
+              <input type="file" id="notes-file-input" accept=".docx,.txt,.pdf" style="display:none;" onchange="handleNotesFile(event)">
             </label>
             <span id="notes-file-name" style="font-size:0.75rem;color:var(--slate);font-style:italic;"></span>
-            <button class="btn btn-ghost" style="margin-left:auto;" title="Paste clipboard content after existing notes (for multi-tab Google Docs)" onclick="appendTabNotes()">+ Append Tab</button>
-            <button class="btn btn-ghost" onclick="clearOutlineNotes()">Clear Notes</button>
+            <button class="btn btn-ghost" style="margin-left:auto;" onclick="clearOutlineNotes()">Clear Notes</button>
           </div>
           <textarea class="form-input" id="outline-notes-text" rows="7"
-            placeholder="Paste your class notes here (from Google Docs, a Word doc, or anywhere else)...&#10;&#10;These notes will be used as the primary source when building your outline."
+            placeholder="Type or paste your class notes here...&#10;&#10;You can also upload a Word doc or PDF using the button above. These notes will be used as the primary source when building your outline."
             style="resize:vertical;font-size:0.82rem;line-height:1.6;font-family:var(--font-body);"></textarea>
           <div style="margin-top:0.5rem;font-size:0.72rem;color:var(--slate);">
-            Tip: In Google Docs, press <strong>Ctrl+A</strong> then <strong>Ctrl+C</strong> and paste here. For Word, upload the .docx file directly.
+            Tip: For large notes, upload a <strong>.docx</strong> or <strong>.pdf</strong> file directly — there is no size limit on uploaded files.
           </div>
           <div style="display:flex;align-items:center;justify-content:flex-end;margin-top:1rem;padding-top:0.85rem;border-top:1px solid var(--mist);gap:10px;">
-            <span style="font-size:0.75rem;color:var(--slate);">Builds a <strong>Comprehensive Outline</strong> from your notes</span>
             <button class="btn btn-primary" onclick="generateOutline(getOutlineType())" style="display:inline-flex;align-items:center;gap:7px;">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
               Build Outline from Notes
@@ -5029,12 +5019,13 @@ async function handleNotesFile(event) {
   const file = event.target.files[0];
   if (!file) return;
   document.getElementById('notes-file-name').textContent = file.name;
+  const fname = file.name.toLowerCase();
 
-  if (file.name.endsWith('.txt')) {
+  if (fname.endsWith('.txt')) {
     const text = await file.text();
     document.getElementById('outline-notes-text').value = text;
     toast('Notes loaded from ' + file.name);
-  } else if (file.name.endsWith('.docx')) {
+  } else if (fname.endsWith('.docx')) {
     try {
       const arrayBuffer = await file.arrayBuffer();
       const result = await mammoth.extractRawText({ arrayBuffer });
@@ -5043,6 +5034,37 @@ async function handleNotesFile(event) {
     } catch(e) {
       console.error(e);
       toast('Could not read .docx — try pasting your text instead');
+    }
+  } else if (fname.endsWith('.pdf')) {
+    try {
+      toast('Reading PDF — please wait…');
+      const pdfjs = await loadPDFJS();
+      const arrayBuffer = await file.arrayBuffer();
+      const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
+      let fullText = '';
+      for (let p = 1; p <= pdf.numPages; p++) {
+        const page = await pdf.getPage(p);
+        const content = await page.getTextContent();
+        const lineMap = {};
+        content.items.forEach(item => {
+          if (!item.str || !item.str.trim()) return;
+          const y = Math.round(item.transform[5] / 2) * 2;
+          if (!lineMap[y]) lineMap[y] = [];
+          lineMap[y].push({ x: item.transform[4], str: item.str });
+        });
+        Object.keys(lineMap).map(Number).sort((a, b) => b - a).forEach(y => {
+          const line = lineMap[y].sort((a, b) => a.x - b.x).map(i => i.str).join(' ').trim();
+          if (line) fullText += line + '\n';
+        });
+        fullText += '\n';
+      }
+      fullText = fullText.replace(/[ \t]+/g, ' ').replace(/\n{3,}/g, '\n\n').trim();
+      if (!fullText) throw new Error('No text could be extracted from this PDF.');
+      document.getElementById('outline-notes-text').value = fullText;
+      toast(`Notes extracted from ${file.name} (${pdf.numPages} page${pdf.numPages !== 1 ? 's' : ''})`);
+    } catch(e) {
+      console.error(e);
+      toast('Could not read PDF — try copying and pasting your notes instead');
     }
   }
   // Reset input so the same file can be re-uploaded if needed
@@ -5247,7 +5269,8 @@ function extractGoogleDocId(url) {
 }
 
 function getOutlineType() {
-  return 'full'; // Always comprehensive
+  const el = document.querySelector('input[name="outline-type"]:checked');
+  return el ? el.value : 'full';
 }
 
 function updateNotesTypeLabel() {
@@ -5391,23 +5414,12 @@ function loadOutline() {
   const courseId = document.getElementById('outline-course-select').value;
   const display = document.getElementById('outline-display');
 
-  // Populate the Google Doc URL input with any saved link for this course
-  const urlInput = document.getElementById('gdoc-url-input');
-  const statusEl = document.getElementById('gdoc-status');
-  if (urlInput) urlInput.value = '';
-  if (statusEl) statusEl.style.display = 'none';
   if (!courseId) {
     display.innerHTML = '<div class="empty-state"><h3>Select a course</h3></div>';
     document.getElementById('outline-display-header').style.display = 'none';
     return;
   }
   const course = state.courses.find(c => c.id === courseId);
-
-  // Restore saved Google Doc URL for this course
-  if (urlInput && course?.googleDocUrl) {
-    urlInput.value = course.googleDocUrl;
-    setGdocStatus('success', '✓ Google Doc linked — click "Sync Notes" to pull your latest edits, or "Sync & Build" to update your outline automatically.');
-  }
 
   if (course?.outlineData) {
     showOutlineContent(`<div class="md-rendered">${marked.parse(course.outlineData)}</div>`, course.name);
@@ -5511,20 +5523,39 @@ async function generateOutline(type) {
   const materialsContext = gatherCourseContext(course);
   const userNotes = document.getElementById('outline-notes-text').value.trim();
   const typeInstructions = {
-    full: 'Create a comprehensive, detailed course outline with all black-letter rules, case holdings, policy rationales, and multi-step doctrine flowcharts.',
-    attack: 'Create a concise attack outline — just the key rules, elements, and analysis frameworks needed for quick exam reference.',
-    checklist: 'Create a one-page exam checklist with every issue to spot, organized by topic, with brief rule triggers.',
+    full: 'Create a comprehensive, detailed course outline covering all black-letter rules, case holdings, policy rationales, and multi-step doctrine flowcharts. Include every major topic and subtopic from the notes.',
+    attack: 'Create an attack outline — a condensed version of the comprehensive outline stripped down to only what is needed for fast exam reference. For each topic and subtopic include: (1) a concise one-sentence definition of the concept, (2) the black-letter rule or legal standard stated precisely, (3) the key elements or factors listed as brief bullets, and (4) for any case cited, one sentence stating the case name and the rule or holding it stands for (no full facts). Omit policy discussions, lengthy explanations, and anything not directly testable. Every entry should be as short as possible while remaining complete.',
+    checklist: 'Create an issue-spotter checklist for the exam. For each major topic, list every sub-issue to check, with brief rule triggers. Format as nested checklists (e.g., [ ] Issue → [ ] Sub-issue).',
     auto: 'Create a well-organized course outline extracting all rules, cases, and doctrines. Include rule statements, case holdings, and policy rationales organized by topic and subtopic.'
   };
 
   let prompt;
   if (userNotes) {
     const hasOtherMaterials = materialsContext && !materialsContext.startsWith('No materials');
-    prompt = `For the course "${course.name}", ${typeInstructions[type]}\n\nPRIMARY SOURCE — Student's own notes:\n${userNotes.slice(0, 25000)}${hasOtherMaterials ? `\n\nSUPPLEMENTAL COURSE MATERIALS:\n${materialsContext}` : ''}`;
+    prompt = `For the course "${course.name}", ${typeInstructions[type]}\n\nPRIMARY SOURCE — Student's own notes:\n${userNotes.slice(0, 150000)}${hasOtherMaterials ? `\n\nSUPPLEMENTAL COURSE MATERIALS:\n${materialsContext}` : ''}`;
   } else {
     prompt = `For the course "${course.name}", ${typeInstructions[type]}\n\nBase this on the following materials:\n${materialsContext}`;
   }
-  const system = 'You are JURIS, an expert law school outline builder. Create clear, well-organized, accurate legal outlines that would help a student prepare for exams.';
+  const system = `You are JURIS, an expert law school outline builder. Your outlines must be clearly structured using markdown formatting:
+- Use # for major topic headings (e.g., # I. Negligence)
+- Use ## for subtopic headings (e.g., ## A. Duty)
+- Use ### for sub-subtopics (e.g., ### 1. General Rule)
+- Use bullet points (- ) for rules, elements, and case holdings
+- Use **bold** for key terms, rule statements, and case names
+- Use > blockquotes for important policy rationales or exam tips
+- Separate each major topic with a horizontal rule (---)
+Never produce a wall of paragraphs. Every section must be visually distinct with headers and lists. Organize content by legal doctrine, not chronologically.
+
+${type === 'attack'
+  ? `CASES IN ATTACK OUTLINES:
+For every case cited, include only a single bullet in this format: **Case Name** — one sentence stating the rule or holding it stands for. Do NOT include facts, background, or any further explanation. Keep it as brief as possible.`
+  : `CASE BRIEFS — CRITICAL REQUIREMENT:
+Every time you cite or mention a case by name, you must immediately follow it with a mini case brief formatted as an indented block:
+  - **Facts:** 3–10 sentences describing the key facts, parties, and what happened. Include enough detail so a student can recall why this case matters.
+  - **Holding:** One sentence stating exactly what the court decided.
+  - **Rule/Significance:** One sentence explaining which legal rule or doctrine this case illustrates and why it is important for exam purposes.
+Do this for every single case — no exceptions. If a case appears more than once, include the full brief the first time and a brief parenthetical reminder on subsequent mentions.`
+}`;
   const result = await callGemini(prompt, system);
   course.outlineData = result;
   saveState();
