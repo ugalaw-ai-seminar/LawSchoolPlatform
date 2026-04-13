@@ -820,6 +820,9 @@ tr:hover td { background: rgba(42,127,127,0.04); }
   max-width: 85%;
   white-space: pre-wrap;
 }
+.ai-msg.md-rendered {
+  white-space: normal;
+}
 .ai-msg.user {
   background: rgba(186,12,47,0.08);
   color: var(--ink);
@@ -4437,13 +4440,11 @@ async function callGemini(prompt, systemInstruction) {
   // Universal formatting rules appended to every system instruction
   const formatRules = `
 
-CRITICAL FORMATTING RULES — follow these exactly:
-- NEVER use asterisks (*) for bold or emphasis. Instead use HTML tags: <strong> for bold, <em> for italic.
-- Use clean markdown headers (# ## ###) for section titles.
-- Use numbered lists (1. 2. 3.) or bullet lists (- item) for lists, but never use asterisks as bullet markers.
+FORMATTING RULES:
+- Format responses using clean markdown: use # ## ### for headers, numbered lists, and dash-based bullet lists.
+- Use **bold** sparingly for key terms only. Do not overuse bold or italic.
 - Use line breaks between sections for readability.
-- Keep formatting clean, professional, and easy to scan.
-- Do NOT wrap text in asterisks for any reason.`;
+- Keep formatting clean, professional, and easy to scan.`;
 
   const fullSystem = systemInstruction ? systemInstruction + formatRules : formatRules.trim();
   
@@ -4465,12 +4466,7 @@ CRITICAL FORMATTING RULES — follow these exactly:
       throw new Error(msg);
     }
     const data = await resp.json();
-    let result = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response generated.';
-    // Post-process: strip any remaining asterisk-based bold/italic formatting
-    result = result.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
-    result = result.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-    result = result.replace(/(?<!\w)\*(?!\s)(.+?)(?<!\s)\*(?!\w)/g, '<em>$1</em>');
-    return result;
+    return data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response generated.';
   } catch (e) {
     console.error('Gemini error:', e);
     if (e.message === 'Failed to fetch') {
@@ -4747,7 +4743,7 @@ async function runAITool(type) {
   titleEl.textContent = p.title;
   const system = `You are JURIS, an expert law school AI tutor. You help law students study effectively. Be thorough, accurate, and pedagogically sound. Format your responses cleanly with proper structure using headers and lists.`;
   const result = await callGemini(p.prompt, system);
-  contentEl.textContent = result;
+  contentEl.innerHTML = `<div class="md-rendered">${marked.parse(result)}</div>`;
 }
 
 function gatherCourseContext(course) {
@@ -4937,7 +4933,7 @@ ${qaText}`;
 
   const system = 'You are JURIS, an expert law professor. Grade each answer rigorously but constructively. Always produce a rubric first, then score against it. Use clean formatting with headers and lists.';
   const result = await callGemini(prompt, system);
-  gradeContent.innerHTML = marked.parse(result);
+  gradeContent.innerHTML = `<div class="md-rendered">${marked.parse(result)}</div>`;
 
   // Save to performance profile
   saveQuizResult(extractTextScore(result, textQuestions.length));
@@ -4955,7 +4951,7 @@ async function gradeAnswer() {
   const prompt = `Grade this law student answer.\n\nQuestion:\n${question}\n\nAnswer:\n${answer}\n\nProvide a rubric, score each criterion, give a total out of 10, and 2-3 sentences of feedback.`;
   const system = 'You are JURIS, an expert law professor. Use clean formatting with clear headings.';
   const result = await callGemini(prompt, system);
-  gradeContent.innerHTML = marked.parse(result);
+  gradeContent.innerHTML = `<div class="md-rendered">${marked.parse(result)}</div>`;
 }
 
 // ── MBE parsing ──
@@ -5034,7 +5030,7 @@ async function submitMBEQuiz() {
   const prompt = `A law student just completed a multiple choice quiz. Grade their answers.\n\nFor EACH question:\n1. State whether they were CORRECT or INCORRECT\n2. Reveal the correct answer and letter\n3. Briefly explain the controlling rule and why the correct answer is right\n4. If wrong, explain why their choice was incorrect\n\nEnd with a total score (X out of ${mbeQuestions.length}) and 1-2 sentences of overall feedback.\n\nStudent's answers:\n${answersText}`;
   const system = 'You are JURIS, an expert law professor. Grade MBE answers clearly and educationally. Use ## for each question heading.';
   const result = await callGemini(prompt, system);
-  gradeContent.innerHTML = marked.parse(result);
+  gradeContent.innerHTML = `<div class="md-rendered">${marked.parse(result)}</div>`;
 
   // Save to performance profile
   saveQuizResult(extractMBEScore(result, mbeQuestions.length));
@@ -5794,7 +5790,7 @@ async function generateStudyPlan() {
   const prompt = `Create a detailed weekly study plan based on these courses and upcoming assignments:\n\n${JSON.stringify(courses, null, 2)}\n\nToday is ${new Date().toLocaleDateString()}. Include spaced repetition, break reminders, and prioritize upcoming deadlines.`;
   const system = 'You are JURIS, a law school study planning assistant. Create practical, time-blocked study plans that incorporate spaced repetition and prevent burnout.';
   const result = await callGemini(prompt, system);
-  el.innerHTML = `<div style="white-space:pre-wrap;">${esc(result)}</div>`;
+  el.innerHTML = `<div class="md-rendered">${marked.parse(result)}</div>`;
 }
 
 // ═══════════════════════════════════════════
@@ -6338,7 +6334,7 @@ Provide comprehensive career intelligence with:
 
   const system = 'You are JURIS, an expert legal career counselor at UGA Law. Provide realistic, data-informed guidance. Use clean formatting with headers, lists, and tables for clarity.';
   const result = await callGemini(prompt, system);
-  outputEl.innerHTML = marked.parse ? marked.parse(result) : result;
+  outputEl.innerHTML = `<div class="md-rendered">${marked.parse(result)}</div>`;
 }
 
 function saveCareerProfile() {
@@ -6465,7 +6461,7 @@ async function researchEmployer() {
   const card = document.getElementById('career-results');
   const out = document.getElementById('career-output');
   card.style.display = 'block';
-  out.innerHTML = `<strong>Employer Intel: ${esc(name)}</strong><br><br>` + (marked.parse ? marked.parse(result) : result);
+  out.innerHTML = `<strong>Employer Intel: ${esc(name)}</strong><br><br><div class="md-rendered">${marked.parse(result)}</div>`;
   switchCareerTab('career-match', document.querySelector('.career-tab[data-tab="career-match"]'));
 }
 
@@ -6595,7 +6591,7 @@ Provide:
 5. Any red flags for legal recruiting
 Use clean formatting with headers and lists.`;
   const result = await callGemini(prompt, 'You are JURIS, an expert legal resume coach at a top law school career services office. Be honest, specific, and constructive.');
-  out.innerHTML = marked.parse ? marked.parse(result) : result;
+  out.innerHTML = `<div class="md-rendered">${marked.parse(result)}</div>`;
 }
 
 async function generateCoverLetter() {
@@ -6620,7 +6616,7 @@ Personal hook/connection: ${hook || 'N/A'}
 
 Format as a complete, ready-to-use cover letter (3–4 short paragraphs). Professional but not stiff. Do NOT use hollow phrases like "I am writing to express my interest." Open with something specific and compelling.`;
   const result = await callGemini(prompt, 'You are JURIS, an expert legal writing coach. Write cover letters that are specific, confident, and memorable without being over-the-top.');
-  out.innerHTML = '<pre style="white-space:pre-wrap;font-family:inherit;">' + esc(result) + '</pre>';
+  out.innerHTML = `<div class="md-rendered">${marked.parse(result)}</div>`;
 }
 
 // ─── TAB 5: INTERVIEW PREP ───
@@ -6739,7 +6735,7 @@ Evaluate this answer for a legal job interview:
 3. A stronger version of the answer (rewrite it)
 4. Score: /10 with one-sentence rationale`;
   const result = await callGemini(prompt, 'You are JURIS, a legal interview coach. Give honest, constructive feedback. Be specific. Use clean formatting.');
-  feedbackEl.innerHTML = marked.parse ? marked.parse(result) : result;
+  feedbackEl.innerHTML = `<div class="md-rendered">${marked.parse(result)}</div>`;
 }
 
 // ─── TAB 6: NETWORK TRACKER ───
@@ -6811,7 +6807,7 @@ async function draftFollowup(id) {
 
   const prompt = `Draft a short, professional follow-up email from a UGA Law student to ${c.name} (${c.org}). They met via: ${c.how}. Notes from conversation: ${c.notes || 'N/A'}. The email should feel genuine, reference something specific if possible, and end with a soft ask (coffee chat, advice, etc). Keep it under 150 words.`;
   const result = await callGemini(prompt, 'You are a polished legal networking coach. Write emails that are warm, brief, and memorable. No filler phrases like "Hope this finds you well."');
-  out.textContent = result;
+  out.innerHTML = `<div class="md-rendered">${marked.parse(result)}</div>`;
   card.scrollIntoView({ behavior: 'smooth' });
 }
 
@@ -7736,7 +7732,7 @@ Be warm, specific, and constructive. Reference their actual numbers and patterns
 
   const system = 'You are JURIS wellness advisor. You help law students maintain healthy study habits, manage stress, and prevent burnout. Be warm, supportive, practical, and specific. Always reference the student\'s actual data in your advice.';
   const result = await callGemini(prompt, system);
-  el.textContent = result;
+  el.innerHTML = `<div class="md-rendered">${marked.parse(result)}</div>`;
 }
 
 // ═══════════════════════════════════════════
