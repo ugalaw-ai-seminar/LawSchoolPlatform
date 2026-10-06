@@ -3,22 +3,23 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LAW DAWG — UGA Law AI Platform</title>
+<title>LOQUITUR — AI Legal Study Platform</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.6.1/mermaid.min.js"></script>
 <style>
 :root {
   --ink: #1c1917;
   --parchment: #f7f4f0;
-  --red: #BA0C2F;
-  --red-light: #d41636;
-  --red-dark: #8f0922;
-  --gold: #BA0C2F;
-  --gold-light: #d41636;
-  --gold-dark: #8f0922;
-  --crimson: #BA0C2F;
-  --crimson-light: #d41636;
+  --primary: #2a5a7f;
+  --primary-light: #3a7aaf;
+  --primary-dark: #1a3a5f;
+  --gold: #c49a3c;
+  --gold-light: #d9b563;
+  --gold-dark: #a17d2f;
+  --accent: #c49a3c;
+  --accent-light: #d9b563;
   --teal: #2a7f7f;
   --teal-light: #3a9f9f;
   --teal-soft: rgba(42,127,127,0.1);
@@ -57,14 +58,14 @@ body {
   overflow-x: hidden;
   background-image:
     radial-gradient(ellipse at 10% 30%, rgba(42,127,127,0.06) 0%, transparent 45%),
-    radial-gradient(ellipse at 85% 75%, rgba(186,12,47,0.05) 0%, transparent 40%),
+    radial-gradient(ellipse at 85% 75%, rgba(42,90,127,0.05) 0%, transparent 40%),
     radial-gradient(ellipse at 55% 10%, rgba(181,101,29,0.04) 0%, transparent 35%);
 }
 
 /* Scrollbar */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 3px; opacity: 0.5; }
+::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; opacity: 0.5; }
 
 /* ─── SPLASH / API KEY SCREEN ─── */
 #splash-screen {
@@ -177,6 +178,52 @@ body {
   line-height: 1.6;
 }
 
+/* Provider radio group */
+.provider-group {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 1.5rem;
+  justify-content: center;
+}
+.provider-group label {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 8px;
+  border: 1.5px solid rgba(42,127,127,0.3);
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.5);
+  transition: all 0.3s;
+  font-family: var(--font-body);
+}
+.provider-group input[type="radio"] { display: none; }
+.provider-group label:has(input:checked) {
+  border-color: var(--teal-light);
+  background: rgba(42,127,127,0.2);
+  color: white;
+}
+
+/* Days checkbox group */
+.days-check {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+.days-check label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 400;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
 /* ─── MAIN APP LAYOUT ─── */
 #app { display: none; min-height: 100vh; }
 #app.active { display: flex; }
@@ -200,7 +247,7 @@ body {
   height: var(--header-h);
   padding: 0 1.25rem;
   border-bottom: 1px solid rgba(0,0,0,0.15);
-  background: var(--red);
+  background: var(--primary);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -308,8 +355,8 @@ body {
   border: 1px solid rgba(0,0,0,0.12);
 }
 .btn-ghost:hover { border-color: var(--teal); color: var(--teal); }
-.btn-danger { background: var(--crimson); color: white; }
-.btn-danger:hover { background: var(--crimson-light); }
+.btn-danger { background: var(--primary-dark); color: white; }
+.btn-danger:hover { background: var(--primary); }
 
 .btn svg { width: 14px; height: 14px; }
 
@@ -327,7 +374,7 @@ body {
   background: #f5f1ec;
   background-image:
     radial-gradient(ellipse at 10% 30%, rgba(42,127,127,0.07) 0%, transparent 45%),
-    radial-gradient(ellipse at 85% 75%, rgba(186,12,47,0.05) 0%, transparent 40%),
+    radial-gradient(ellipse at 85% 75%, rgba(42,90,127,0.05) 0%, transparent 40%),
     radial-gradient(ellipse at 55% 10%, rgba(181,101,29,0.05) 0%, transparent 35%);
 }
 
@@ -584,10 +631,10 @@ body {
   position: absolute;
   top: 0; left: 0; bottom: 0;
   width: 6px;
-  background: var(--red);
+  background: var(--primary);
   border-radius: 20px 0 0 20px;
 }
-.stat-card:nth-child(1)::before { background: var(--red); }
+.stat-card:nth-child(1)::before { background: var(--primary); }
 .stat-card:nth-child(2)::before { background: var(--teal); }
 .stat-card:nth-child(3)::before { background: var(--amber); }
 .stat-card:nth-child(4)::before { background: var(--sage); }
@@ -607,7 +654,7 @@ body {
   letter-spacing: -0.04em;
   overflow: hidden;
 }
-.stat-card:nth-child(1) { color: var(--red); }
+.stat-card:nth-child(1) { color: var(--primary); }
 .stat-card:nth-child(2) { color: var(--teal); }
 .stat-card:nth-child(3) { color: var(--amber); }
 .stat-card:nth-child(4) { color: var(--sage); }
@@ -688,7 +735,7 @@ body {
   gap: 4px;
 }
 .tag-gold { background: var(--teal-soft); color: var(--teal); }
-.tag-crimson { background: rgba(186,12,47,0.1); color: var(--red); }
+.tag-crimson { background: rgba(186,12,47,0.1); color: var(--primary); }
 .tag-success { background: var(--sage-soft); color: var(--sage); }
 
 /* Tables */
@@ -805,7 +852,7 @@ tr:hover td { background: rgba(42,127,127,0.04); }
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  border-bottom: 2px solid var(--red);
+  border-bottom: 2px solid var(--primary);
 }
 .ai-panel-header svg { width: 16px; height: 16px; }
 
@@ -844,7 +891,7 @@ tr:hover td { background: rgba(42,127,127,0.04); }
 }
 .ai-msg.system {
   background: rgba(139,38,53,0.06);
-  color: var(--crimson);
+  color: var(--accent);
   font-size: 0.75rem;
   align-self: center;
   text-align: center;
@@ -919,7 +966,7 @@ tr:hover td { background: rgba(42,127,127,0.04); }
 .md-rendered h1 {
   font-family: var(--font-display);
   font-size: 1.75rem; font-weight: 900; color: var(--ink);
-  border-bottom: 3px solid var(--red);
+  border-bottom: 3px solid var(--primary);
   padding-bottom: 0.4rem; margin: 1.5rem 0 0.75rem;
 }
 .md-rendered h2 {
@@ -1021,9 +1068,9 @@ tr:hover td { background: rgba(42,127,127,0.04); }
 }
 /* Feedback correct/incorrect coloring */
 .mbe-option.correct { border-color: var(--sage); background: var(--sage-soft); }
-.mbe-option.incorrect { border-color: var(--red); background: rgba(186,12,47,0.07); }
+.mbe-option.incorrect { border-color: var(--primary); background: rgba(186,12,47,0.07); }
 .mbe-option.correct .mbe-option-letter { background: var(--sage); border-color: var(--sage); color: white; }
-.mbe-option.incorrect .mbe-option-letter { background: var(--red); border-color: var(--red); color: white; }
+.mbe-option.incorrect .mbe-option-letter { background: var(--primary); border-color: var(--primary); color: white; }
 
 /* (outline uses shared .md-rendered class) */
 
@@ -1060,7 +1107,7 @@ tr:hover td { background: rgba(42,127,127,0.04); }
   content: '';
   width: 5px; height: 5px;
   border-radius: 50%;
-  background: var(--red);
+  background: var(--primary);
   margin-top: 2px;
 }
 .cal-cell.empty { pointer-events: none; }
@@ -1361,7 +1408,7 @@ tr:hover td { background: rgba(42,127,127,0.04); }
   background: rgba(181,101,29,0.12);
   color: var(--amber);
 }
-.net-followup-badge.overdue { background: rgba(186,12,47,0.1); color: var(--red); }
+.net-followup-badge.overdue { background: rgba(186,12,47,0.1); color: var(--primary); }
 
 /* OCI checklist */
 .oci-phase {
@@ -1458,6 +1505,125 @@ body.dark-mode .net-contact-card { border-color: rgba(181,101,29,0.15); }
 #page-ai-chat { background: radial-gradient(ellipse at 50% 20%, rgba(25,110,110,0.07) 0%, transparent 55%); }
 
 /* ─── END PAGE-SPECIFIC COLORWAYS ─── */
+
+/* ─── Weekly Schedule Grid ─── */
+.schedule-grid {
+  display: grid;
+  grid-template-columns: 80px repeat(5, 1fr);
+  gap: 1px;
+  background: var(--mist);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+.schedule-grid .sg-header {
+  background: var(--navy);
+  color: white;
+  padding: 10px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.85rem;
+  font-family: var(--font-body);
+}
+.schedule-grid .sg-time {
+  background: var(--card-bg);
+  padding: 8px;
+  font-size: 0.78rem;
+  color: var(--slate);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-body);
+}
+.schedule-grid .sg-cell {
+  background: white;
+  padding: 4px;
+  min-height: 40px;
+  position: relative;
+}
+.schedule-grid .sg-cell .class-block {
+  background: var(--teal);
+  color: white;
+  padding: 4px 6px;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  font-family: var(--font-body);
+}
+
+/* ─── Bluebook Citation ─── */
+.cite-output {
+  background: white;
+  border: 1px solid var(--mist);
+  border-radius: var(--radius);
+  padding: 16px;
+  font-family: var(--font-display);
+  margin-top: 12px;
+  min-height: 60px;
+  white-space: pre-wrap;
+}
+.cite-mode-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 16px;
+}
+.cite-mode-tabs button {
+  flex: 1;
+  padding: 12px;
+  border: 1.5px solid var(--mist);
+  background: var(--card-bg);
+  font-family: var(--font-body);
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.3s;
+  color: var(--slate);
+}
+.cite-mode-tabs button:first-child { border-radius: var(--radius) 0 0 var(--radius); }
+.cite-mode-tabs button:last-child { border-radius: 0 var(--radius) var(--radius) 0; }
+.cite-mode-tabs button.active {
+  background: var(--teal);
+  color: white;
+  border-color: var(--teal);
+}
+
+/* ─── Billable Hours / Stopwatch ─── */
+.time-log { list-style: none; }
+.time-log li {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: white;
+  border: 1px solid var(--mist);
+  border-radius: 6px;
+  margin-bottom: 6px;
+  font-size: 0.88rem;
+  font-family: var(--font-body);
+}
+
+/* ─── Weak Areas ─── */
+.weak-area-list { list-style: none; }
+.weak-area-list li {
+  padding: 8px 12px;
+  background: rgba(217, 83, 79, 0.08);
+  border-radius: 6px;
+  margin-bottom: 4px;
+  font-size: 0.85rem;
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-body);
+}
+
+/* ─── Mermaid Diagrams ─── */
+.mermaid-container {
+  background: white;
+  border: 1px solid var(--mist);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-top: 12px;
+  overflow-x: auto;
+}
+.mermaid-container svg { max-width: 100%; }
 
 /* ─── FLOATING AI CHAT BUTTON ─── */
 .fab-chat {
@@ -1728,7 +1894,7 @@ body.dark-mode .net-contact-card { border-color: rgba(181,101,29,0.15); }
   border: 1px solid rgba(74,124,95,0.25);
 }
 .perf-tag.weakness {
-  background: rgba(186,12,47,0.08); color: var(--red);
+  background: rgba(186,12,47,0.08); color: var(--primary);
   border: 1px solid rgba(186,12,47,0.2);
 }
 .perf-tag.neutral {
@@ -1753,7 +1919,7 @@ body.dark-mode .net-contact-card { border-color: rgba(181,101,29,0.15); }
   color: var(--slate); background: none; border: none;
   cursor: pointer; text-decoration: underline; padding: 0;
 }
-.perf-clear-btn:hover { color: var(--red); }
+.perf-clear-btn:hover { color: var(--primary); }
 
 /* ── Google Docs Sync ── */
 .gdoc-card { border-color: rgba(66,133,244,0.22) !important; background: rgba(66,133,244,0.025) !important; }
@@ -1771,7 +1937,7 @@ body.dark-mode .net-contact-card { border-color: rgba(181,101,29,0.15); }
   border-radius: 6px;
 }
 .gdoc-status.success { color: var(--sage); background: var(--sage-soft); }
-.gdoc-status.error   { color: var(--red); background: rgba(186,12,47,0.07); }
+.gdoc-status.error   { color: var(--primary); background: rgba(186,12,47,0.07); }
 .gdoc-status.info    { color: var(--slate); background: rgba(90,96,112,0.06); }
 
 /* ── Bar Alignment: Parsed Course Rows ── */
@@ -1803,7 +1969,7 @@ body.dark-mode .net-contact-card { border-color: rgba(181,101,29,0.15); }
 .gp-excellent { background: var(--sage-soft); color: var(--sage); }
 .gp-good { background: var(--teal-soft); color: var(--teal); }
 .gp-fair { background: var(--amber-soft); color: var(--amber); }
-.gp-poor { background: rgba(186,12,47,0.12); color: var(--red); }
+.gp-poor { background: rgba(186,12,47,0.12); color: var(--primary); }
 
 .importance-badge {
   font-size: 0.62rem;
@@ -1813,7 +1979,7 @@ body.dark-mode .net-contact-card { border-color: rgba(181,101,29,0.15); }
   padding: 2px 7px;
   border-radius: 4px;
 }
-.imp-critical { background: rgba(186,12,47,0.12); color: var(--red); }
+.imp-critical { background: rgba(186,12,47,0.12); color: var(--primary); }
 .imp-high { background: var(--amber-soft); color: var(--amber); }
 .imp-medium { background: var(--teal-soft); color: var(--teal); }
 .imp-elective { background: rgba(90,96,112,0.08); color: var(--slate); }
@@ -1876,7 +2042,7 @@ body.dark-mode .net-contact-card { border-color: rgba(181,101,29,0.15); }
   font-size: 0.8rem;
   line-height: 1.5;
 }
-.improvement-tip.tip-critical { background: rgba(186,12,47,0.06); border-left: 3px solid var(--red); }
+.improvement-tip.tip-critical { background: rgba(186,12,47,0.06); border-left: 3px solid var(--primary); }
 .improvement-tip.tip-warning { background: var(--amber-soft); border-left: 3px solid var(--amber); }
 .improvement-tip.tip-info { background: var(--teal-soft); border-left: 3px solid var(--teal); }
 .tip-icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
@@ -2051,7 +2217,7 @@ body.dark-mode .net-contact-card { border-color: rgba(181,101,29,0.15); }
   transition: all 0.15s;
 }
 .cal-event-btn:hover { border-color: var(--teal); color: var(--teal); }
-.cal-event-btn.del:hover { border-color: var(--red); color: var(--red); }
+.cal-event-btn.del:hover { border-color: var(--primary); color: var(--primary); }
 .cal-edit-row {
   display: flex;
   gap: 6px;
@@ -2063,7 +2229,7 @@ body.dark-mode .net-contact-card { border-color: rgba(181,101,29,0.15); }
 .cal-edit-row .form-input { padding: 6px 10px; font-size: 0.78rem; }
 body.dark-mode .cal-event-btn { border-color: rgba(255,255,255,0.08); color: #9ca3af; }
 body.dark-mode .cal-event-btn:hover { border-color: var(--teal); color: var(--teal); }
-body.dark-mode .cal-event-btn.del:hover { border-color: var(--red); color: var(--red); }
+body.dark-mode .cal-event-btn.del:hover { border-color: var(--primary); color: var(--primary); }
 .cal-add-inline {
   display: flex;
   gap: 8px;
@@ -2119,7 +2285,7 @@ body.dark-mode .cal-event-btn.del:hover { border-color: var(--red); color: var(-
 }
 .course-stat-chip.cs-amber { background: var(--amber-soft); color: var(--amber); }
 .course-stat-chip.cs-sage { background: var(--sage-soft); color: var(--sage); }
-.course-stat-chip.cs-red { background: rgba(186,12,47,0.08); color: var(--red); }
+.course-stat-chip.cs-red { background: rgba(186,12,47,0.08); color: var(--primary); }
 
 /* ─── WELLNESS: Study Timer ─── */
 .timer-display {
@@ -2140,7 +2306,7 @@ body.dark-mode .cal-event-btn.del:hover { border-color: var(--red); color: var(-
   text-transform: uppercase;
   margin-bottom: 1rem;
 }
-.timer-phase-label.work { color: var(--red); }
+.timer-phase-label.work { color: var(--primary); }
 .timer-phase-label.break { color: var(--sage); }
 .timer-phase-label.idle { color: var(--slate); }
 .timer-controls {
@@ -2218,7 +2384,7 @@ body.dark-mode .cal-event-btn.del:hover { border-color: var(--red); color: var(-
   flex: 1;
   -webkit-appearance: none;
   height: 6px;
-  background: linear-gradient(90deg, var(--red) 0%, var(--amber) 50%, var(--sage) 100%);
+  background: linear-gradient(90deg, var(--primary) 0%, var(--amber) 50%, var(--sage) 100%);
   border-radius: 3px;
   outline: none;
 }
@@ -2559,7 +2725,7 @@ body.dark-mode .perf-subject-card { background: #1a1e26; border-color: rgba(255,
 body.dark-mode .course-card { border-left-color: var(--teal) !important; }
 body.dark-mode #page-hero { border-bottom-color: rgba(255,255,255,0.06); }
 body.dark-mode ::-webkit-scrollbar-thumb { background: rgba(42,127,127,0.4); }
-body.dark-mode .md-rendered h1 { color: #e8e4dc; border-bottom-color: var(--red); }
+body.dark-mode .md-rendered h1 { color: #e8e4dc; border-bottom-color: var(--primary); }
 body.dark-mode .md-rendered h2 { color: #c8d4e8; }
 body.dark-mode .md-rendered h3 { color: var(--amber); }
 body.dark-mode .md-rendered blockquote { color: #9ca3af; }
@@ -2579,17 +2745,23 @@ body.dark-mode .reading-name { color: #e8e4dc; }
 <!-- ═══════ SPLASH SCREEN ═══════ -->
 <div id="splash-screen">
   <div class="splash-inner">
-    <div class="splash-logo">LAW<span>DAWG</span></div>
-    <div class="splash-tagline">UGA School of Law · AI Assistant</div>
+    <div class="splash-logo">LOQUI<span>TUR</span></div>
+    <div class="splash-tagline">Your Intelligent Law School Companion</div>
     <div class="splash-divider"></div>
-    <div class="splash-label">Gemini API Key</div>
-    <div class="api-input-wrap">
-      <input type="password" id="api-key-input" placeholder="AIza..." autocomplete="off">
+    <div class="splash-label">AI Provider</div>
+    <div class="provider-group">
+      <label><input type="radio" name="ai-provider" value="gemini" checked> Gemini</label>
+      <label><input type="radio" name="ai-provider" value="openai"> OpenAI</label>
+      <label><input type="radio" name="ai-provider" value="claude"> Claude</label>
     </div>
-    <button class="btn-enter" id="btn-enter" onclick="enterApp()">Enter Platform</button>
+    <div class="splash-label">API Key</div>
+    <div class="api-input-wrap">
+      <input type="password" id="api-key-input" placeholder="Paste your API key here" autocomplete="off">
+    </div>
+    <button class="btn-enter" id="btn-enter" onclick="enterApp()">Enter LOQUITUR</button>
     <div class="splash-note">
       Your API key is used exclusively for AI-powered features. Data is saved per key.
-      <br>Obtain a FREE key from <a href="https://aistudio.google.com" target="_blank" style="color:var(--gold);text-decoration:underline;">aistudio.google.com</a>
+      <br>Obtain a free Gemini key from <a href="https://aistudio.google.com" target="_blank" style="color:var(--gold);text-decoration:underline;">aistudio.google.com</a>
     </div>
     <button onclick="document.getElementById('api-help-panel').style.display = document.getElementById('api-help-panel').style.display === 'none' ? 'block' : 'none'" style="margin-top:1.25rem;background:transparent;border:1px solid rgba(197,165,90,0.3);color:var(--gold-light);padding:8px 20px;border-radius:var(--radius);cursor:pointer;font-family:var(--font-body);font-size:0.75rem;letter-spacing:0.05em;transition:all 0.2s;">
       <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
@@ -2617,8 +2789,8 @@ body.dark-mode .reading-name { color: #e8e4dc; }
   <!-- Sidebar -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
-      <div class="sidebar-brand"><span class="paw">🐾</span> LAW DAWG</div>
-      <div class="sidebar-sub">UGA School of Law</div>
+      <div class="sidebar-brand">LOQUITUR</div>
+      <div class="sidebar-sub">AI Legal Study Platform</div>
     </div>
     <nav class="sidebar-nav">
       <div class="nav-section-label">Academic</div>
@@ -2654,13 +2826,16 @@ body.dark-mode .reading-name { color: #e8e4dc; }
       </div>
 
       <div class="nav-section-label">Tools</div>
+      <div class="nav-item" data-page="bluebook" onclick="navigateTo('bluebook')">
+        <span class="nav-icon">📖</span>Bluebook Cite
+      </div>
       <div class="nav-item" data-page="wellness" onclick="navigateTo('wellness')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
         Wellness
       </div>
       <div class="nav-item" data-page="ai-chat" onclick="navigateTo('ai-chat')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-        AI Assistant
+        RES Assistant
       </div>
     </nav>
     <div class="sidebar-footer">
@@ -2696,7 +2871,7 @@ body.dark-mode .reading-name { color: #e8e4dc; }
 
         <!-- Greeting + Today at a Glance -->
         <div class="card today-card">
-          <div class="dash-greeting" id="dash-greeting">Good morning! 🐾</div>
+          <div class="dash-greeting" id="dash-greeting">Good morning!</div>
           <div class="dash-greeting-sub" id="dash-greeting-sub">Here's your day at a glance.</div>
           <div class="today-grid" id="today-grid"></div>
         </div>
@@ -2767,12 +2942,25 @@ body.dark-mode .reading-name { color: #e8e4dc; }
         <div class="card" style="margin-top:1.25rem;">
           <div class="card-header">
             <span class="card-title">Quick AI Actions</span>
-            <span class="card-badge">Gemini Powered</span>
+            <span class="card-badge">AI Powered</span>
           </div>
           <div class="grid-3">
             <button class="btn btn-ghost" style="padding:16px;justify-content:center;" onclick="quickAI('Generate a practice question for my weakest subject')">Practice Question</button>
             <button class="btn btn-ghost" style="padding:16px;justify-content:center;" onclick="quickAI('Give me a cold-call simulation question')">Cold Call Prep</button>
             <button class="btn btn-ghost" style="padding:16px;justify-content:center;" onclick="quickAI('Create a study schedule for this week')">Study Schedule</button>
+          </div>
+        </div>
+
+        <!-- Weak Areas Widget -->
+        <div class="card" style="margin-top:1.25rem;">
+          <div class="card-header">
+            <span class="card-title">Weak Areas</span>
+            <span class="card-badge">Performance</span>
+          </div>
+          <div id="weak-areas-dashboard">
+            <ul class="weak-area-list" id="weak-area-list">
+              <li style="background:transparent;color:var(--slate);justify-content:center;">Complete quizzes in the Study Engine to identify weak areas.</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -2830,7 +3018,12 @@ body.dark-mode .reading-name { color: #e8e4dc; }
                 <label class="form-label">Add Class Note</label>
                 <textarea class="form-textarea" id="note-input" placeholder="Paste or type your class notes here..."></textarea>
               </div>
-              <button class="btn btn-primary" onclick="saveNote()">Save Note</button>
+              <div style="display:flex;gap:8px;margin-bottom:8px;">
+                <button class="btn btn-primary" onclick="saveNote()">Save Note</button>
+                <button class="btn btn-ghost" onclick="aiReorganizeNotes()">AI Reorganize</button>
+                <button class="btn btn-ghost" onclick="generateDiagram()">Generate Diagram</button>
+              </div>
+              <div class="mermaid-container" id="note-diagram-container" style="display:none;"></div>
               <div id="notes-list" style="margin-top:1rem;"></div>
             </div>
 
@@ -2921,6 +3114,11 @@ body.dark-mode .reading-name { color: #e8e4dc; }
                 <option value="hypo">Full Hypothetical</option>
               </select>
             </div>
+            <div class="form-group" style="margin-bottom:0.75rem;">
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:0.85rem;font-weight:500;">
+                <input type="checkbox" id="quiz-weak-areas"> Focus on weak areas
+              </label>
+            </div>
             <button class="btn btn-primary" onclick="generateQuiz()" style="width:100%;justify-content:center;">Generate Questions</button>
           </div>
 
@@ -2991,7 +3189,7 @@ body.dark-mode .reading-name { color: #e8e4dc; }
             <span class="gdoc-badge">Google Docs</span>
           </div>
           <p style="font-size:0.8rem;color:var(--slate);margin-bottom:0.9rem;line-height:1.6;">
-            Paste your Google Doc link and click <strong>Sync &amp; Build</strong> — JURIS will pull all your notes (including every tab) and build a comprehensive outline automatically. Or click <strong>Sync Notes Only</strong> to load the notes first and build manually.
+            Paste your Google Doc link and click <strong>Sync &amp; Build</strong> — RES will pull all your notes (including every tab) and build a comprehensive outline automatically. Or click <strong>Sync Notes Only</strong> to load the notes first and build manually.
             <br><span style="font-size:0.71rem;opacity:0.75;">⚠️ Your Google Doc must be set to <strong>"Anyone with the link can view"</strong> (Share → General Access).</span>
           </p>
           <div class="gdoc-url-row">
@@ -3049,7 +3247,7 @@ body.dark-mode .reading-name { color: #e8e4dc; }
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 Download as Word Doc
               </button>
-              <button class="btn btn-ghost" onclick="clearSavedOutline()" style="font-size:0.75rem;color:var(--crimson);display:inline-flex;align-items:center;gap:5px;">
+              <button class="btn btn-ghost" onclick="clearSavedOutline()" style="font-size:0.75rem;color:var(--accent);display:inline-flex;align-items:center;gap:5px;">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6m4-6v6"/><path d="M9 6V4h6v2"/></svg>
                 Clear Outline
               </button>
@@ -3067,6 +3265,24 @@ body.dark-mode .reading-name { color: #e8e4dc; }
 
       <!-- ══════ CALENDAR PAGE ══════ -->
       <div class="page" id="page-calendar">
+
+        <!-- Weekly Class Schedule -->
+        <div class="card" style="margin-bottom:1.25rem;">
+          <div class="card-header">
+            <span class="card-title">Weekly Class Schedule</span>
+            <button class="btn btn-ghost" onclick="refreshScheduleGrid()" style="font-size:0.72rem;padding:4px 10px;">Refresh</button>
+          </div>
+          <div class="schedule-grid" id="weekly-schedule-grid">
+            <div class="sg-header"></div>
+            <div class="sg-header">Mon</div>
+            <div class="sg-header">Tue</div>
+            <div class="sg-header">Wed</div>
+            <div class="sg-header">Thu</div>
+            <div class="sg-header">Fri</div>
+          </div>
+          <p style="font-size:0.72rem;color:var(--slate);">Add courses with room, time, and day info to populate this schedule.</p>
+        </div>
+
         <div class="card">
           <div class="card-header">
             <span class="card-title" id="cal-month-title"></span>
@@ -3123,7 +3339,7 @@ body.dark-mode .reading-name { color: #e8e4dc; }
             <span class="card-title">📄 Step 1: Upload Your Transcript</span>
             <span class="card-badge">Auto-Parsed</span>
           </div>
-          <p style="font-size:0.82rem;color:var(--slate);margin-bottom:1rem;">Paste your transcript text or type your courses and grades. Law Dawg will automatically extract your course history and grades to power the bar readiness analysis.</p>
+          <p style="font-size:0.82rem;color:var(--slate);margin-bottom:1rem;">Paste your transcript text or type your courses and grades. RES will automatically extract your course history and grades to power the bar readiness analysis.</p>
           
           <div class="tabs">
             <div class="tab active" data-ttab="pdf" onclick="switchTranscriptTab('pdf')">Upload PDF</div>
@@ -3175,7 +3391,7 @@ body.dark-mode .reading-name { color: #e8e4dc; }
           <div id="ttab-paste" style="display:none;">
             <div class="form-group">
               <label class="form-label">Paste Transcript Text</label>
-              <textarea class="form-textarea" id="transcript-text" style="min-height:160px;font-family:var(--font-mono);font-size:0.78rem;" placeholder="Paste your transcript here. Law Dawg will extract course names and grades automatically.&#10;&#10;Example format:&#10;LAW 101  Contracts I          A   3 credits&#10;LAW 103  Civil Procedure       A-  4 credits&#10;LAW 105  Torts                 B+  3 credits&#10;&#10;Any format works — tabular, comma-separated, or plain text."></textarea>
+              <textarea class="form-textarea" id="transcript-text" style="min-height:160px;font-family:var(--font-mono);font-size:0.78rem;" placeholder="Paste your transcript here. RES will extract course names and grades automatically.&#10;&#10;Example format:&#10;LAW 101  Contracts I          A   3 credits&#10;LAW 103  Civil Procedure       A-  4 credits&#10;LAW 105  Torts                 B+  3 credits&#10;&#10;Any format works — tabular, comma-separated, or plain text."></textarea>
             </div>
             <button class="btn btn-primary" onclick="parseTranscript()">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg>
@@ -3228,18 +3444,62 @@ body.dark-mode .reading-name { color: #e8e4dc; }
               <label class="form-label">Bar Jurisdiction</label>
               <select class="form-select" id="bar-jurisdiction" onchange="renderJurisdictionChecklist()">
                 <option value="">Select state...</option>
-                <option value="NY">New York</option>
+                <option value="AL">Alabama</option>
+                <option value="AK">Alaska</option>
+                <option value="AZ">Arizona</option>
+                <option value="AR">Arkansas</option>
                 <option value="CA">California</option>
-                <option value="TX">Texas</option>
-                <option value="FL">Florida</option>
-                <option value="IL">Illinois</option>
-                <option value="PA">Pennsylvania</option>
-                <option value="OH">Ohio</option>
-                <option value="GA">Georgia</option>
+                <option value="CO">Colorado</option>
+                <option value="CT">Connecticut</option>
+                <option value="DE">Delaware</option>
                 <option value="DC">District of Columbia</option>
+                <option value="FL">Florida</option>
+                <option value="GA">Georgia</option>
+                <option value="HI">Hawaii</option>
+                <option value="ID">Idaho</option>
+                <option value="IL">Illinois</option>
+                <option value="IN">Indiana</option>
+                <option value="IA">Iowa</option>
+                <option value="KS">Kansas</option>
+                <option value="KY">Kentucky</option>
+                <option value="LA">Louisiana</option>
+                <option value="ME">Maine</option>
+                <option value="MD">Maryland</option>
                 <option value="MA">Massachusetts</option>
-                <option value="VA">Virginia</option>
+                <option value="MI">Michigan</option>
+                <option value="MN">Minnesota</option>
+                <option value="MS">Mississippi</option>
+                <option value="MO">Missouri</option>
+                <option value="MT">Montana</option>
+                <option value="NE">Nebraska</option>
+                <option value="NV">Nevada</option>
+                <option value="NH">New Hampshire</option>
                 <option value="NJ">New Jersey</option>
+                <option value="NM">New Mexico</option>
+                <option value="NY">New York</option>
+                <option value="NC">North Carolina</option>
+                <option value="ND">North Dakota</option>
+                <option value="OH">Ohio</option>
+                <option value="OK">Oklahoma</option>
+                <option value="OR">Oregon</option>
+                <option value="PA">Pennsylvania</option>
+                <option value="RI">Rhode Island</option>
+                <option value="SC">South Carolina</option>
+                <option value="SD">South Dakota</option>
+                <option value="TN">Tennessee</option>
+                <option value="TX">Texas</option>
+                <option value="UT">Utah</option>
+                <option value="VT">Vermont</option>
+                <option value="VA">Virginia</option>
+                <option value="WA">Washington</option>
+                <option value="WV">West Virginia</option>
+                <option value="WI">Wisconsin</option>
+                <option value="WY">Wyoming</option>
+                <option value="AS">American Samoa</option>
+                <option value="GU">Guam</option>
+                <option value="MP">Northern Mariana Islands</option>
+                <option value="PR">Puerto Rico</option>
+                <option value="VI">U.S. Virgin Islands</option>
                 <option value="UBE">Uniform Bar Exam (UBE)</option>
               </select>
             </div>
@@ -3278,7 +3538,7 @@ body.dark-mode .reading-name { color: #e8e4dc; }
         <div class="card">
           <div class="card-header">
             <span class="card-title">🤖 AI Bar Readiness Analysis</span>
-            <span class="card-badge">Gemini Powered</span>
+            <span class="card-badge">AI Powered</span>
           </div>
           <button class="btn btn-primary" onclick="analyzeBarReadiness()" id="bar-analyze-btn">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
@@ -3727,6 +3987,79 @@ body.dark-mode .reading-name { color: #e8e4dc; }
 
       </div><!-- end page-career -->
 
+      <!-- ══════════ BLUEBOOK CITATIONS ══════════ -->
+      <div class="page" id="page-bluebook">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">📖 Bluebook Citation Tool</span>
+            <span class="card-badge">AI Powered</span>
+          </div>
+          <div class="cite-mode-tabs">
+            <button class="active" onclick="switchCiteMode('generate',this)">Generate</button>
+            <button onclick="switchCiteMode('fix',this)">Fix</button>
+            <button onclick="switchCiteMode('draft',this)">Draft with Citations</button>
+          </div>
+
+          <!-- Generate mode -->
+          <div id="cite-panel-generate">
+            <div class="form-group">
+              <label class="form-label">Source Type</label>
+              <select class="form-select" id="cite-source-type">
+                <option value="case">Case</option>
+                <option value="statute">Statute</option>
+                <option value="book">Book / Treatise</option>
+                <option value="journal">Law Review / Journal Article</option>
+                <option value="website">Website</option>
+                <option value="regulation">Regulation</option>
+                <option value="constitution">Constitution</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Source Details</label>
+              <textarea class="form-textarea" id="cite-source-details" rows="3" placeholder="Paste case name, parties, reporter info, or any details you have..."></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Citation Format</label>
+              <select class="form-select" id="cite-format">
+                <option value="full">Full Citation</option>
+                <option value="short">Short Form</option>
+                <option value="id">Id. Citation</option>
+              </select>
+            </div>
+            <button class="btn btn-primary" onclick="generateBluebookCite()" style="width:100%;justify-content:center;">Generate Citation</button>
+          </div>
+
+          <!-- Fix mode -->
+          <div id="cite-panel-fix" style="display:none;">
+            <div class="form-group">
+              <label class="form-label">Paste Your Citation to Fix</label>
+              <textarea class="form-textarea" id="cite-fix-input" rows="3" placeholder="Paste your citation here and AI will correct Bluebook formatting..."></textarea>
+            </div>
+            <button class="btn btn-primary" onclick="fixBluebookCite()" style="width:100%;justify-content:center;">Fix Citation</button>
+          </div>
+
+          <!-- Draft with Citations mode -->
+          <div id="cite-panel-draft" style="display:none;">
+            <div class="form-group">
+              <label class="form-label">Legal Topic or Argument</label>
+              <textarea class="form-textarea" id="cite-draft-input" rows="4" placeholder="Describe the legal point you want to make, and AI will draft a paragraph with proper Bluebook citations..."></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Jurisdiction (optional)</label>
+              <input class="form-input" id="cite-draft-jurisdiction" placeholder="e.g., Georgia, Federal, 11th Circuit">
+            </div>
+            <button class="btn btn-primary" onclick="draftWithCitations()" style="width:100%;justify-content:center;">Draft with Citations</button>
+          </div>
+
+          <!-- Output area -->
+          <div id="cite-output-area" style="display:none;margin-top:16px;">
+            <div class="form-label">Result</div>
+            <div class="cite-output" id="cite-result"></div>
+            <button class="btn btn-ghost" onclick="copyCiteResult()" style="margin-top:8px;">Copy to Clipboard</button>
+          </div>
+        </div>
+      </div>
+
       <!-- ══════ WELLNESS PAGE ══════ -->
       <div class="page" id="page-wellness">
 
@@ -3782,6 +4115,18 @@ body.dark-mode .reading-name { color: #e8e4dc; }
               <div>Sessions today: <strong id="timer-sessions-today">0</strong></div>
               <div>Focus time: <strong id="timer-focus-today">0h 0m</strong></div>
               <div>Current streak: <strong id="timer-streak">0</strong> days</div>
+            </div>
+
+            <!-- Billable Hours Log -->
+            <div style="margin-top:1.25rem;padding-top:1rem;border-top:1px solid rgba(0,0,0,0.06);">
+              <div class="form-label">Activity / Matter Log</div>
+              <div class="grid-2" style="margin-bottom:8px;">
+                <input class="form-input" id="billable-activity" placeholder="Activity description...">
+                <input class="form-input" id="billable-matter" placeholder="Matter / Client (optional)">
+              </div>
+              <button class="btn btn-ghost" onclick="logBillableTime()" style="width:100%;justify-content:center;margin-bottom:8px;">Log Time Entry</button>
+              <ul class="time-log" id="billable-time-log"></ul>
+              <button class="btn btn-ghost" onclick="exportBillableLog()" style="margin-top:6px;font-size:0.72rem;">Export Time Log (CSV)</button>
             </div>
           </div>
 
@@ -3989,7 +4334,7 @@ body.dark-mode .reading-name { color: #e8e4dc; }
           <div class="ai-panel-header">
             <div style="display:flex;align-items:center;gap:8px;flex:1;">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-              JURIS AI Assistant — Your Law School Companion
+              RES AI Assistant — Your Law School Companion
             </div>
             <button onclick="clearChat()" title="Clear conversation" style="background:rgba(245,240,232,0.1);border:1px solid rgba(245,240,232,0.2);border-radius:var(--radius);padding:4px 10px;cursor:pointer;color:var(--gold-light);font-size:0.68rem;font-family:var(--font-body);transition:all 0.2s;">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;vertical-align:-1px;"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
@@ -3997,7 +4342,7 @@ body.dark-mode .reading-name { color: #e8e4dc; }
             </button>
           </div>
           <div class="ai-messages" id="chat-messages">
-            <div class="ai-msg assistant">Hello! I'm your Law Dawg AI assistant. I can help you with anything related to law school — studying, outlines, bar prep, career planning, and more. What would you like to work on?</div>
+            <div class="ai-msg assistant">Hello! I'm your RES AI assistant. I can help you with anything related to law school — studying, outlines, bar prep, career planning, and more. What would you like to work on?</div>
             <div id="chat-suggestions" style="display:flex;flex-wrap:wrap;gap:6px;padding:4px 0;">
               <button class="chat-chip" onclick="useChip(this)">Help me outline a course</button>
               <button class="chat-chip" onclick="useChip(this)">Quiz me on a topic</button>
@@ -4032,6 +4377,24 @@ body.dark-mode .reading-name { color: #e8e4dc; }
     <div class="form-group">
       <label class="form-label">Credits</label>
       <input class="form-input" id="new-course-credits" type="number" min="1" max="6" value="3">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Room</label>
+      <input class="form-input" id="new-course-room" placeholder="e.g., Rusk Hall 203">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Class Time</label>
+      <input class="form-input" id="new-course-time" placeholder="e.g., 10:00 AM - 11:15 AM">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Days</label>
+      <div class="days-check">
+        <label><input type="checkbox" class="new-course-day" value="Mon"> Mon</label>
+        <label><input type="checkbox" class="new-course-day" value="Tue"> Tue</label>
+        <label><input type="checkbox" class="new-course-day" value="Wed"> Wed</label>
+        <label><input type="checkbox" class="new-course-day" value="Thu"> Thu</label>
+        <label><input type="checkbox" class="new-course-day" value="Fri"> Fri</label>
+      </div>
     </div>
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:1.5rem;">
       <button class="btn btn-ghost" onclick="closeModal('add-course-modal')">Cancel</button>
@@ -4141,7 +4504,7 @@ body.dark-mode .reading-name { color: #e8e4dc; }
   </div>
 </div>
 
-<button class="fab-chat" onclick="navigateTo('ai-chat')" title="Ask Law Dawg" style="right:2rem;">🐾</button>
+<button class="fab-chat" onclick="navigateTo('ai-chat')" title="Ask RES Assistant" style="right:2rem;">💬</button>
 <button class="fab-chat" onclick="openQuickAdd()" title="Quick add assignment" style="right:6rem;background:var(--teal);font-size:1.3rem;">+</button>
 
 <!-- Toast container -->
@@ -4152,6 +4515,7 @@ body.dark-mode .reading-name { color: #e8e4dc; }
 //  STATE MANAGEMENT
 // ═══════════════════════════════════════════
 let API_KEY = '';
+let API_PROVIDER = 'gemini';
 let state = {
   semester: 'Spring 2026',
   courses: [],
@@ -4182,12 +4546,27 @@ let state = {
 // Tracks the quiz currently in progress for performance logging
 let currentQuizMeta = { courseId: '', courseName: '', topic: '', questionType: '' };
 
+// Model tiering -- harder tasks use better models
+const MODEL_TIERS = {
+  gemini: { easy: 'gemini-3.8-flash', normal: 'gemini-3.8-flash', hard: 'gemini-3.1-pro-preview' },
+  claude: { easy: 'claude-haiku-4-5-20251001', normal: 'claude-sonnet-5', hard: 'claude-opus-5-5' },
+  openai: { easy: 'gpt-4o-mini', normal: 'gpt-4o', hard: 'gpt-4o' }
+};
+
+function getDifficulty(task) {
+  const hard = ['hypo','outline_full','career','bar','issue','draft_cite','cold_call','career_match','interview_prep'];
+  const easy = ['cite_gen','cite_fix','motivation','wellness','quick','mood_check'];
+  if (hard.includes(task)) return 'hard';
+  if (easy.includes(task)) return 'easy';
+  return 'normal';
+}
+
 function saveState() {
-  try { localStorage.setItem('juris_state_' + btoa(API_KEY), JSON.stringify(state)); } catch(e) {}
+  try { localStorage.setItem('loquitur_state_' + btoa(API_KEY), JSON.stringify(state)); } catch(e) {}
 }
 function loadState() {
   try {
-    const s = localStorage.getItem('juris_state_' + btoa(API_KEY));
+    const s = localStorage.getItem('loquitur_state_' + btoa(API_KEY));
     if (s) state = { ...state, ...JSON.parse(s) };
   } catch(e) {}
 }
@@ -4199,7 +4578,7 @@ function enterApp() {
   const key = document.getElementById('api-key-input').value.trim();
   if (!key) return;
   API_KEY = key;
-  ACTIVE_MODEL = null; // re-detect model for this key
+  API_PROVIDER = document.querySelector('input[name="ai-provider"]:checked')?.value || 'gemini';
   console.log('API key set, length:', API_KEY.length, 'prefix:', API_KEY.slice(0, 6));
   document.getElementById('splash-screen').classList.add('hidden');
   document.getElementById('app').classList.add('active');
@@ -4224,6 +4603,7 @@ function initApp() {
   renderCalendar();
   renderWeeklyChart();
   renderPerformanceProfile();
+  renderWeakAreasWidget();
   initCardTilt();
   // Initialize hero for dashboard
   const hero = document.getElementById('page-hero');
@@ -4358,7 +4738,8 @@ function navigateTo(page) {
       outlines:  { title: 'Outline Builder', subtitle: 'Organize · Structure · Conquer', svgKey: 'outlines', bg: 'linear-gradient(135deg, #d2eedd 0%, #bfe4cc 100%)', color: '#1e5c38' },
       study:     { title: 'Study Engine', subtitle: 'Adaptive quizzes · Practice · Mastery', svgKey: 'study', bg: 'linear-gradient(135deg, #dce4f7 0%, #c8d4f0 100%)', color: '#2c3e80' },
       bar:       { title: 'Bar Alignment', subtitle: 'Track your readiness · Close the gaps', svgKey: 'bar', bg: 'linear-gradient(135deg, #b8e4e4 0%, #a0d8d8 100%)', color: '#124f4f' },
-      'ai-chat': { title: 'AI Assistant', subtitle: 'Ask anything · Law Dawg has your back', svgKey: 'ai-chat', bg: 'linear-gradient(135deg, #c8eeee 0%, #b0e4e4 100%)', color: '#1a6060' },
+      'ai-chat': { title: 'RES Assistant', subtitle: 'Ask anything about law school', svgKey: 'ai-chat', bg: 'linear-gradient(135deg, #c8eeee 0%, #b0e4e4 100%)', color: '#1a6060' },
+      bluebook:  { title: 'Bluebook Cite', subtitle: 'Generate · Fix · Draft with Citations', svgKey: 'outlines', bg: 'linear-gradient(135deg, #dce4f7 0%, #c8d4f0 100%)', color: '#28378c' },
       wellness:  { title: 'Wellness', subtitle: 'Balance · Rest · Thrive', svgKey: 'wellness', bg: 'linear-gradient(135deg, #fcd8dc 0%, #f8c4c8 100%)', color: '#8f0922' },
       calendar:  { title: 'Calendar', subtitle: 'Deadlines · Study plans · Scheduling', svgKey: 'calendar', bg: 'linear-gradient(135deg, #fde0cc 0%, #f8cdb8 100%)', color: '#8a3820' },
     };
@@ -4390,6 +4771,8 @@ function navigateTo(page) {
     // Wellness hooks
     if (page === 'wellness' && typeof checkNotifBanner === 'function') checkNotifBanner();
     if (page === 'wellness' && typeof checkMoodNudge === 'function') checkMoodNudge();
+    if (page === 'wellness' && typeof renderBillableLog === 'function') renderBillableLog();
+    if (page === 'calendar' && typeof refreshScheduleGrid === 'function') refreshScheduleGrid();
   }, 140);
 }
 
@@ -4434,10 +4817,10 @@ function toast(msg) {
 // ═══════════════════════════════════════════
 // Preferred models in order — first available one wins
 const PREFERRED_MODELS = [
-  'gemini-3-flash-preview',
+  'gemini-3.8-flash',
+  'gemini-3.1-pro-preview',
   'gemini-2.5-flash',
-  'gemini-2.5-flash-preview-04-17',
-  'gemini-2.0-flash',
+  'gemini-2.5-pro',
 ];
 let ACTIVE_MODEL = null;
 
@@ -4472,15 +4855,26 @@ async function resolveModel() {
   } catch(e) {
     console.warn('Model resolution failed, using default:', e);
   }
-  ACTIVE_MODEL = 'gemini-3-flash-preview';
+  ACTIVE_MODEL = 'gemini-3.8-flash';
   return ACTIVE_MODEL;
 }
 
-async function callGemini(prompt, systemInstruction) {
+// ═══════════════════════════════════════════
+//  AI ROUTER -- Multi-provider support
+// ═══════════════════════════════════════════
+async function callAI(prompt, systemInstruction, task='normal', opts={}) {
+  const diff = typeof task === 'string' && ['easy','normal','hard'].includes(task) ? task : getDifficulty(task);
+  if (API_PROVIDER === 'gemini') return callGemini(prompt, systemInstruction, diff, opts);
+  if (API_PROVIDER === 'claude') return callClaude(prompt, systemInstruction, diff, opts);
+  if (API_PROVIDER === 'openai') return callOpenAI(prompt, systemInstruction, diff, opts);
+  throw new Error('Unknown AI provider: ' + API_PROVIDER);
+}
+
+async function callGemini(prompt, systemInstruction, difficulty, opts) {
   if (!API_KEY || API_KEY.length < 10) {
     return 'Error: No valid API key set. Please go to ⚙ API Key Settings in the sidebar and enter your Gemini API key.';
   }
-  const model = await resolveModel();
+  const model = (difficulty && MODEL_TIERS.gemini[difficulty]) || MODEL_TIERS.gemini.normal;
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${API_KEY}`;
   
   // Safety: truncate prompt if it's absurdly long
@@ -4510,16 +4904,112 @@ FORMATTING RULES:
       body: JSON.stringify(body)
     });
     if (!resp.ok) {
-      const err = await resp.json();
+      const err = await resp.json().catch(() => ({}));
       const msg = err.error?.message || `HTTP ${resp.status}`;
       throw new Error(msg);
     }
     const data = await resp.json();
-    return data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response generated.';
+    // Check for blocked prompts
+    if (data.promptFeedback?.blockReason) {
+      return `Error: Request blocked by Gemini safety filter (${data.promptFeedback.blockReason}). Try rephrasing your question.`;
+    }
+    // Handle empty candidates
+    if (!data.candidates || data.candidates.length === 0) {
+      console.error('Gemini empty candidates. Full response:', JSON.stringify(data).slice(0, 500));
+      return 'Error: Gemini returned no candidates. The prompt may have been filtered or the model may be temporarily unavailable.';
+    }
+    const candidate = data.candidates[0];
+    // Check for blocked candidate
+    if (candidate.finishReason && candidate.finishReason !== 'STOP' && candidate.finishReason !== 'MAX_TOKENS') {
+      return `Error: Gemini stopped generating (reason: ${candidate.finishReason}). Try rephrasing your question.`;
+    }
+    // Extract text from parts, skipping thinking parts
+    const parts = candidate.content?.parts || [];
+    const textParts = parts.filter(p => p.text && !p.thought);
+    if (textParts.length > 0) return textParts.map(p => p.text).join('');
+    // Fallback: try any part with text
+    const anyText = parts.find(p => p.text);
+    if (anyText) return anyText.text;
+    console.error('Gemini no text in parts. Full response:', JSON.stringify(data).slice(0, 500));
+    return 'Error: Gemini returned a response but it contained no text. Please try again.';
   } catch (e) {
     console.error('Gemini error:', e);
     if (e.message === 'Failed to fetch') {
       return 'Error: Could not reach the Gemini API. Check your internet connection and make sure your API key is valid. If you are using a browser that blocks requests from local files, try opening this file in Chrome or Edge instead.';
+    }
+    return `Error: ${e.message}`;
+  }
+}
+
+async function callClaude(prompt, systemInstruction, difficulty, opts) {
+  const model = MODEL_TIERS.claude[difficulty] || MODEL_TIERS.claude.normal;
+  const safePrompt = prompt.length > 30000 ? prompt.slice(0, 30000) + '\n\n[Content truncated]' : prompt;
+  const body = {
+    model, max_tokens: opts?.maxTokens || 4096,
+    messages: [{ role: 'user', content: safePrompt }]
+  };
+  if (systemInstruction) body.system = systemInstruction;
+  try {
+    const r = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': API_KEY,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify(body)
+    });
+    if (!r.ok) {
+      const errBody = await r.json().catch(() => ({}));
+      const msg = errBody.error?.message || `HTTP ${r.status}`;
+      throw new Error(msg);
+    }
+    const j = await r.json();
+    if (j.error) throw new Error(j.error.message);
+    // Extract text from content blocks
+    const textBlock = (j.content || []).find(b => b.type === 'text');
+    if (textBlock?.text) return textBlock.text;
+    console.error('Claude unexpected response:', JSON.stringify(j).slice(0, 500));
+    return 'Error: Claude returned a response but it contained no text. Please try again.';
+  } catch(e) {
+    console.error('Claude error:', e);
+    if (e.message === 'Failed to fetch') {
+      return 'Error: Could not reach the Claude API. This may be a CORS issue if you are running from a local file. Try using Gemini instead, or host this page on a web server.';
+    }
+    return `Error: ${e.message}`;
+  }
+}
+
+async function callOpenAI(prompt, systemInstruction, difficulty, opts) {
+  const model = MODEL_TIERS.openai[difficulty] || MODEL_TIERS.openai.normal;
+  const safePrompt = prompt.length > 30000 ? prompt.slice(0, 30000) + '\n\n[Content truncated]' : prompt;
+  const messages = [];
+  if (systemInstruction) messages.push({ role: 'system', content: systemInstruction });
+  messages.push({ role: 'user', content: safePrompt });
+  const body = { model, messages };
+  if (opts?.maxTokens) body.max_tokens = opts.maxTokens;
+  try {
+    const r = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${API_KEY}` },
+      body: JSON.stringify(body)
+    });
+    if (!r.ok) {
+      const errBody = await r.json().catch(() => ({}));
+      const msg = errBody.error?.message || `HTTP ${r.status}`;
+      throw new Error(msg);
+    }
+    const j = await r.json();
+    if (j.error) throw new Error(j.error.message);
+    const text = j.choices?.[0]?.message?.content;
+    if (text) return text;
+    console.error('OpenAI unexpected response:', JSON.stringify(j).slice(0, 500));
+    return 'Error: OpenAI returned a response but it contained no text. Please try again.';
+  } catch(e) {
+    console.error('OpenAI error:', e);
+    if (e.message === 'Failed to fetch') {
+      return 'Error: Could not reach the OpenAI API. Check your internet connection and API key.';
     }
     return `Error: ${e.message}`;
   }
@@ -4532,10 +5022,13 @@ function addCourse() {
   const name = document.getElementById('new-course-name').value.trim();
   const prof = document.getElementById('new-course-prof').value.trim();
   const credits = parseInt(document.getElementById('new-course-credits').value) || 3;
+  const room = document.getElementById('new-course-room').value.trim();
+  const time = document.getElementById('new-course-time').value.trim();
+  const days = [...document.querySelectorAll('.new-course-day:checked')].map(cb => cb.value);
   if (!name) return toast('Please enter a course name');
   state.courses.push({
     id: Date.now().toString(36),
-    name, prof, credits,
+    name, prof, credits, room, time, days,
     materials: [],
     notes: [],
     assignments: [],
@@ -4546,6 +5039,9 @@ function addCourse() {
   closeModal('add-course-modal');
   document.getElementById('new-course-name').value = '';
   document.getElementById('new-course-prof').value = '';
+  document.getElementById('new-course-room').value = '';
+  document.getElementById('new-course-time').value = '';
+  document.querySelectorAll('.new-course-day').forEach(cb => cb.checked = false);
   refreshDashboard();
   renderCoursesGrid();
   refreshCourseSelects();
@@ -4819,8 +5315,8 @@ async function runAITool(type) {
 
   const p = prompts[type];
   titleEl.textContent = p.title;
-  const system = `You are JURIS, an expert law school AI tutor. You help law students study effectively. Be thorough, accurate, and pedagogically sound. Format your responses cleanly with proper structure using headers and lists.`;
-  const result = await callGemini(p.prompt, system);
+  const system = `You are RES, an expert law school AI tutor. You help law students study effectively. Be thorough, accurate, and pedagogically sound. Format your responses cleanly with proper structure using headers and lists.`;
+  const result = await callAI(p.prompt, system);
   contentEl.innerHTML = `<div class="md-rendered">${marked.parse(result)}</div>`;
 }
 
@@ -4866,7 +5362,7 @@ async function generateQuiz() {
   const diffLabels = { early: 'early-semester comprehension level', mid: 'midterm reinforcement level', final: 'final exam complexity level' };
   const topicClause = topic ? ` focused specifically on the topic: "${topic}"` : '';
 
-  const system = 'You are JURIS, an expert law school quiz generator. Create challenging, pedagogically sound questions that test understanding of legal doctrines, rules, and analytical skills.';
+  const system = 'You are RES, an expert law school quiz generator. Create challenging, pedagogically sound questions that test understanding of legal doctrines, rules, and analytical skills.';
 
   if (qtype === 'mbe') {
     document.getElementById('quiz-output-title').textContent = 'Multiple Choice Quiz';
@@ -4883,7 +5379,7 @@ D: [option text]
 Do NOT include the correct answer or any explanation yet. The student will answer first.
 
 Base questions on these materials:\n${materialsContext}`;
-    const result = await callGemini(prompt, system);
+    const result = await callAI(prompt, system);
     mbeQuestions = parseMBEQuestions(result);
     if (mbeQuestions.length === 0) {
       // Fallback: AI didn't follow format, render as markdown
@@ -4914,7 +5410,7 @@ Do NOT include answers, rubrics, or explanations. The student will answer first.
 
 Base questions on these materials:\n${materialsContext}`;
 
-    const result = await callGemini(prompt, system);
+    const result = await callAI(prompt, system);
     textQuestions = parseTextQuestions(result);
 
     if (textQuestions.length === 0) {
@@ -5009,8 +5505,8 @@ Use ## Question N — [brief topic] as the heading for each question.
 
 ${qaText}`;
 
-  const system = 'You are JURIS, an expert law professor. Grade each answer rigorously but constructively. Always produce a rubric first, then score against it. Use clean formatting with headers and lists.';
-  const result = await callGemini(prompt, system);
+  const system = 'You are RES, an expert law professor. Grade each answer rigorously but constructively. Always produce a rubric first, then score against it. Use clean formatting with headers and lists.';
+  const result = await callAI(prompt, system, 'hypo');
   gradeContent.innerHTML = `<div class="md-rendered">${marked.parse(result)}</div>`;
 
   // Save to performance profile
@@ -5027,8 +5523,8 @@ async function gradeAnswer() {
   gradeEl.style.display = 'block';
   gradeContent.innerHTML = '<div style="text-align:center;padding:1.5rem;"><div class="loading-dots"><span></span><span></span><span></span></div></div>';
   const prompt = `Grade this law student answer.\n\nQuestion:\n${question}\n\nAnswer:\n${answer}\n\nProvide a rubric, score each criterion, give a total out of 10, and 2-3 sentences of feedback.`;
-  const system = 'You are JURIS, an expert law professor. Use clean formatting with clear headings.';
-  const result = await callGemini(prompt, system);
+  const system = 'You are RES, an expert law professor. Use clean formatting with clear headings.';
+  const result = await callAI(prompt, system);
   gradeContent.innerHTML = `<div class="md-rendered">${marked.parse(result)}</div>`;
 }
 
@@ -5106,8 +5602,8 @@ async function submitMBEQuiz() {
   ).join('\n\n');
 
   const prompt = `A law student just completed a multiple choice quiz. Grade their answers.\n\nFor EACH question:\n1. State whether they were CORRECT or INCORRECT\n2. Reveal the correct answer and letter\n3. Briefly explain the controlling rule and why the correct answer is right\n4. If wrong, explain why their choice was incorrect\n\nEnd with a total score (X out of ${mbeQuestions.length}) and 1-2 sentences of overall feedback.\n\nStudent's answers:\n${answersText}`;
-  const system = 'You are JURIS, an expert law professor. Grade MBE answers clearly and educationally. Use ## for each question heading.';
-  const result = await callGemini(prompt, system);
+  const system = 'You are RES, an expert law professor. Grade MBE answers clearly and educationally. Use ## for each question heading.';
+  const result = await callAI(prompt, system);
   gradeContent.innerHTML = `<div class="md-rendered">${marked.parse(result)}</div>`;
 
   // Save to performance profile
@@ -5218,6 +5714,7 @@ function saveQuizResult({ raw, max }) {
   });
   saveState();
   renderPerformanceProfile();
+  renderWeakAreasWidget();
 }
 
 function clearPerformanceData() {
@@ -5225,6 +5722,7 @@ function clearPerformanceData() {
   state.quizResults = [];
   saveState();
   renderPerformanceProfile();
+  renderWeakAreasWidget();
   toast('Performance data cleared');
 }
 
@@ -5269,7 +5767,7 @@ function renderPerformanceProfile() {
     const weaknesses = topicAvgs.filter(t => t.avg < 60).sort((a, b) => a.avg - b.avg).slice(0, 4);
     const middle     = topicAvgs.filter(t => t.avg >= 60 && t.avg < 75).sort((a, b) => b.avg - a.avg).slice(0, 3);
 
-    const barColor = avgPct === null ? 'var(--gold)' : avgPct >= 75 ? 'var(--success)' : avgPct >= 60 ? 'var(--warning)' : 'var(--crimson)';
+    const barColor = avgPct === null ? 'var(--gold)' : avgPct >= 75 ? 'var(--success)' : avgPct >= 60 ? 'var(--warning)' : 'var(--accent)';
 
     html += `<div class="perf-subject-card">
       <div class="perf-subject-header">
@@ -5315,7 +5813,7 @@ function renderPerformanceProfile() {
       const tl = typeLabel[r.questionType] || r.questionType;
       const topicDisplay = r.topic && r.topic !== r.courseName ? r.topic : '—';
       const pctStr = r.pct !== null ? `${r.pct}%` : '—';
-      const pctColor = r.pct === null ? 'var(--slate)' : r.pct >= 75 ? 'var(--success)' : r.pct >= 60 ? 'var(--warning)' : 'var(--crimson)';
+      const pctColor = r.pct === null ? 'var(--slate)' : r.pct >= 75 ? 'var(--success)' : r.pct >= 60 ? 'var(--warning)' : 'var(--accent)';
       html += `<div class="perf-history-item">
         <span class="perf-history-type">${tl}</span>
         <span class="perf-history-topic" title="${topicDisplay}">${topicDisplay}</span>
@@ -5327,6 +5825,37 @@ function renderPerformanceProfile() {
   });
 
   container.innerHTML = html;
+}
+
+function getWeakAreas() {
+  const topicScores = {};
+  for (const r of state.quizResults) {
+    const key = `${r.course || r.courseName || 'General'}|||${r.topic || 'General'}`;
+    if (!topicScores[key]) topicScores[key] = [];
+    topicScores[key].push(typeof r.score === 'number' ? r.score : parseInt(r.score) || 0);
+  }
+  const weak = [];
+  for (const [key, scores] of Object.entries(topicScores)) {
+    const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
+    if (avg < 65) {
+      const [course, topic] = key.split('|||');
+      weak.push({ course, topic, avg: Math.round(avg), attempts: scores.length });
+    }
+  }
+  weak.sort((a, b) => a.avg - b.avg);
+  return weak.slice(0, 8);
+}
+
+function renderWeakAreasWidget() {
+  const weak = getWeakAreas();
+  const widget = document.getElementById('weak-areas-widget');
+  const list = document.getElementById('dash-weak-areas');
+  if (!widget || !list) return;
+  if (!weak.length) { widget.style.display = 'none'; return; }
+  widget.style.display = 'block';
+  list.innerHTML = weak.map(w => `
+    <li><span>${esc(w.course)} — ${esc(w.topic)}</span><span>${w.avg}% avg (${w.attempts} attempts)</span></li>
+  `).join('');
 }
 
 // ═══════════════════════════════════════════
@@ -5562,7 +6091,7 @@ function downloadOutlineAsDoc() {
 </head>
 <body>
   <div class="doc-title">${esc(course.name)} — Outline</div>
-  <div class="doc-meta">Generated by JURIS · ${date}</div>
+  <div class="doc-meta">Generated by RES · ${date}</div>
   ${contentEl.innerHTML}
 </body>
 </html>`;
@@ -5616,8 +6145,8 @@ async function generateOutline(type) {
   } else {
     prompt = `For the course "${course.name}", ${typeInstructions[type]}\n\nBase this on the following materials:\n${materialsContext}`;
   }
-  const system = 'You are JURIS, an expert law school outline builder. Create clear, well-organized, accurate legal outlines that would help a student prepare for exams.';
-  const result = await callGemini(prompt, system);
+  const system = 'You are RES, an expert law school outline builder. Create clear, well-organized, accurate legal outlines that would help a student prepare for exams.';
+  const result = await callAI(prompt, system, 'outline_full');
   course.outlineData = result;
   saveState();
   showOutlineContent(`<div class="md-rendered">${marked.parse(result)}</div>`, course.name);
@@ -5697,8 +6226,8 @@ function showCalDayDetail(day) {
     eventsEl.innerHTML = events.map(e => {
       const timeStr = e.time ? ` · ${formatDueDateTime(e).split(' at ')[1]}` : '';
       const hrsLeft = hoursUntilDue(e);
-      const urgency = !e.completed && hrsLeft < 0 ? ' · <span style="color:var(--red);font-weight:600;">OVERDUE</span>' :
-                      !e.completed && hrsLeft < 6 ? ` · <span style="color:var(--red);font-weight:600;">Due in ${Math.max(0,Math.round(hrsLeft))}h</span>` :
+      const urgency = !e.completed && hrsLeft < 0 ? ' · <span style="color:var(--primary);font-weight:600;">OVERDUE</span>' :
+                      !e.completed && hrsLeft < 6 ? ` · <span style="color:var(--primary);font-weight:600;">Due in ${Math.max(0,Math.round(hrsLeft))}h</span>` :
                       !e.completed && hrsLeft < 24 ? ` · <span style="color:var(--amber);font-weight:600;">Due in ${Math.round(hrsLeft)}h</span>` : '';
       return `<div class="cal-day-event" id="cal-evt-${e.courseId}-${e.id}">
         <div style="flex:1;min-width:0;">
@@ -5866,8 +6395,8 @@ async function generateStudyPlan() {
   el.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div> Generating study plan...';
 
   const prompt = `Create a detailed weekly study plan based on these courses and upcoming assignments:\n\n${JSON.stringify(courses, null, 2)}\n\nToday is ${new Date().toLocaleDateString()}. Include spaced repetition, break reminders, and prioritize upcoming deadlines.`;
-  const system = 'You are JURIS, a law school study planning assistant. Create practical, time-blocked study plans that incorporate spaced repetition and prevent burnout.';
-  const result = await callGemini(prompt, system);
+  const system = 'You are RES, a law school study planning assistant. Create practical, time-blocked study plans that incorporate spaced repetition and prevent burnout.';
+  const result = await callAI(prompt, system);
   el.innerHTML = `<div class="md-rendered">${marked.parse(result)}</div>`;
 }
 
@@ -5974,7 +6503,7 @@ Transcript:
 ${text.slice(0, 8000)}`;
 
   try {
-    const result = await callGemini(prompt, 'You are a precise data extraction tool. Return only valid JSON.');
+    const result = await callAI(prompt, 'You are a precise data extraction tool. Return only valid JSON.');
     const cleaned = result.replace(/```json?|```/g, '').trim();
     const parsed = JSON.parse(cleaned);
     if (Array.isArray(parsed) && parsed.length > 0) {
@@ -6245,8 +6774,8 @@ Suggest a realistic bar prep timeline and approach given the student's current p
 
 Be direct, specific, and actionable. Reference the student's actual grades where visible.`;
 
-  const system = 'You are Law Dawg, an expert bar exam preparation advisor for law students. Be specific, accurate, and practical.';
-  const result = await callGemini(prompt, system);
+  const system = 'You are RES, an expert bar exam preparation advisor for law students. Be specific, accurate, and practical.';
+  const result = await callAI(prompt, system, 'bar');
 
   outputEl.innerHTML = `
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem;">
@@ -6362,12 +6891,12 @@ const careerState = {
 };
 (function loadCareerState() {
   try {
-    const s = localStorage.getItem('lawdawg_career');
+    const s = localStorage.getItem('loquitur_career');
     if (s) Object.assign(careerState, JSON.parse(s));
   } catch(e) {}
 })();
 function saveCareerState() {
-  localStorage.setItem('lawdawg_career', JSON.stringify(careerState));
+  localStorage.setItem('loquitur_career', JSON.stringify(careerState));
 }
 
 // ─── SUB-NAV ───
@@ -6410,8 +6939,8 @@ Provide comprehensive career intelligence with:
 3. Skill gaps to address and courses/clinics to prioritize
 4. Concrete next steps for this ${year} student in the next 6 months`;
 
-  const system = 'You are JURIS, an expert legal career counselor at UGA Law. Provide realistic, data-informed guidance. Use clean formatting with headers, lists, and tables for clarity.';
-  const result = await callGemini(prompt, system);
+  const system = 'You are RES, an expert legal career counselor. Provide realistic, data-informed guidance. Use clean formatting with headers, lists, and tables for clarity.';
+  const result = await callAI(prompt, system, 'career');
   outputEl.innerHTML = `<div class="md-rendered">${marked.parse(result)}</div>`;
 }
 
@@ -6535,7 +7064,7 @@ async function researchEmployer() {
   if (!name) { toast('Add an employer first'); return; }
   toast('Researching ' + name + '...');
   const prompt = `Give a concise employer intelligence brief for a law student considering ${name}. Include: firm type/size, practice strengths, culture/WLB reputation, summer associate program info, typical entry salary, and 2-3 tips for impressing them in interviews. Use bullet points.`;
-  const result = await callGemini(prompt, 'You are JURIS, a legal career advisor. Be concise and practical.');
+  const result = await callAI(prompt, 'You are RES, a legal career advisor. Be concise and practical.', 'career_match');
   const card = document.getElementById('career-results');
   const out = document.getElementById('career-output');
   card.style.display = 'block';
@@ -6668,7 +7197,7 @@ Provide:
 4. Bullet point rewrites for the weakest 2 bullets
 5. Any red flags for legal recruiting
 Use clean formatting with headers and lists.`;
-  const result = await callGemini(prompt, 'You are JURIS, an expert legal resume coach at a top law school career services office. Be honest, specific, and constructive.');
+  const result = await callAI(prompt, 'You are RES, an expert legal resume coach at a top law school career services office. Be honest, specific, and constructive.', 'career');
   out.innerHTML = `<div class="md-rendered">${marked.parse(result)}</div>`;
 }
 
@@ -6685,7 +7214,7 @@ async function generateCoverLetter() {
   const out = document.getElementById('resume-output');
   out.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div> Writing your cover letter...';
 
-  const prompt = `Write a polished legal cover letter for a UGA Law student applying to:
+  const prompt = `Write a polished legal cover letter for a law student applying to:
 Employer: ${employer}
 Position: ${position}
 Practice area interest: ${practice || 'General'}
@@ -6693,7 +7222,7 @@ Key strengths: ${strengths || 'Strong academic record, research skills'}
 Personal hook/connection: ${hook || 'N/A'}
 
 Format as a complete, ready-to-use cover letter (3–4 short paragraphs). Professional but not stiff. Do NOT use hollow phrases like "I am writing to express my interest." Open with something specific and compelling.`;
-  const result = await callGemini(prompt, 'You are JURIS, an expert legal writing coach. Write cover letters that are specific, confident, and memorable without being over-the-top.');
+  const result = await callAI(prompt, 'You are RES, an expert legal writing coach. Write cover letters that are specific, confident, and memorable without being over-the-top.', 'career');
   out.innerHTML = `<div class="md-rendered">${marked.parse(result)}</div>`;
 }
 
@@ -6761,7 +7290,7 @@ async function startInterviewPrep() {
     const prompt = `Generate 8 ${mode === 'stress' ? 'challenging, curveball-style' : 'realistic'} interview questions for a law student doing a ${type.replace(/-/g,' ')} interview. Return as a JSON array of strings only.`;
     const sys = 'Return only a valid JSON array of strings. No markdown, no preamble.';
     try {
-      const raw = await callGemini(prompt, sys);
+      const raw = await callAI(prompt, sys, 'interview_prep');
       const clean = raw.replace(/```json|```/g,'').trim();
       careerState.interviewQuestions = JSON.parse(clean);
     } catch(e) {
@@ -6812,7 +7341,7 @@ Evaluate this answer for a legal job interview:
 2. Weaknesses or missed opportunities (2–3 points)
 3. A stronger version of the answer (rewrite it)
 4. Score: /10 with one-sentence rationale`;
-  const result = await callGemini(prompt, 'You are JURIS, a legal interview coach. Give honest, constructive feedback. Be specific. Use clean formatting.');
+  const result = await callAI(prompt, 'You are RES, a legal interview coach. Give honest, constructive feedback. Be specific. Use clean formatting.', 'interview_prep');
   feedbackEl.innerHTML = `<div class="md-rendered">${marked.parse(result)}</div>`;
 }
 
@@ -6883,8 +7412,8 @@ async function draftFollowup(id) {
   card.style.display = 'block';
   out.textContent = 'Drafting follow-up email...';
 
-  const prompt = `Draft a short, professional follow-up email from a UGA Law student to ${c.name} (${c.org}). They met via: ${c.how}. Notes from conversation: ${c.notes || 'N/A'}. The email should feel genuine, reference something specific if possible, and end with a soft ask (coffee chat, advice, etc). Keep it under 150 words.`;
-  const result = await callGemini(prompt, 'You are a polished legal networking coach. Write emails that are warm, brief, and memorable. No filler phrases like "Hope this finds you well."');
+  const prompt = `Draft a short, professional follow-up email from a law student to ${c.name} (${c.org}). They met via: ${c.how}. Notes from conversation: ${c.notes || 'N/A'}. The email should feel genuine, reference something specific if possible, and end with a soft ask (coffee chat, advice, etc). Keep it under 150 words.`;
+  const result = await callAI(prompt, 'You are a polished legal networking coach. Write emails that are warm, brief, and memorable. No filler phrases like "Hope this finds you well."', 'quick');
   out.innerHTML = `<div class="md-rendered">${marked.parse(result)}</div>`;
   card.scrollIntoView({ behavior: 'smooth' });
 }
@@ -6911,7 +7440,7 @@ const ociBaseChecklist = [
 ];
 
 function renderOCIChecklist() {
-  const stored = JSON.parse(localStorage.getItem('lawdawg_oci_checks') || '{}');
+  const stored = JSON.parse(localStorage.getItem('loquitur_oci_checks') || '{}');
   const phases = [...new Set(ociBaseChecklist.map(i => i.phase))];
   document.getElementById('oci-checklist').innerHTML = phases.map(phase => {
     const items = ociBaseChecklist.filter(i => i.phase === phase);
@@ -6932,9 +7461,9 @@ function renderOCIChecklist() {
 }
 
 function toggleOCIItem(key, el) {
-  const stored = JSON.parse(localStorage.getItem('lawdawg_oci_checks') || '{}');
+  const stored = JSON.parse(localStorage.getItem('loquitur_oci_checks') || '{}');
   stored[key] = el.checked;
-  localStorage.setItem('lawdawg_oci_checks', JSON.stringify(stored));
+  localStorage.setItem('loquitur_oci_checks', JSON.stringify(stored));
   el.closest('.oci-item').classList.toggle('done', el.checked);
 }
 
@@ -6955,7 +7484,7 @@ function renderOCICustomDeadlines() {
   const today = new Date();
   list.innerHTML = careerState.ociDeadlines.map(d => {
     const days = d.date ? Math.ceil((new Date(d.date) - today) / 86400000) : null;
-    const urgency = days !== null && days <= 7 ? 'color:var(--red);font-weight:700;' : 'color:var(--slate);';
+    const urgency = days !== null && days <= 7 ? 'color:var(--primary);font-weight:700;' : 'color:var(--slate);';
     return `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(181,101,29,0.08);">
       <span style="font-size:0.83rem;">${esc(d.name)}</span>
       <div style="display:flex;align-items:center;gap:8px;">
@@ -7808,8 +8337,8 @@ Provide:
 
 Be warm, specific, and constructive. Reference their actual numbers and patterns — don't be generic.`;
 
-  const system = 'You are JURIS wellness advisor. You help law students maintain healthy study habits, manage stress, and prevent burnout. Be warm, supportive, practical, and specific. Always reference the student\'s actual data in your advice.';
-  const result = await callGemini(prompt, system);
+  const system = 'You are RES wellness advisor. You help law students maintain healthy study habits, manage stress, and prevent burnout. Be warm, supportive, practical, and specific. Always reference the student\'s actual data in your advice.';
+  const result = await callAI(prompt, system, 'wellness');
   el.innerHTML = `<div class="md-rendered">${marked.parse(result)}</div>`;
 }
 
@@ -7888,7 +8417,7 @@ function exportStudyLog() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `JURIS_Study_Hours_${new Date().toISOString().split('T')[0]}.csv`;
+  a.download = `RES_Study_Hours_${new Date().toISOString().split('T')[0]}.csv`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
@@ -7924,8 +8453,8 @@ async function sendChat() {
   }).join('\n');
   const contextPrompt = `Student context: Courses: [${courseSummary || 'none'}]. Semester: ${state.semester}.\n\nRecent conversation:\n${recentHistory}\n\nRespond to the student's latest message.`;
 
-  const system = `You are Law Dawg, an intelligent law school AI assistant for UGA law students. You help with studying, outlines, bar prep, career planning, and general law school advice. Be knowledgeable, supportive, and thorough. Reference the student's actual courses and materials when relevant. Use clean formatting with headers, lists, and line breaks to make responses clear and scannable.`;
-  const result = await callGemini(contextPrompt, system);
+  const system = `You are RES, an intelligent law school AI assistant for law students. You help with studying, outlines, bar prep, career planning, and general law school advice. Be knowledgeable, supportive, and thorough. Reference the student's actual courses and materials when relevant. Use clean formatting with headers, lists, and line breaks to make responses clear and scannable.`;
+  const result = await callAI(contextPrompt, system);
 
   state.chatHistory.push({ role: 'assistant', content: result });
   if (state.chatHistory.length > 20) state.chatHistory = state.chatHistory.slice(-20);
@@ -7948,7 +8477,7 @@ function clearChat() {
   state.chatHistory = [];
   const msgsEl = document.getElementById('chat-messages');
   msgsEl.innerHTML = `
-    <div class="ai-msg assistant">Hello! I'm your Law Dawg AI assistant. I can help you with anything related to law school — studying, outlines, bar prep, career planning, and more. What would you like to work on?</div>
+    <div class="ai-msg assistant">Hello! I'm your RES AI assistant. I can help you with anything related to law school — studying, outlines, bar prep, career planning, and more. What would you like to work on?</div>
     <div id="chat-suggestions" style="display:flex;flex-wrap:wrap;gap:6px;padding:4px 0;">
       <button class="chat-chip" onclick="useChip(this)">Help me outline a course</button>
       <button class="chat-chip" onclick="useChip(this)">Quiz me on a topic</button>
@@ -8299,6 +8828,166 @@ function initCardTilt() {
       c.style.transform = ''; c.style.boxShadow = ''; c.classList.remove('tilting');
     });
   });
+}
+
+// ─── BLUEBOOK CITATION FUNCTIONS ───
+function switchCiteMode(mode, btn) {
+  document.querySelectorAll('.cite-mode-tabs button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('cite-panel-generate').style.display = mode === 'generate' ? '' : 'none';
+  document.getElementById('cite-panel-fix').style.display = mode === 'fix' ? '' : 'none';
+  document.getElementById('cite-panel-draft').style.display = mode === 'draft' ? '' : 'none';
+  document.getElementById('cite-output-area').style.display = 'none';
+}
+
+async function generateBluebookCite() {
+  const srcType = document.getElementById('cite-source-type').value;
+  const details = document.getElementById('cite-source-details').value.trim();
+  const format = document.getElementById('cite-format').value;
+  if (!details) return alert('Please enter source details.');
+  const prompt = `Generate a proper Bluebook citation (${format} form) for this ${srcType}:\n${details}\n\nReturn ONLY the formatted citation, nothing else.`;
+  const result = await callAI(prompt, 'You are RES, an expert in Bluebook legal citation format. Produce accurate citations following The Bluebook: A Uniform System of Citation (21st ed.).', 'cite_gen');
+  document.getElementById('cite-result').textContent = result;
+  document.getElementById('cite-output-area').style.display = '';
+}
+
+async function fixBluebookCite() {
+  const input = document.getElementById('cite-fix-input').value.trim();
+  if (!input) return alert('Please paste a citation to fix.');
+  const prompt = `Fix this citation to proper Bluebook format:\n${input}\n\nReturn the corrected citation, then on a new line explain what was changed.`;
+  const result = await callAI(prompt, 'You are RES, an expert in Bluebook legal citation format.', 'cite_fix');
+  document.getElementById('cite-result').innerHTML = marked.parse(result);
+  document.getElementById('cite-output-area').style.display = '';
+}
+
+async function draftWithCitations() {
+  const topic = document.getElementById('cite-draft-input').value.trim();
+  const jurisdiction = document.getElementById('cite-draft-jurisdiction').value.trim();
+  if (!topic) return alert('Please describe the legal point.');
+  const jNote = jurisdiction ? ` Focus on ${jurisdiction} law.` : '';
+  const prompt = `Draft a well-written legal paragraph about: ${topic}${jNote}\n\nInclude proper Bluebook citations to real, verifiable cases and statutes. Use footnote-style citation placement.`;
+  const result = await callAI(prompt, 'You are RES, an expert legal writer. Draft paragraphs with accurate Bluebook citations to real authorities.', 'draft_cite');
+  document.getElementById('cite-result').innerHTML = marked.parse(result);
+  document.getElementById('cite-output-area').style.display = '';
+}
+
+function copyCiteResult() {
+  const text = document.getElementById('cite-result').innerText;
+  navigator.clipboard.writeText(text).then(() => alert('Copied to clipboard.'));
+}
+
+// ─── BILLABLE HOURS LOG ───
+function logBillableTime() {
+  const activity = document.getElementById('billable-activity').value.trim();
+  const matter = document.getElementById('billable-matter').value.trim();
+  const focusEl = document.getElementById('timer-focus-today');
+  const focusTime = focusEl ? focusEl.textContent : '0h 0m';
+  if (!activity) return alert('Please enter an activity description.');
+  const d = appData();
+  if (!d.billableLog) d.billableLog = [];
+  d.billableLog.push({ activity, matter, time: focusTime, date: new Date().toISOString() });
+  saveData();
+  document.getElementById('billable-activity').value = '';
+  document.getElementById('billable-matter').value = '';
+  renderBillableLog();
+}
+
+function renderBillableLog() {
+  const d = appData();
+  const log = d.billableLog || [];
+  const ul = document.getElementById('billable-time-log');
+  if (!ul) return;
+  ul.innerHTML = log.slice(-10).reverse().map(e =>
+    `<li><span>${e.activity}${e.matter ? ' — ' + e.matter : ''}</span><span>${e.time} · ${new Date(e.date).toLocaleDateString()}</span></li>`
+  ).join('');
+}
+
+function exportBillableLog() {
+  const d = appData();
+  const log = d.billableLog || [];
+  if (!log.length) return alert('No time entries to export.');
+  let csv = 'Date,Activity,Matter,Time\n';
+  log.forEach(e => {
+    csv += `"${new Date(e.date).toLocaleDateString()}","${e.activity}","${e.matter}","${e.time}"\n`;
+  });
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `RES_Billable_Hours_${new Date().toISOString().split('T')[0]}.csv`;
+  a.click();
+}
+
+// ─── AI REORGANIZE NOTES ───
+async function aiReorganizeNotes() {
+  const textarea = document.getElementById('note-input');
+  const text = textarea.value.trim();
+  if (!text) return alert('Please enter notes first.');
+  const prompt = `Reorganize and structure these class notes into a clear, well-organized format with headings and bullet points:\n\n${text}`;
+  const result = await callAI(prompt, 'You are RES, an expert at organizing law school class notes. Structure notes clearly with headings, sub-points, and logical flow.', 'quick');
+  textarea.value = result;
+}
+
+// ─── GENERATE DIAGRAM ───
+async function generateDiagram() {
+  const textarea = document.getElementById('note-input');
+  const text = textarea.value.trim();
+  if (!text) return alert('Please enter notes first.');
+  const container = document.getElementById('note-diagram-container');
+  container.style.display = '';
+  container.innerHTML = '<p style="color:var(--slate);font-size:0.82rem;">Generating diagram...</p>';
+  const prompt = `Based on these law school notes, create a Mermaid.js diagram (flowchart or mind map) that visualizes the key concepts and their relationships. Return ONLY the mermaid code block, no explanation.\n\n${text}`;
+  const result = await callAI(prompt, 'You are RES. Generate clean Mermaid.js diagram syntax. Use graph TD or mindmap format.', 'quick');
+  const mermaidCode = result.replace(/```mermaid\n?/g, '').replace(/```\n?/g, '').trim();
+  try {
+    container.innerHTML = '<div class="mermaid">' + mermaidCode + '</div>';
+    if (typeof mermaid !== 'undefined') mermaid.init(undefined, container.querySelector('.mermaid'));
+  } catch(e) {
+    container.innerHTML = '<pre style="font-size:0.78rem;color:var(--slate);">' + mermaidCode + '</pre>';
+  }
+}
+
+// ─── WEEKLY SCHEDULE GRID ───
+function refreshScheduleGrid() {
+  const grid = document.getElementById('weekly-schedule-grid');
+  if (!grid) return;
+  const d = appData();
+  const courses = d.courses || [];
+  const dayMap = { Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5 };
+  const hours = ['8 AM','9 AM','10 AM','11 AM','12 PM','1 PM','2 PM','3 PM','4 PM','5 PM'];
+  let html = '<div class="sg-header"></div><div class="sg-header">Mon</div><div class="sg-header">Tue</div><div class="sg-header">Wed</div><div class="sg-header">Thu</div><div class="sg-header">Fri</div>';
+  hours.forEach(h => {
+    html += `<div class="sg-time">${h}</div>`;
+    for (let col = 1; col <= 5; col++) {
+      let cellContent = '';
+      courses.forEach(c => {
+        if (c.days && c.time) {
+          const cDays = c.days || [];
+          const dayNames = Object.keys(dayMap);
+          if (cDays.includes(dayNames[col - 1])) {
+            const timeMatch = c.time.match(/(\d{1,2}):?(\d{2})?\s*(AM|PM)/i);
+            if (timeMatch) {
+              let hr = parseInt(timeMatch[1]);
+              const ampm = timeMatch[3].toUpperCase();
+              if (ampm === 'PM' && hr !== 12) hr += 12;
+              if (ampm === 'AM' && hr === 12) hr = 0;
+              const slotHr = hours.indexOf(h);
+              const baseHr = slotHr + 8;
+              if (hr === baseHr) {
+                cellContent += `<div class="class-block">${c.name}${c.room ? '<br>' + c.room : ''}</div>`;
+              }
+            }
+          }
+        }
+      });
+      html += `<div class="sg-cell">${cellContent}</div>`;
+    }
+  });
+  grid.innerHTML = html;
+}
+
+// Initialize mermaid
+if (typeof mermaid !== 'undefined') {
+  mermaid.initialize({ startOnLoad: false, theme: 'neutral' });
 }
 </script>
 </body>
