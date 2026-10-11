@@ -1127,6 +1127,13 @@ tr:hover td { background: rgba(42,127,127,0.04); }
   background: var(--primary);
   margin-top: 2px;
 }
+.cal-cell.has-class::before {
+  content: '';
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--teal);
+  margin-bottom: 2px;
+}
 .cal-cell.empty { pointer-events: none; }
 
 /* Heat map */
@@ -1526,7 +1533,7 @@ body.dark-mode .net-contact-card { border-color: rgba(181,101,29,0.15); }
 /* ─── Weekly Schedule Grid ─── */
 .schedule-grid {
   display: grid;
-  grid-template-columns: 80px repeat(5, 1fr);
+  grid-template-columns: 80px repeat(7, 1fr);
   gap: 1px;
   background: var(--mist);
   border-radius: var(--radius);
@@ -3012,6 +3019,10 @@ body.dark-mode .reading-name { color: #e8e4dc; }
               <button class="btn btn-danger" onclick="deleteCourse()">Delete Course</button>
             </div>
             <div id="detail-course-prof" style="font-size:0.82rem;color:var(--slate);margin-bottom:0.5rem;"></div>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:0.75rem;flex-wrap:wrap;">
+              <span id="detail-course-schedule" style="font-size:0.78rem;color:var(--slate);"></span>
+              <button class="btn btn-ghost" style="padding:2px 10px;font-size:0.68rem;" onclick="openEditSchedule()">✏️ Edit Schedule</button>
+            </div>
             <div class="course-stats-banner" id="course-stats-banner"></div>
 
             <div class="tabs">
@@ -3315,6 +3326,8 @@ body.dark-mode .reading-name { color: #e8e4dc; }
             <div class="sg-header">Wed</div>
             <div class="sg-header">Thu</div>
             <div class="sg-header">Fri</div>
+            <div class="sg-header">Sat</div>
+            <div class="sg-header">Sun</div>
           </div>
           <p style="font-size:0.72rem;color:var(--slate);">Add courses with room, time, and day info to populate this schedule.</p>
         </div>
@@ -4438,11 +4451,46 @@ body.dark-mode .reading-name { color: #e8e4dc; }
         <label><input type="checkbox" class="new-course-day" value="Wed"> Wed</label>
         <label><input type="checkbox" class="new-course-day" value="Thu"> Thu</label>
         <label><input type="checkbox" class="new-course-day" value="Fri"> Fri</label>
+        <label><input type="checkbox" class="new-course-day" value="Sat"> Sat</label>
+        <label><input type="checkbox" class="new-course-day" value="Sun"> Sun</label>
       </div>
+      <div style="font-size:0.68rem;color:var(--slate);margin-top:4px;">Checked days + the class time above will automatically show up on the Calendar page every week.</div>
     </div>
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:1.5rem;">
       <button class="btn btn-ghost" onclick="closeModal('add-course-modal')">Cancel</button>
       <button class="btn btn-primary" onclick="addCourse()">Add Course</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ EDIT COURSE SCHEDULE ═══════ -->
+<div class="modal-overlay" id="edit-schedule-modal">
+  <div class="modal">
+    <div class="modal-title">Edit Class Schedule</div>
+    <div class="form-group">
+      <label class="form-label">Room</label>
+      <input class="form-input" id="edit-course-room" placeholder="e.g., Rusk Hall 203">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Class Time</label>
+      <input class="form-input" id="edit-course-time" placeholder="e.g., 10:00 AM - 11:15 AM">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Days</label>
+      <div class="days-check">
+        <label><input type="checkbox" class="edit-course-day" value="Mon"> Mon</label>
+        <label><input type="checkbox" class="edit-course-day" value="Tue"> Tue</label>
+        <label><input type="checkbox" class="edit-course-day" value="Wed"> Wed</label>
+        <label><input type="checkbox" class="edit-course-day" value="Thu"> Thu</label>
+        <label><input type="checkbox" class="edit-course-day" value="Fri"> Fri</label>
+        <label><input type="checkbox" class="edit-course-day" value="Sat"> Sat</label>
+        <label><input type="checkbox" class="edit-course-day" value="Sun"> Sun</label>
+      </div>
+      <div style="font-size:0.68rem;color:var(--slate);margin-top:4px;">Checked days + the class time above will automatically show up on the Calendar page every week.</div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:1.5rem;">
+      <button class="btn btn-ghost" onclick="closeModal('edit-schedule-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEditedSchedule()">Save Schedule</button>
     </div>
   </div>
 </div>
@@ -5243,6 +5291,7 @@ function openCourseDetail(id) {
   document.getElementById('course-detail').style.display = 'block';
   document.getElementById('detail-course-name').textContent = course.name;
   document.getElementById('detail-course-prof').textContent = `${course.prof} · ${course.credits} credits`;
+  document.getElementById('detail-course-schedule').textContent = formatCourseSchedule(course);
 
   // Course stats banner — cross-tab data
   const courseHrs = state.studyLog.filter(l => l.subject === course.name).reduce((s, l) => s + l.hours, 0);
@@ -5273,6 +5322,38 @@ function closeCourseDetail() {
   document.querySelector('#page-courses > div:first-child').style.display = '';
   state.currentCourseId = null;
   renderCoursesGrid();
+}
+
+function formatCourseSchedule(course) {
+  const days = course.days && course.days.length ? course.days.join(', ') : null;
+  const time = course.time ? course.time.trim() : null;
+  const room = course.room ? course.room.trim() : null;
+  if (!days && !time && !room) return '🗓 No class schedule set — click Edit Schedule to add one (it will appear on the Calendar).';
+  return `🗓 ${[days, time, room].filter(Boolean).join(' · ')}`;
+}
+
+function openEditSchedule() {
+  const course = state.courses.find(c => c.id === state.currentCourseId);
+  if (!course) return;
+  document.getElementById('edit-course-room').value = course.room || '';
+  document.getElementById('edit-course-time').value = course.time || '';
+  const days = new Set(course.days || []);
+  document.querySelectorAll('.edit-course-day').forEach(cb => cb.checked = days.has(cb.value));
+  openModal('edit-schedule-modal');
+}
+
+function saveEditedSchedule() {
+  const course = state.courses.find(c => c.id === state.currentCourseId);
+  if (!course) return;
+  course.room = document.getElementById('edit-course-room').value.trim();
+  course.time = document.getElementById('edit-course-time').value.trim();
+  course.days = [...document.querySelectorAll('.edit-course-day:checked')].map(cb => cb.value);
+  saveState();
+  document.getElementById('detail-course-schedule').textContent = formatCourseSchedule(course);
+  closeModal('edit-schedule-modal');
+  if (typeof renderCalendar === 'function') renderCalendar();
+  if (typeof refreshScheduleGrid === 'function') { try { refreshScheduleGrid(); } catch (e) { console.error(e); } }
+  toast('Class schedule updated');
 }
 
 function switchCourseTab(tab) {
@@ -6452,6 +6533,12 @@ async function generateOutline(type) {
 // ═══════════════════════════════════════════
 //  CALENDAR
 // ═══════════════════════════════════════════
+const WEEKDAY_ABBR = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+function coursesOnWeekday(abbr) {
+  return state.courses.filter(c => c.days && c.days.includes(abbr));
+}
+
 function renderCalendar() {
   const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
   document.getElementById('cal-month-title').textContent = `${monthNames[state.calMonth]} ${state.calYear}`;
@@ -6476,10 +6563,12 @@ function renderCalendar() {
   let html = '';
   for (let i = 0; i < firstDay; i++) html += '<div class="cal-cell empty"></div>';
   for (let d = 1; d <= daysInMonth; d++) {
+    const cellDate = new Date(state.calYear, state.calMonth, d);
     const isToday = d === today.getDate() && state.calMonth === today.getMonth() && state.calYear === today.getFullYear();
     const hasEvent = !!assignByDate[d];
+    const hasClass = coursesOnWeekday(WEEKDAY_ABBR[cellDate.getDay()]).length > 0;
     const isSelected = d === state._calSelectedDay;
-    html += `<div class="cal-cell${isToday ? ' today' : ''}${hasEvent ? ' has-event' : ''}${isSelected ? ' selected' : ''}" onclick="selectCalDay(${d})">${d}</div>`;
+    html += `<div class="cal-cell${isToday ? ' today' : ''}${hasEvent ? ' has-event' : ''}${hasClass ? ' has-class' : ''}${isSelected ? ' selected' : ''}" onclick="selectCalDay(${d})">${d}</div>`;
   }
   document.getElementById('cal-days').innerHTML = html;
 
@@ -6518,9 +6607,20 @@ function showCalDayDetail(day) {
     });
   });
 
+  // Find recurring class sessions for this day of the week
+  const classEvents = coursesOnWeekday(WEEKDAY_ABBR[dateObj.getDay()]);
+
   const eventsEl = document.getElementById('cal-detail-events');
+  const classHtml = classEvents.map(c => `
+    <div class="cal-day-event">
+      <div style="flex:1;min-width:0;">
+        <div style="font-weight:500;">🗓 ${esc(c.name)} <span class="tag tag-gold" style="margin-left:4px;">Class</span></div>
+        <div style="font-size:0.7rem;color:var(--slate);">${[c.time, c.room].filter(Boolean).map(esc).join(' · ') || 'Recurring class session'}</div>
+      </div>
+    </div>`).join('');
+
   if (events.length > 0) {
-    eventsEl.innerHTML = events.map(e => {
+    eventsEl.innerHTML = classHtml + events.map(e => {
       const timeStr = e.time ? ` · ${formatDueDateTime(e).split(' at ')[1]}` : '';
       const hrsLeft = hoursUntilDue(e);
       const urgency = !e.completed && hrsLeft < 0 ? ' · <span style="color:var(--primary);font-weight:600;">OVERDUE</span>' :
@@ -6541,7 +6641,7 @@ function showCalDayDetail(day) {
       </div>`;
     }).join('');
   } else {
-    eventsEl.innerHTML = '<div style="font-size:0.82rem;color:var(--slate);font-style:italic;padding:4px 0;">No assignments on this day.</div>';
+    eventsEl.innerHTML = classHtml + '<div style="font-size:0.82rem;color:var(--slate);font-style:italic;padding:4px 0;">No assignments on this day.</div>';
   }
 
   // Set the date for inline add
@@ -9550,33 +9650,25 @@ function saveDiagramWithNote() {
 function refreshScheduleGrid() {
   const grid = document.getElementById('weekly-schedule-grid');
   if (!grid) return;
-  const d = appData();
-  const courses = d.courses || [];
-  const dayMap = { Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5 };
-  const hours = ['8 AM','9 AM','10 AM','11 AM','12 PM','1 PM','2 PM','3 PM','4 PM','5 PM'];
-  let html = '<div class="sg-header"></div><div class="sg-header">Mon</div><div class="sg-header">Tue</div><div class="sg-header">Wed</div><div class="sg-header">Thu</div><div class="sg-header">Fri</div>';
-  hours.forEach(h => {
+  const courses = (state.courses || []).filter(c => c.days && c.days.length && c.time);
+  const dayNames = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const hourLabels = ['8 AM','9 AM','10 AM','11 AM','12 PM','1 PM','2 PM','3 PM','4 PM','5 PM','6 PM','7 PM','8 PM'];
+  let html = '<div class="sg-header"></div>' + dayNames.map(d => `<div class="sg-header">${d}</div>`).join('');
+  hourLabels.forEach((h, slotHr) => {
     html += `<div class="sg-time">${h}</div>`;
-    for (let col = 1; col <= 5; col++) {
+    const baseHr = slotHr + 8;
+    for (let col = 0; col < dayNames.length; col++) {
       let cellContent = '';
       courses.forEach(c => {
-        if (c.days && c.time) {
-          const cDays = c.days || [];
-          const dayNames = Object.keys(dayMap);
-          if (cDays.includes(dayNames[col - 1])) {
-            const timeMatch = c.time.match(/(\d{1,2}):?(\d{2})?\s*(AM|PM)/i);
-            if (timeMatch) {
-              let hr = parseInt(timeMatch[1]);
-              const ampm = timeMatch[3].toUpperCase();
-              if (ampm === 'PM' && hr !== 12) hr += 12;
-              if (ampm === 'AM' && hr === 12) hr = 0;
-              const slotHr = hours.indexOf(h);
-              const baseHr = slotHr + 8;
-              if (hr === baseHr) {
-                cellContent += `<div class="class-block">${c.name}${c.room ? '<br>' + c.room : ''}</div>`;
-              }
-            }
-          }
+        if (!c.days.includes(dayNames[col])) return;
+        const timeMatch = c.time.match(/(\d{1,2}):?(\d{2})?\s*(AM|PM)/i);
+        if (!timeMatch) return;
+        let hr = parseInt(timeMatch[1]);
+        const ampm = timeMatch[3].toUpperCase();
+        if (ampm === 'PM' && hr !== 12) hr += 12;
+        if (ampm === 'AM' && hr === 12) hr = 0;
+        if (hr === baseHr) {
+          cellContent += `<div class="class-block">${esc(c.name)}${c.room ? '<br>' + esc(c.room) : ''}</div>`;
         }
       });
       html += `<div class="sg-cell">${cellContent}</div>`;
