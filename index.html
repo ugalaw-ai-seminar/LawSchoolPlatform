@@ -208,6 +208,35 @@ body {
   color: white;
 }
 
+/* Provider selector variant for light modals (e.g. Settings) */
+.provider-group-light {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 0.25rem;
+}
+.provider-group-light label {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 8px;
+  border: 1.5px solid var(--mist);
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--slate);
+  transition: all 0.2s;
+  font-family: var(--font-body);
+}
+.provider-group-light input[type="radio"] { display: none; }
+.provider-group-light label:has(input:checked) {
+  border-color: var(--teal);
+  background: var(--teal-soft);
+  color: var(--teal);
+}
+
 /* Days checkbox group */
 .days-check {
   display: flex;
@@ -476,18 +505,6 @@ body {
   opacity: 0.12;
   pointer-events: none;
   z-index: 0;
-}
-#page-hero .hero-semester {
-  position: absolute;
-  top: 1rem;
-  right: 1.5rem;
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  opacity: 0.55;
-  z-index: 2;
-  font-family: var(--font-body);
 }
 #page-hero {
   animation: heroSlide 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
@@ -1110,6 +1127,13 @@ tr:hover td { background: rgba(42,127,127,0.04); }
   background: var(--primary);
   margin-top: 2px;
 }
+.cal-cell.has-class::before {
+  content: '';
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--teal);
+  margin-bottom: 2px;
+}
 .cal-cell.empty { pointer-events: none; }
 
 /* Heat map */
@@ -1509,7 +1533,7 @@ body.dark-mode .net-contact-card { border-color: rgba(181,101,29,0.15); }
 /* ─── Weekly Schedule Grid ─── */
 .schedule-grid {
   display: grid;
-  grid-template-columns: 80px repeat(5, 1fr);
+  grid-template-columns: 80px repeat(7, 1fr);
   gap: 1px;
   background: var(--mist);
   border-radius: var(--radius);
@@ -1619,11 +1643,15 @@ body.dark-mode .net-contact-card { border-color: rgba(181,101,29,0.15); }
   background: white;
   border: 1px solid var(--mist);
   border-radius: var(--radius);
-  padding: 16px;
+  padding: 20px;
   margin-top: 12px;
-  overflow-x: auto;
+  overflow: auto;
+  min-height: 220px;
+  max-height: 65vh;
+  display: flex;
+  justify-content: center;
 }
-.mermaid-container svg { max-width: 100%; }
+.mermaid-container svg { min-width: 500px; height: auto; }
 
 /* ─── FLOATING AI CHAT BUTTON ─── */
 .fab-chat {
@@ -2858,9 +2886,6 @@ body.dark-mode .reading-name { color: #e8e4dc; }
         </button>
         <div class="page-title" id="page-title">Dashboard</div>
       </div>
-      <div class="top-actions">
-        <span style="font-size:0.7rem;color:var(--slate);" id="semester-label"></span>
-      </div>
     </div>
 
     <div class="content-area">
@@ -2994,6 +3019,10 @@ body.dark-mode .reading-name { color: #e8e4dc; }
               <button class="btn btn-danger" onclick="deleteCourse()">Delete Course</button>
             </div>
             <div id="detail-course-prof" style="font-size:0.82rem;color:var(--slate);margin-bottom:0.5rem;"></div>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:0.75rem;flex-wrap:wrap;">
+              <span id="detail-course-schedule" style="font-size:0.78rem;color:var(--slate);"></span>
+              <button class="btn btn-ghost" style="padding:2px 10px;font-size:0.68rem;" onclick="openEditSchedule()">✏️ Edit Schedule</button>
+            </div>
             <div class="course-stats-banner" id="course-stats-banner"></div>
 
             <div class="tabs">
@@ -3011,19 +3040,37 @@ body.dark-mode .reading-name { color: #e8e4dc; }
               </div>
               <input type="file" id="file-upload" style="display:none;" multiple accept=".pdf,.docx,.txt,.pptx,.md" onchange="handleFileUpload(event)">
               <div id="materials-list" style="margin-top:1rem;"></div>
+
+              <div class="card" style="margin-top:1.25rem;">
+                <div class="card-header">
+                  <span class="card-title" style="font-size:0.95rem;">📅 Key Dates & Deadlines</span>
+                  <button class="btn btn-ghost" style="padding:4px 10px;font-size:0.7rem;" onclick="extractCourseDeadlines()">Refresh Summary</button>
+                </div>
+                <div id="materials-summary">
+                  <span style="color:var(--slate);font-size:0.82rem;">Upload a syllabus or course materials and this section will automatically surface key dates and deadlines.</span>
+                </div>
+              </div>
             </div>
 
             <div id="ctab-notes" style="display:none;">
               <div class="form-group">
                 <label class="form-label">Add Class Note</label>
-                <textarea class="form-textarea" id="note-input" placeholder="Paste or type your class notes here..."></textarea>
+                <textarea class="form-textarea" id="note-input" placeholder="Paste or type your class notes here, or upload a file below..." style="min-height:180px;" oninput="invalidatePendingDiagram()"></textarea>
               </div>
-              <div style="display:flex;gap:8px;margin-bottom:8px;">
+              <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
                 <button class="btn btn-primary" onclick="saveNote()">Save Note</button>
-                <button class="btn btn-ghost" onclick="aiReorganizeNotes()">AI Reorganize</button>
-                <button class="btn btn-ghost" onclick="generateDiagram()">Generate Diagram</button>
+                <button class="btn btn-ghost" id="ai-reorganize-btn" onclick="aiReorganizeNotes()">AI Reorganize</button>
+                <button class="btn btn-ghost" id="generate-diagram-btn" onclick="generateDiagram()">Generate Diagram</button>
+                <button class="btn btn-ghost" onclick="document.getElementById('note-file-upload').click()">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13" style="vertical-align:-2px;margin-right:4px;"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                  Upload Notes File
+                </button>
+                <input type="file" id="note-file-upload" style="display:none;" accept=".pdf,.docx,.txt,.pptx,.md" onchange="handleNoteFileUpload(event)">
               </div>
               <div class="mermaid-container" id="note-diagram-container" style="display:none;"></div>
+              <div id="note-diagram-save-wrap" style="display:none;margin-bottom:1.25rem;">
+                <button class="btn btn-ghost" style="font-size:0.75rem;" onclick="saveDiagramWithNote()">💾 Save Diagram with Note</button>
+              </div>
               <div id="notes-list" style="margin-top:1rem;"></div>
             </div>
 
@@ -3279,6 +3326,8 @@ body.dark-mode .reading-name { color: #e8e4dc; }
             <div class="sg-header">Wed</div>
             <div class="sg-header">Thu</div>
             <div class="sg-header">Fri</div>
+            <div class="sg-header">Sat</div>
+            <div class="sg-header">Sun</div>
           </div>
           <p style="font-size:0.72rem;color:var(--slate);">Add courses with room, time, and day info to populate this schedule.</p>
         </div>
@@ -3797,8 +3846,16 @@ body.dark-mode .reading-name { color: #e8e4dc; }
             </div>
             <div class="form-group">
               <label class="form-label">Paste Your Resume (plain text)</label>
-              <textarea class="form-input" id="resume-text" rows="8" placeholder="Paste your resume content here..."></textarea>
+              <textarea class="form-input" id="resume-text" rows="8" placeholder="Paste your resume content here, or upload a file below..."></textarea>
             </div>
+            <div style="display:flex;gap:8px;margin:-4px 0 1rem;flex-wrap:wrap;">
+              <button class="btn btn-ghost" onclick="document.getElementById('resume-file-upload').click()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13" style="vertical-align:-2px;margin-right:4px;"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                Upload Resume File
+              </button>
+              <input type="file" id="resume-file-upload" style="display:none;" accept=".pdf,.docx,.txt,.md" onchange="handleResumeFileUpload(event)">
+            </div>
+            <div id="resume-file-chip" style="display:none;font-size:0.72rem;color:var(--slate);background:var(--mist);border-radius:6px;padding:6px 10px;margin:-4px 0 1rem;"></div>
             <div class="grid-2">
               <div class="form-group">
                 <label class="form-label">Target Role / Employer Type</label>
@@ -3816,7 +3873,7 @@ body.dark-mode .reading-name { color: #e8e4dc; }
                 </select>
               </div>
             </div>
-            <button class="btn btn-primary" onclick="reviewResume()">🤖 AI Resume Review</button>
+            <button class="btn btn-primary" id="resume-review-btn" onclick="reviewResume()">🤖 AI Resume Review</button>
           </div>
 
           <div class="card">
@@ -4394,7 +4451,10 @@ body.dark-mode .reading-name { color: #e8e4dc; }
         <label><input type="checkbox" class="new-course-day" value="Wed"> Wed</label>
         <label><input type="checkbox" class="new-course-day" value="Thu"> Thu</label>
         <label><input type="checkbox" class="new-course-day" value="Fri"> Fri</label>
+        <label><input type="checkbox" class="new-course-day" value="Sat"> Sat</label>
+        <label><input type="checkbox" class="new-course-day" value="Sun"> Sun</label>
       </div>
+      <div style="font-size:0.68rem;color:var(--slate);margin-top:4px;">Checked days + the class time above will automatically show up on the Calendar page every week.</div>
     </div>
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:1.5rem;">
       <button class="btn btn-ghost" onclick="closeModal('add-course-modal')">Cancel</button>
@@ -4403,17 +4463,92 @@ body.dark-mode .reading-name { color: #e8e4dc; }
   </div>
 </div>
 
+<!-- ═══════ EDIT COURSE SCHEDULE ═══════ -->
+<div class="modal-overlay" id="edit-schedule-modal">
+  <div class="modal">
+    <div class="modal-title">Edit Class Schedule</div>
+    <div class="form-group">
+      <label class="form-label">Room</label>
+      <input class="form-input" id="edit-course-room" placeholder="e.g., Rusk Hall 203">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Class Time</label>
+      <input class="form-input" id="edit-course-time" placeholder="e.g., 10:00 AM - 11:15 AM">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Days</label>
+      <div class="days-check">
+        <label><input type="checkbox" class="edit-course-day" value="Mon"> Mon</label>
+        <label><input type="checkbox" class="edit-course-day" value="Tue"> Tue</label>
+        <label><input type="checkbox" class="edit-course-day" value="Wed"> Wed</label>
+        <label><input type="checkbox" class="edit-course-day" value="Thu"> Thu</label>
+        <label><input type="checkbox" class="edit-course-day" value="Fri"> Fri</label>
+        <label><input type="checkbox" class="edit-course-day" value="Sat"> Sat</label>
+        <label><input type="checkbox" class="edit-course-day" value="Sun"> Sun</label>
+      </div>
+      <div style="font-size:0.68rem;color:var(--slate);margin-top:4px;">Checked days + the class time above will automatically show up on the Calendar page every week.</div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:1.5rem;">
+      <button class="btn btn-ghost" onclick="closeModal('edit-schedule-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEditedSchedule()">Save Schedule</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="api-key-modal">
   <div class="modal">
     <div class="modal-title">API Key Settings</div>
     <div class="form-group">
-      <label class="form-label">Gemini API Key</label>
-      <input class="form-input" id="settings-api-key" type="password">
+      <label class="form-label">AI Provider</label>
+      <div class="provider-group-light">
+        <label><input type="radio" name="settings-ai-provider" value="gemini" onchange="onSettingsProviderChange()"> Gemini</label>
+        <label><input type="radio" name="settings-ai-provider" value="openai" onchange="onSettingsProviderChange()"> OpenAI</label>
+        <label><input type="radio" name="settings-ai-provider" value="claude" onchange="onSettingsProviderChange()"> Claude</label>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label" id="settings-api-key-label">API Key</label>
+      <input class="form-input" id="settings-api-key" type="password" placeholder="Paste your API key here" autocomplete="off">
+      <div style="font-size:0.68rem;color:var(--slate);margin-top:6px;" id="settings-api-key-hint"></div>
     </div>
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:1rem;">
       <button class="btn btn-ghost" onclick="closeModal('api-key-modal')">Cancel</button>
       <button class="btn btn-primary" onclick="updateApiKey()">Save</button>
     </div>
+  </div>
+</div>
+
+<!-- ═══════ FULL NOTE VIEW MODAL ═══════ -->
+<div class="modal-overlay history-modal" id="note-view-modal">
+  <div class="modal" style="max-height:85vh;display:flex;flex-direction:column;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-shrink:0;">
+      <div class="modal-title" style="margin-bottom:0;" id="note-view-date"></div>
+      <button class="btn btn-ghost" onclick="closeModal('note-view-modal')" style="padding:6px 12px;">✕</button>
+    </div>
+    <div style="overflow-y:auto;">
+      <div class="md-rendered" id="note-view-text" style="font-size:0.88rem;line-height:1.7;"></div>
+      <div class="mermaid-container" id="note-view-diagram" style="display:none;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ FULL-SIZE DIAGRAM VIEWER (zoom + pan) ═══════ -->
+<div class="modal-overlay history-modal" id="diagram-view-modal">
+  <div class="modal" style="max-width:min(96vw,1300px);width:96vw;max-height:92vh;display:flex;flex-direction:column;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;flex-shrink:0;gap:10px;flex-wrap:wrap;">
+      <div class="modal-title" style="margin-bottom:0;" id="diagram-view-title">Diagram</div>
+      <div style="display:flex;gap:6px;align-items:center;flex-shrink:0;">
+        <button class="btn btn-ghost" style="padding:4px 12px;font-size:0.9rem;" onclick="zoomDiagramView(-0.2)" title="Zoom out">−</button>
+        <span id="diagram-view-zoom-label" style="font-size:0.72rem;color:var(--slate);min-width:42px;text-align:center;">100%</span>
+        <button class="btn btn-ghost" style="padding:4px 12px;font-size:0.9rem;" onclick="zoomDiagramView(0.2)" title="Zoom in">+</button>
+        <button class="btn btn-ghost" style="padding:4px 10px;font-size:0.68rem;" onclick="resetDiagramViewZoom()">Reset</button>
+        <button class="btn btn-ghost" onclick="closeModal('diagram-view-modal')" style="padding:6px 12px;">✕</button>
+      </div>
+    </div>
+    <div id="diagram-view-scroll" style="overflow:auto;flex:1;border:1px solid var(--mist);border-radius:var(--radius);background:white;padding:24px;">
+      <div id="diagram-view-content" style="transform-origin:top left;display:inline-block;"></div>
+    </div>
+    <div style="font-size:0.68rem;color:var(--slate);margin-top:8px;flex-shrink:0;">Scroll or drag to pan · use + / − to zoom</div>
   </div>
 </div>
 
@@ -4514,8 +4649,28 @@ body.dark-mode .reading-name { color: #e8e4dc; }
 // ═══════════════════════════════════════════
 //  STATE MANAGEMENT
 // ═══════════════════════════════════════════
+// Strips wrapping quotes (common when copying from a .env/JSON file) and ALL
+// whitespace, including embedded newlines/stray spaces that plain .trim() leaves
+// behind in the middle of a pasted key — either of which gets rejected by the
+// provider's API as an invalid key.
+function sanitizeApiKey(raw) {
+  let key = (raw || '').trim();
+  key = key.replace(/^['"]+|['"]+$/g, '');
+  key = key.replace(/\s+/g, '');
+  return key;
+}
+
 let API_KEY = '';
 let API_PROVIDER = 'gemini';
+let API_KEYS = { gemini: '', openai: '', claude: '' }; // remembers a key per provider so switching providers in Settings doesn't lose the others
+const PROVIDER_LABELS = { gemini: 'Gemini', openai: 'OpenAI', claude: 'Claude' };
+const PROVIDER_KEY_HINTS = {
+  gemini: 'Starts with "AIza...". Get one free at aistudio.google.com.',
+  openai: 'Starts with "sk-...". Get one at platform.openai.com/api-keys.',
+  claude: 'Starts with "sk-ant-...". Get one at console.anthropic.com.'
+};
+// Used to warn (not block) if a pasted key doesn't look like it matches the chosen provider.
+const PROVIDER_KEY_PREFIXES = { gemini: 'AIza', openai: 'sk-', claude: 'sk-ant-' };
 let state = {
   semester: 'Spring 2026',
   courses: [],
@@ -4574,11 +4729,23 @@ function loadState() {
 // ═══════════════════════════════════════════
 //  INITIALIZATION
 // ═══════════════════════════════════════════
+// Non-blocking sanity check: flags keys that clearly don't match the chosen
+// provider's expected prefix (e.g. an OpenAI key pasted while Claude is selected),
+// which otherwise fails silently until the first AI call with a confusing auth error.
+function warnIfKeyLooksWrong(provider, key) {
+  const prefix = PROVIDER_KEY_PREFIXES[provider];
+  if (prefix && !key.startsWith(prefix)) {
+    toast(`Heads up: that key doesn't start with "${prefix}" — double-check it's your ${PROVIDER_LABELS[provider]} key.`);
+  }
+}
+
 function enterApp() {
-  const key = document.getElementById('api-key-input').value.trim();
+  const key = sanitizeApiKey(document.getElementById('api-key-input').value);
   if (!key) return;
   API_KEY = key;
   API_PROVIDER = document.querySelector('input[name="ai-provider"]:checked')?.value || 'gemini';
+  API_KEYS[API_PROVIDER] = key;
+  warnIfKeyLooksWrong(API_PROVIDER, key);
   console.log('API key set, length:', API_KEY.length, 'prefix:', API_KEY.slice(0, 6));
   document.getElementById('splash-screen').classList.add('hidden');
   document.getElementById('app').classList.add('active');
@@ -4597,7 +4764,6 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 function initApp() {
-  document.getElementById('semester-label').textContent = state.semester;
   refreshDashboard();
   refreshCourseSelects();
   renderCalendar();
@@ -4617,7 +4783,6 @@ function initApp() {
       <div class="hero-title">Dashboard</div>
       <div class="hero-subtitle">Your law school command center</div>
       <div class="hero-deco"><img src="${dashSvg}" alt="" style="width:100%;height:100%;object-fit:contain;"></div>
-      <div class="hero-semester">${state.semester}</div>
     `;
   }
   // Set default date for manual study log
@@ -4756,7 +4921,6 @@ function navigateTo(page) {
         <div class="hero-title">${h.title}</div>
         <div class="hero-subtitle">${h.subtitle}</div>
         <div class="hero-deco"><img src="${decoSrc}" alt="" style="width:100%;height:100%;object-fit:contain;"></div>
-        <div class="hero-semester">${state.semester}</div>
       `;
     }
 
@@ -4772,6 +4936,7 @@ function navigateTo(page) {
     if (page === 'wellness' && typeof checkNotifBanner === 'function') checkNotifBanner();
     if (page === 'wellness' && typeof checkMoodNudge === 'function') checkMoodNudge();
     if (page === 'wellness' && typeof renderBillableLog === 'function') renderBillableLog();
+    if (page === 'calendar' && typeof renderCalendar === 'function') renderCalendar();
     if (page === 'calendar' && typeof refreshScheduleGrid === 'function') refreshScheduleGrid();
   }, 140);
 }
@@ -4787,16 +4952,33 @@ function openModal(id) { document.getElementById(id).classList.add('active'); }
 function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
 function showApiKeyModal() {
-  document.getElementById('settings-api-key').value = API_KEY;
+  const radio = document.querySelector(`input[name="settings-ai-provider"][value="${API_PROVIDER}"]`);
+  if (radio) radio.checked = true;
+  updateSettingsKeyField();
   openModal('api-key-modal');
 }
+function onSettingsProviderChange() {
+  updateSettingsKeyField();
+}
+function updateSettingsKeyField() {
+  const provider = document.querySelector('input[name="settings-ai-provider"]:checked')?.value || API_PROVIDER;
+  document.getElementById('settings-api-key-label').textContent = PROVIDER_LABELS[provider] + ' API Key';
+  document.getElementById('settings-api-key').value = API_KEYS[provider] || '';
+  document.getElementById('settings-api-key-hint').textContent = PROVIDER_KEY_HINTS[provider] || '';
+}
 function updateApiKey() {
-  const key = document.getElementById('settings-api-key').value.trim();
-  if (key) {
-    API_KEY = key;
-    ACTIVE_MODEL = null; // re-detect model for new key
-    toast('API key updated');
+  const provider = document.querySelector('input[name="settings-ai-provider"]:checked')?.value || API_PROVIDER;
+  const key = sanitizeApiKey(document.getElementById('settings-api-key').value);
+  if (key) API_KEYS[provider] = key;
+  if (!API_KEYS[provider]) {
+    toast(`Please enter a ${PROVIDER_LABELS[provider]} API key`);
+    return;
   }
+  if (key) warnIfKeyLooksWrong(provider, key);
+  API_PROVIDER = provider;
+  API_KEY = API_KEYS[provider];
+  ACTIVE_MODEL = null; // re-detect model for new key/provider
+  toast(`Now using ${PROVIDER_LABELS[provider]}`);
   closeModal('api-key-modal');
 }
 
@@ -4890,9 +5072,15 @@ FORMATTING RULES:
 - Keep formatting clean, professional, and easy to scan.`;
 
   const fullSystem = systemInstruction ? systemInstruction + formatRules : formatRules.trim();
-  
+
+  const parts = [];
+  if (opts?.pdfBase64) {
+    parts.push({ inlineData: { mimeType: opts.pdfMimeType || 'application/pdf', data: opts.pdfBase64 } });
+  }
+  parts.push({ text: safePrompt });
+
   const body = {
-    contents: [{ parts: [{ text: safePrompt }] }],
+    contents: [{ parts }],
   };
   if (fullSystem) {
     body.systemInstruction = { parts: [{ text: fullSystem }] };
@@ -4944,9 +5132,15 @@ FORMATTING RULES:
 async function callClaude(prompt, systemInstruction, difficulty, opts) {
   const model = MODEL_TIERS.claude[difficulty] || MODEL_TIERS.claude.normal;
   const safePrompt = prompt.length > 30000 ? prompt.slice(0, 30000) + '\n\n[Content truncated]' : prompt;
+  const userContent = opts?.pdfBase64
+    ? [
+        { type: 'document', source: { type: 'base64', media_type: opts.pdfMimeType || 'application/pdf', data: opts.pdfBase64 } },
+        { type: 'text', text: safePrompt }
+      ]
+    : safePrompt;
   const body = {
     model, max_tokens: opts?.maxTokens || 4096,
-    messages: [{ role: 'user', content: safePrompt }]
+    messages: [{ role: 'user', content: userContent }]
   };
   if (systemInstruction) body.system = systemInstruction;
   try {
@@ -5032,6 +5226,7 @@ function addCourse() {
     materials: [],
     notes: [],
     assignments: [],
+    deadlines: [],
     outlineData: null,
     progress: 0
   });
@@ -5096,6 +5291,7 @@ function openCourseDetail(id) {
   document.getElementById('course-detail').style.display = 'block';
   document.getElementById('detail-course-name').textContent = course.name;
   document.getElementById('detail-course-prof').textContent = `${course.prof} · ${course.credits} credits`;
+  document.getElementById('detail-course-schedule').textContent = formatCourseSchedule(course);
 
   // Course stats banner — cross-tab data
   const courseHrs = state.studyLog.filter(l => l.subject === course.name).reduce((s, l) => s + l.hours, 0);
@@ -5112,7 +5308,9 @@ function openCourseDetail(id) {
     <div class="course-stat-chip ${hasOutline ? 'cs-sage' : ''}">${hasOutline ? '📝 Outline built' : '📝 No outline yet'}</div>
   `;
 
+  course.deadlines = course.deadlines || [];
   renderMaterials(course);
+  renderMaterialsSummary(course);
   renderNotes(course);
   renderAssignments(course);
   switchCourseTab('materials');
@@ -5126,6 +5324,38 @@ function closeCourseDetail() {
   renderCoursesGrid();
 }
 
+function formatCourseSchedule(course) {
+  const days = course.days && course.days.length ? course.days.join(', ') : null;
+  const time = course.time ? course.time.trim() : null;
+  const room = course.room ? course.room.trim() : null;
+  if (!days && !time && !room) return '🗓 No class schedule set — click Edit Schedule to add one (it will appear on the Calendar).';
+  return `🗓 ${[days, time, room].filter(Boolean).join(' · ')}`;
+}
+
+function openEditSchedule() {
+  const course = state.courses.find(c => c.id === state.currentCourseId);
+  if (!course) return;
+  document.getElementById('edit-course-room').value = course.room || '';
+  document.getElementById('edit-course-time').value = course.time || '';
+  const days = new Set(course.days || []);
+  document.querySelectorAll('.edit-course-day').forEach(cb => cb.checked = days.has(cb.value));
+  openModal('edit-schedule-modal');
+}
+
+function saveEditedSchedule() {
+  const course = state.courses.find(c => c.id === state.currentCourseId);
+  if (!course) return;
+  course.room = document.getElementById('edit-course-room').value.trim();
+  course.time = document.getElementById('edit-course-time').value.trim();
+  course.days = [...document.querySelectorAll('.edit-course-day:checked')].map(cb => cb.value);
+  saveState();
+  document.getElementById('detail-course-schedule').textContent = formatCourseSchedule(course);
+  closeModal('edit-schedule-modal');
+  if (typeof renderCalendar === 'function') renderCalendar();
+  if (typeof refreshScheduleGrid === 'function') { try { refreshScheduleGrid(); } catch (e) { console.error(e); } }
+  toast('Class schedule updated');
+}
+
 function switchCourseTab(tab) {
   ['materials', 'notes', 'assignments', 'ai-tools'].forEach(t => {
     document.getElementById('ctab-' + t).style.display = t === tab ? 'block' : 'none';
@@ -5136,57 +5366,74 @@ function switchCourseTab(tab) {
 }
 
 // File upload
-function handleFileUpload(event) {
-  const course = state.courses.find(c => c.id === state.currentCourseId);
-  if (!course) return;
-  const files = event.target.files;
-  Array.from(files).forEach(file => {
+function readPlainText(file) {
+  return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = (e) => {
-      course.materials.push({
-        id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-        name: file.name,
-        type: file.type,
-        size: file.size,
-        content: e.target.result.slice(0, 50000), // limit stored content
-        uploadedAt: new Date().toISOString()
-      });
-      saveState();
-      renderMaterials(course);
-      toast(`${file.name} uploaded`);
-    };
+    reader.onload = (e) => resolve(e.target.result);
+    reader.onerror = () => reject(new Error('Could not read ' + file.name));
     reader.readAsText(file);
   });
+}
+
+// Dispatches by file type so binary formats (PDF, DOCX) get real text extraction
+// instead of FileReader.readAsText() producing garbled binary characters.
+async function readFileAsText(file) {
+  const name = file.name.toLowerCase();
+  if (name.endsWith('.pdf')) return extractPDFText(file);
+  if (name.endsWith('.docx')) {
+    const arrayBuffer = await file.arrayBuffer();
+    const result = await mammoth.extractRawText({ arrayBuffer });
+    return result.value;
+  }
+  if (name.endsWith('.pptx')) {
+    throw new Error('.pptx text extraction isn\'t supported yet — please save/export as PDF or paste the text directly.');
+  }
+  return readPlainText(file);
+}
+
+async function handleFileUpload(event) {
+  const course = state.courses.find(c => c.id === state.currentCourseId);
+  const files = Array.from(event.target.files);
   event.target.value = '';
+  if (!course || files.length === 0) return;
+  await ingestMaterialFiles(course, files);
 }
 
 // Handle files from drag-and-drop (uses same logic as handleFileUpload but accepts a FileList directly)
-function handleDroppedFiles(fileList) {
+async function handleDroppedFiles(fileList) {
   const course = state.courses.find(c => c.id === state.currentCourseId);
   if (!course) { toast('Open a course first to upload materials'); return; }
   const allowed = ['.pdf', '.docx', '.txt', '.pptx', '.md'];
-  Array.from(fileList).forEach(file => {
+  const files = Array.from(fileList).filter(file => {
     const ext = '.' + file.name.split('.').pop().toLowerCase();
-    if (!allowed.includes(ext)) {
-      toast(`${file.name}: unsupported file type`);
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = (e) => {
+    const ok = allowed.includes(ext);
+    if (!ok) toast(`${file.name}: unsupported file type`);
+    return ok;
+  });
+  await ingestMaterialFiles(course, files);
+}
+
+async function ingestMaterialFiles(course, files) {
+  if (files.length === 0) return;
+  await Promise.all(files.map(async file => {
+    try {
+      const content = await readFileAsText(file);
       course.materials.push({
         id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
         name: file.name,
         type: file.type,
         size: file.size,
-        content: e.target.result.slice(0, 50000),
+        content: content.slice(0, 50000), // limit stored content
         uploadedAt: new Date().toISOString()
       });
-      saveState();
-      renderMaterials(course);
-      toast(`${file.name} uploaded`);
-    };
-    reader.readAsText(file);
-  });
+    } catch (e) {
+      toast(`Could not read ${file.name}`);
+    }
+  }));
+  saveState();
+  renderMaterials(course);
+  toast(files.length > 1 ? `${files.length} files uploaded` : `${files[0].name} uploaded`);
+  extractCourseDeadlines();
 }
 
 function renderMaterials(course) {
@@ -5210,31 +5457,162 @@ function removeMaterial(mid) {
   renderMaterials(course);
 }
 
+// ─── MATERIALS SUMMARY: AI-extracted dates & deadlines ───
+async function extractCourseDeadlines() {
+  const course = state.courses.find(c => c.id === state.currentCourseId);
+  if (!course) return;
+  const summaryEl = document.getElementById('materials-summary');
+  if (!course.materials || course.materials.length === 0) {
+    if (summaryEl) summaryEl.innerHTML = '<span style="color:var(--slate);font-size:0.82rem;">Upload a syllabus or course materials and this section will automatically surface key dates and deadlines.</span>';
+    return;
+  }
+  if (summaryEl) summaryEl.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div> <span style="font-size:0.78rem;color:var(--slate);">Scanning materials for dates & deadlines...</span>';
+
+  let materialsText = '';
+  course.materials.forEach(m => {
+    materialsText += `\n--- File: ${m.name} ---\n${m.content ? m.content.slice(0, 10000) : '[binary file, no extractable text]'}\n`;
+  });
+  const today = new Date().toISOString().split('T')[0];
+  const prompt = `Today's date is ${today}. Below are course materials (syllabus, reading schedule, assignment sheets, etc.) for a law school course. Identify every date-specific item: assignment due dates, exam dates, reading deadlines, presentation dates, paper due dates, important class dates. Ignore generic recurring class meeting times unless a specific date is given.
+
+Return ONLY a JSON array (no prose, no markdown code fences) in this exact shape:
+[{"date":"YYYY-MM-DD","label":"short description"}]
+
+If a date lacks an explicit year, infer the most sensible one based on today's date. If no concrete dates are found, return [].
+
+Materials:
+${materialsText.slice(0, 28000)}`;
+
+  const result = await callAI(prompt, 'You are RES, a precise assistant that extracts dates from law school course materials and returns strict JSON only, with no explanation.', 'easy');
+  if (result.startsWith('Error:')) {
+    if (summaryEl) summaryEl.innerHTML = `<span style="color:var(--crimson);font-size:0.8rem;">${esc(result)}</span>`;
+    return;
+  }
+  let items = [];
+  try {
+    const jsonMatch = result.match(/\[[\s\S]*\]/);
+    items = jsonMatch ? JSON.parse(jsonMatch[0]) : [];
+    if (!Array.isArray(items)) items = [];
+  } catch (e) {
+    if (summaryEl) summaryEl.innerHTML = `<span style="color:var(--crimson);font-size:0.8rem;">Couldn't parse dates from the AI response. ${esc(result.slice(0, 200))}</span>`;
+    return;
+  }
+  course.deadlines = items
+    .filter(i => i && i.date && i.label)
+    .map(i => ({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), date: i.date, label: String(i.label).slice(0, 200) }));
+  saveState();
+  renderMaterialsSummary(course);
+}
+
+function renderMaterialsSummary(course) {
+  const el = document.getElementById('materials-summary');
+  if (!el) return;
+  const items = course.deadlines || [];
+  if (items.length === 0) {
+    el.innerHTML = `<span style="color:var(--slate);font-size:0.82rem;">${course.materials.length > 0 ? 'No dates found yet. Click "Refresh Summary" to scan your uploaded materials.' : 'Upload a syllabus or course materials and this section will automatically surface key dates and deadlines.'}</span>`;
+    return;
+  }
+  const existingNames = new Set(course.assignments.map(a => a.name + '|' + a.date));
+  const sorted = [...items].sort((a, b) => parseLocalDate(a.date) - parseLocalDate(b.date));
+  el.innerHTML = `<ul style="list-style:none;padding:0;margin:0;">${sorted.map(d => {
+    const already = existingNames.has(d.label + '|' + d.date);
+    return `
+    <li style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(26,26,46,0.06);">
+      <span style="font-size:0.82rem;"><strong style="color:var(--teal);">${parseLocalDate(d.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</strong> — ${esc(d.label)}</span>
+      <button class="btn btn-ghost" style="padding:3px 8px;font-size:0.65rem;flex-shrink:0;" ${already ? 'disabled' : ''} onclick="addDeadlineToAssignments('${d.id}')">${already ? '✓ Added' : '+ Assignment'}</button>
+    </li>`;
+  }).join('')}</ul>`;
+}
+
+function addDeadlineToAssignments(deadlineId) {
+  const course = state.courses.find(c => c.id === state.currentCourseId);
+  if (!course) return;
+  const d = (course.deadlines || []).find(x => x.id === deadlineId);
+  if (!d) return;
+  course.assignments.push({ id: Date.now().toString(36), name: d.label, date: d.date, time: '', completed: false });
+  saveState();
+  renderAssignments(course);
+  renderMaterialsSummary(course);
+  refreshDashboard();
+  toast('Added to assignments');
+}
+
 // Notes
 function saveNote() {
   const course = state.courses.find(c => c.id === state.currentCourseId);
   if (!course) return;
   const text = document.getElementById('note-input').value.trim();
   if (!text) return;
+  const hasDiagram = !!(notePendingDiagramCode && notePendingDiagramCode.length);
   course.notes.push({
     id: Date.now().toString(36),
     text,
+    diagrams: hasDiagram ? notePendingDiagramCode : null,
     createdAt: new Date().toISOString()
   });
   saveState();
   document.getElementById('note-input').value = '';
+  notePendingDiagramCode = null;
+  document.getElementById('note-diagram-save-wrap').style.display = 'none';
+  document.getElementById('note-diagram-container').style.display = 'none';
+  document.getElementById('note-diagram-container').innerHTML = '';
   renderNotes(course);
-  toast('Note saved');
+  toast(hasDiagram ? 'Note and diagram saved' : 'Note saved');
 }
 
 function renderNotes(course) {
   const list = document.getElementById('notes-list');
   if (course.notes.length === 0) { list.innerHTML = ''; return; }
-  list.innerHTML = course.notes.map(n => `
-    <div class="card" style="margin-bottom:0.75rem;">
-      <div style="font-size:0.68rem;color:var(--slate);margin-bottom:4px;">${new Date(n.createdAt).toLocaleString()}</div>
-      <div style="font-size:0.82rem;line-height:1.6;white-space:pre-wrap;">${esc(n.text).slice(0, 500)}${n.text.length > 500 ? '...' : ''}</div>
-    </div>`).join('');
+  const sorted = [...course.notes].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  list.innerHTML = sorted.map(n => {
+    // Supports both the new multi-diagram array (n.diagrams) and legacy single-diagram
+    // notes saved before this feature (n.diagram, a plain mermaid code string).
+    const diagramCount = (n.diagrams && n.diagrams.length) || (n.diagram ? 1 : 0);
+    return `
+    <div class="card" style="margin-bottom:0.75rem;cursor:pointer;" onclick="openNoteModal('${n.id}')">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
+        <div style="font-size:0.68rem;color:var(--slate);margin-bottom:4px;">${new Date(n.createdAt).toLocaleString()}${diagramCount ? ` · 📊 ${diagramCount > 1 ? diagramCount + ' diagrams' : 'diagram'}` : ''}</div>
+        <span style="font-size:0.68rem;color:var(--teal);flex-shrink:0;">View full note →</span>
+      </div>
+      <div style="font-size:0.82rem;line-height:1.6;white-space:pre-wrap;color:var(--ink);">${esc(n.text).slice(0, 220)}${n.text.length > 220 ? '…' : ''}</div>
+    </div>`;
+  }).join('');
+}
+
+async function openNoteModal(noteId) {
+  const course = state.courses.find(c => c.id === state.currentCourseId);
+  if (!course) return;
+  const note = course.notes.find(n => n.id === noteId);
+  if (!note) return;
+  document.getElementById('note-view-date').textContent = new Date(note.createdAt).toLocaleString();
+  document.getElementById('note-view-text').innerHTML = marked.parse(note.text);
+  const diagramEl = document.getElementById('note-view-diagram');
+  // Supports both the new multi-diagram array (note.diagrams) and legacy single-diagram
+  // notes saved before this feature (note.diagram, a plain mermaid code string).
+  const sections = note.diagrams && note.diagrams.length ? note.diagrams
+    : note.diagram ? [{ title: 'Diagram', code: note.diagram }] : [];
+  if (sections.length > 0) {
+    diagramEl.style.display = 'flex';
+    diagramEl.innerHTML = '<p style="color:var(--slate);font-size:0.8rem;">Rendering diagram...</p>';
+    try {
+      let combinedHtml = '';
+      for (const sec of sections) {
+        const { svg } = await mermaid.render('note-view-mermaid-' + (++noteDiagramRenderSeq), sec.code);
+        combinedHtml += `<div style="margin-bottom:24px;">${sections.length > 1 ? `<div style="font-weight:700;font-size:0.9rem;margin-bottom:8px;">${esc(sec.title)}</div>` : ''}${svg}</div>`;
+      }
+      // Stash into the shared viewer state (avoids embedding raw SVG markup inside
+      // an onclick="..." attribute string, which would break on internal quotes).
+      _lastDiagramSVG = combinedHtml;
+      _lastDiagramTitle = sections.length > 1 ? sections.length + ' Diagrams' : sections[0].title;
+      diagramEl.innerHTML = `<button class="btn btn-ghost" style="font-size:0.75rem;" onclick="reopenDiagramModal()">🔍 View Full-Size Diagram${sections.length > 1 ? 's' : ''}</button>`;
+    } catch (e) {
+      diagramEl.innerHTML = '<p style="color:var(--crimson);font-size:0.8rem;">Could not render saved diagram.</p>';
+    }
+  } else {
+    diagramEl.style.display = 'none';
+    diagramEl.innerHTML = '';
+  }
+  openModal('note-view-modal');
 }
 
 // Assignments
@@ -6155,6 +6533,12 @@ async function generateOutline(type) {
 // ═══════════════════════════════════════════
 //  CALENDAR
 // ═══════════════════════════════════════════
+const WEEKDAY_ABBR = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+function coursesOnWeekday(abbr) {
+  return state.courses.filter(c => c.days && c.days.includes(abbr));
+}
+
 function renderCalendar() {
   const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
   document.getElementById('cal-month-title').textContent = `${monthNames[state.calMonth]} ${state.calYear}`;
@@ -6179,10 +6563,12 @@ function renderCalendar() {
   let html = '';
   for (let i = 0; i < firstDay; i++) html += '<div class="cal-cell empty"></div>';
   for (let d = 1; d <= daysInMonth; d++) {
+    const cellDate = new Date(state.calYear, state.calMonth, d);
     const isToday = d === today.getDate() && state.calMonth === today.getMonth() && state.calYear === today.getFullYear();
     const hasEvent = !!assignByDate[d];
+    const hasClass = coursesOnWeekday(WEEKDAY_ABBR[cellDate.getDay()]).length > 0;
     const isSelected = d === state._calSelectedDay;
-    html += `<div class="cal-cell${isToday ? ' today' : ''}${hasEvent ? ' has-event' : ''}${isSelected ? ' selected' : ''}" onclick="selectCalDay(${d})">${d}</div>`;
+    html += `<div class="cal-cell${isToday ? ' today' : ''}${hasEvent ? ' has-event' : ''}${hasClass ? ' has-class' : ''}${isSelected ? ' selected' : ''}" onclick="selectCalDay(${d})">${d}</div>`;
   }
   document.getElementById('cal-days').innerHTML = html;
 
@@ -6221,9 +6607,20 @@ function showCalDayDetail(day) {
     });
   });
 
+  // Find recurring class sessions for this day of the week
+  const classEvents = coursesOnWeekday(WEEKDAY_ABBR[dateObj.getDay()]);
+
   const eventsEl = document.getElementById('cal-detail-events');
+  const classHtml = classEvents.map(c => `
+    <div class="cal-day-event">
+      <div style="flex:1;min-width:0;">
+        <div style="font-weight:500;">🗓 ${esc(c.name)} <span class="tag tag-gold" style="margin-left:4px;">Class</span></div>
+        <div style="font-size:0.7rem;color:var(--slate);">${[c.time, c.room].filter(Boolean).map(esc).join(' · ') || 'Recurring class session'}</div>
+      </div>
+    </div>`).join('');
+
   if (events.length > 0) {
-    eventsEl.innerHTML = events.map(e => {
+    eventsEl.innerHTML = classHtml + events.map(e => {
       const timeStr = e.time ? ` · ${formatDueDateTime(e).split(' at ')[1]}` : '';
       const hrsLeft = hoursUntilDue(e);
       const urgency = !e.completed && hrsLeft < 0 ? ' · <span style="color:var(--primary);font-weight:600;">OVERDUE</span>' :
@@ -6244,7 +6641,7 @@ function showCalDayDetail(day) {
       </div>`;
     }).join('');
   } else {
-    eventsEl.innerHTML = '<div style="font-size:0.82rem;color:var(--slate);font-style:italic;padding:4px 0;">No assignments on this day.</div>';
+    eventsEl.innerHTML = classHtml + '<div style="font-size:0.82rem;color:var(--slate);font-style:italic;padding:4px 0;">No assignments on this day.</div>';
   }
 
   // Set the date for inline add
@@ -6831,6 +7228,40 @@ function clearPDF() {
   var inp = document.getElementById('transcript-pdf-input'); if (inp) inp.value = '';
 }
 
+// Walks every page of an already-loaded pdf.js document and reconstructs
+// reading-order text by grouping glyphs into lines via their y-coordinate.
+async function extractPDFTextFromDoc(pdf) {
+  var fullText = '';
+  for (var p = 1; p <= pdf.numPages; p++) {
+    var page = await pdf.getPage(p); var content = await page.getTextContent();
+    var itemsByY = {};
+    content.items.forEach(function(item) {
+      if (!item.str || item.str.trim() === '') return;
+      var y = Math.round(item.transform[5] / 2) * 2;
+      if (!itemsByY[y]) itemsByY[y] = [];
+      itemsByY[y].push({ x: item.transform[4], str: item.str });
+    });
+    var sortedYs = Object.keys(itemsByY).map(Number).sort(function(a, b) { return b - a; });
+    sortedYs.forEach(function(y) {
+      var lineItems = itemsByY[y].sort(function(a, b) { return a.x - b.x; });
+      var line = lineItems.map(function(i) { return i.str; }).join(' ').trim();
+      if (line) fullText += line + '\n';
+    });
+    fullText += '\n';
+  }
+  return fullText.replace(/[ \t]+/g, ' ').replace(/\n{3,}/g, '\n\n').trim();
+}
+
+// Shared PDF text extractor used by the course Materials/Notes uploaders.
+async function extractPDFText(file) {
+  var pdfjs = await loadPDFJS();
+  var arrayBuffer = await file.arrayBuffer();
+  var pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
+  var text = await extractPDFTextFromDoc(pdf);
+  if (!text) throw new Error('No text could be extracted — this PDF may be a scanned image.');
+  return text;
+}
+
 async function processPDFFile(file) {
   if (!file) return;
   if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) { toast('Please select a PDF file (.pdf)'); return; }
@@ -6846,25 +7277,7 @@ async function processPDFFile(file) {
     var loadingTask = pdfjs.getDocument({ data: arrayBuffer });
     var pdf = await loadingTask.promise;
     if (msgEl) msgEl.textContent = 'Extracting text from ' + pdf.numPages + ' page(s)…';
-    var fullText = '';
-    for (var p = 1; p <= pdf.numPages; p++) {
-      var page = await pdf.getPage(p); var content = await page.getTextContent();
-      var itemsByY = {};
-      content.items.forEach(function(item) {
-        if (!item.str || item.str.trim() === '') return;
-        var y = Math.round(item.transform[5] / 2) * 2;
-        if (!itemsByY[y]) itemsByY[y] = [];
-        itemsByY[y].push({ x: item.transform[4], str: item.str });
-      });
-      var sortedYs = Object.keys(itemsByY).map(Number).sort(function(a, b) { return b - a; });
-      sortedYs.forEach(function(y) {
-        var lineItems = itemsByY[y].sort(function(a, b) { return a.x - b.x; });
-        var line = lineItems.map(function(i) { return i.str; }).join(' ').trim();
-        if (line) fullText += line + '\n';
-      });
-      fullText += '\n';
-    }
-    fullText = fullText.replace(/[ \t]+/g, ' ').replace(/\n{3,}/g, '\n\n').trim();
+    var fullText = await extractPDFTextFromDoc(pdf);
     if (!fullText) throw new Error('No text could be extracted. This PDF may be a scanned image — try the Paste Text tab instead.');
     loadingEl.style.display = 'none'; statusEl.style.display = 'block';
     var fnEl = document.getElementById('pdf-filename'); var pcEl = document.getElementById('pdf-page-count'); var taEl = document.getElementById('pdf-extracted-text');
@@ -7174,18 +7587,49 @@ function calcCOL() {
 }
 
 // ─── TAB 4: RESUME & COVER LETTER ───
+let resumeFileBase64 = null;
+let resumeFileMime = null;
+let resumeFileName = null;
+
+function renderMd(result) {
+  return (typeof marked !== 'undefined' && typeof result === 'string') ? marked.parse(result) : esc(String(result ?? ''));
+}
+
 async function reviewResume() {
   const text   = document.getElementById('resume-text').value.trim();
   const target = document.getElementById('resume-target').value;
   const focus  = document.getElementById('resume-focus').value;
-  if (!text) { toast('Paste your resume first'); return; }
+  const providerSupportsFile = (API_PROVIDER === 'gemini' || API_PROVIDER === 'claude');
+  const useFile = !!(resumeFileBase64 && providerSupportsFile);
+  if (!text && !useFile) { toast('Paste your resume first'); return; }
 
-  document.getElementById('resume-output-card').style.display = 'block';
-  document.getElementById('resume-output-title').textContent = 'Resume Review';
+  const card = document.getElementById('resume-output-card');
   const out = document.getElementById('resume-output');
+  card.style.display = 'block';
+  document.getElementById('resume-output-title').textContent = 'Resume Review';
   out.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div> Reviewing your resume...';
 
-  const prompt = `Review this law student resume for ${target || 'general legal recruiting'}. Focus: ${focus}.
+  const btn = document.getElementById('resume-review-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Reviewing...'; }
+
+  try {
+    let prompt;
+    if (useFile) {
+      prompt = `Review the attached PDF resume for ${target || 'general legal recruiting'}. Focus: ${focus}.
+
+Base your review on the attached PDF exactly as it appears — its real formatting, spacing, bullet structure, and layout. Do not assume or invent formatting problems; only comment on formatting if you can actually see an issue in the attached file itself.
+
+Provide:
+1. Overall impression (2–3 sentences)
+2. Top 3 strengths
+3. Top 3 improvements (specific, actionable)
+4. Bullet point rewrites for the weakest 2 bullets
+5. Any red flags for legal recruiting
+Use clean formatting with headers and lists.`;
+    } else {
+      prompt = `Review this law student resume for ${target || 'general legal recruiting'}. Focus: ${focus}.
+
+Note: this text was extracted from the student's original document, so exact spacing and bullet symbols may not be perfectly preserved. Do not criticize formatting quirks that are likely just artifacts of text extraction — focus formatting feedback on structure and organization, not literal spacing/symbols.
 
 RESUME:
 ${text}
@@ -7197,8 +7641,26 @@ Provide:
 4. Bullet point rewrites for the weakest 2 bullets
 5. Any red flags for legal recruiting
 Use clean formatting with headers and lists.`;
-  const result = await callAI(prompt, 'You are RES, an expert legal resume coach at a top law school career services office. Be honest, specific, and constructive.', 'career');
-  out.innerHTML = `<div class="md-rendered">${marked.parse(result)}</div>`;
+    }
+
+    const result = await callAI(
+      prompt,
+      'You are RES, an expert legal resume coach at a top law school career services office. Be honest, specific, and constructive.',
+      'career',
+      useFile ? { pdfBase64: resumeFileBase64, pdfMimeType: resumeFileMime } : {}
+    );
+
+    if (typeof result === 'string' && result.startsWith('Error:')) {
+      out.innerHTML = `<p style="color:var(--crimson);font-size:0.85rem;">${esc(result)}</p>`;
+      return;
+    }
+    out.innerHTML = `<div class="md-rendered">${renderMd(result)}</div>`;
+  } catch (e) {
+    console.error('Resume review error:', e);
+    out.innerHTML = `<p style="color:var(--crimson);font-size:0.85rem;">Something went wrong generating the review (${esc(e.message || 'unknown error')}). Please try again.</p>`;
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '🤖 AI Resume Review'; }
+  }
 }
 
 async function generateCoverLetter() {
@@ -7209,12 +7671,14 @@ async function generateCoverLetter() {
   const hook      = document.getElementById('cl-hook').value.trim();
   if (!employer || !position) { toast('Enter employer and position'); return; }
 
-  document.getElementById('resume-output-card').style.display = 'block';
-  document.getElementById('resume-output-title').textContent = 'Cover Letter Draft';
+  const card = document.getElementById('resume-output-card');
   const out = document.getElementById('resume-output');
+  card.style.display = 'block';
+  document.getElementById('resume-output-title').textContent = 'Cover Letter Draft';
   out.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div> Writing your cover letter...';
 
-  const prompt = `Write a polished legal cover letter for a law student applying to:
+  try {
+    const prompt = `Write a polished legal cover letter for a law student applying to:
 Employer: ${employer}
 Position: ${position}
 Practice area interest: ${practice || 'General'}
@@ -7222,8 +7686,17 @@ Key strengths: ${strengths || 'Strong academic record, research skills'}
 Personal hook/connection: ${hook || 'N/A'}
 
 Format as a complete, ready-to-use cover letter (3–4 short paragraphs). Professional but not stiff. Do NOT use hollow phrases like "I am writing to express my interest." Open with something specific and compelling.`;
-  const result = await callAI(prompt, 'You are RES, an expert legal writing coach. Write cover letters that are specific, confident, and memorable without being over-the-top.', 'career');
-  out.innerHTML = `<div class="md-rendered">${marked.parse(result)}</div>`;
+    const result = await callAI(prompt, 'You are RES, an expert legal writing coach. Write cover letters that are specific, confident, and memorable without being over-the-top.', 'career');
+
+    if (typeof result === 'string' && result.startsWith('Error:')) {
+      out.innerHTML = `<p style="color:var(--crimson);font-size:0.85rem;">${esc(result)}</p>`;
+      return;
+    }
+    out.innerHTML = `<div class="md-rendered">${renderMd(result)}</div>`;
+  } catch (e) {
+    console.error('Cover letter generation error:', e);
+    out.innerHTML = `<p style="color:var(--crimson);font-size:0.85rem;">Something went wrong generating the cover letter (${esc(e.message || 'unknown error')}). Please try again.</p>`;
+  }
 }
 
 // ─── TAB 5: INTERVIEW PREP ───
@@ -8917,66 +9390,285 @@ function exportBillableLog() {
   a.click();
 }
 
+// ─── NOTES: FILE UPLOAD ───
+async function handleNoteFileUpload(event) {
+  const file = event.target.files[0];
+  event.target.value = '';
+  if (!file) return;
+  try {
+    const content = await readFileAsText(file);
+    const textarea = document.getElementById('note-input');
+    const existing = textarea.value.trim();
+    textarea.value = existing ? `${existing}\n\n--- ${file.name} ---\n${content}` : content;
+    notePendingDiagramCode = null;
+    document.getElementById('note-diagram-save-wrap').style.display = 'none';
+    toast(`${file.name} added to notes — edit, then Save Note`);
+  } catch (e) {
+    toast(`Could not read ${file.name}`);
+  }
+}
+
+// ─── RESUME: FILE UPLOAD ───
+function readFileAsDataURL(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => resolve(e.target.result);
+    reader.onerror = () => reject(new Error('Could not read ' + file.name));
+    reader.readAsDataURL(file);
+  });
+}
+
+function clearResumeFileAttachment() {
+  resumeFileBase64 = null;
+  resumeFileMime = null;
+  resumeFileName = null;
+  const chip = document.getElementById('resume-file-chip');
+  if (chip) { chip.style.display = 'none'; chip.innerHTML = ''; }
+}
+
+function showResumeFileChip() {
+  const chip = document.getElementById('resume-file-chip');
+  if (!chip) return;
+  const supported = (API_PROVIDER === 'gemini' || API_PROVIDER === 'claude');
+  chip.style.display = '';
+  chip.innerHTML = supported
+    ? `📎 Reviewing the original file <strong>${esc(resumeFileName)}</strong> directly — its real formatting is preserved (no copy/paste text loss). <button class="btn btn-ghost" style="padding:1px 8px;font-size:0.68rem;margin-left:4px;" onclick="clearResumeFileAttachment()">Remove</button>`
+    : `📎 ${esc(resumeFileName)} uploaded. Note: direct PDF review is only available on Gemini or Claude — with your current provider, the review will use the extracted text below instead. <button class="btn btn-ghost" style="padding:1px 8px;font-size:0.68rem;margin-left:4px;" onclick="clearResumeFileAttachment()">Remove</button>`;
+}
+
+async function handleResumeFileUpload(event) {
+  const file = event.target.files[0];
+  event.target.value = '';
+  if (!file) return;
+  const isPDF = file.name.toLowerCase().endsWith('.pdf');
+  try {
+    const content = await readFileAsText(file);
+    const textarea = document.getElementById('resume-text');
+    textarea.value = content;
+    if (isPDF) {
+      const dataUrl = await readFileAsDataURL(file);
+      resumeFileBase64 = dataUrl.split(',')[1] || null;
+      resumeFileMime = file.type || 'application/pdf';
+      resumeFileName = file.name;
+      showResumeFileChip();
+      toast(`${file.name} loaded — the AI will review the original PDF's real formatting directly`);
+    } else {
+      clearResumeFileAttachment();
+      toast(`${file.name} loaded — review the text, then click AI Resume Review`);
+    }
+  } catch (e) {
+    toast(`Could not read ${file.name}`);
+  }
+}
+
 // ─── AI REORGANIZE NOTES ───
 async function aiReorganizeNotes() {
   const textarea = document.getElementById('note-input');
   const text = textarea.value.trim();
   if (!text) return alert('Please enter notes first.');
-  const prompt = `Reorganize and structure these class notes into a clear, well-organized format with headings and bullet points:\n\n${text}`;
-  const result = await callAI(prompt, 'You are RES, an expert at organizing law school class notes. Structure notes clearly with headings, sub-points, and logical flow.', 'quick');
-  textarea.value = result;
+  const btn = document.getElementById('ai-reorganize-btn');
+  const originalLabel = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Reorganizing...';
+  try {
+    const prompt = `Reorganize and structure these law school class notes into a clear, well-organized format using markdown-style headings (##), sub-headings, and bullet points. Preserve every substantive point from the original notes — do not drop content, only restructure and clarify it.\n\n${text}`;
+    const result = await callAI(prompt, 'You are RES, an expert at organizing law school class notes. Structure notes clearly with headings, sub-points, and logical flow. Never omit substantive content from the original notes.', 'quick');
+    if (result.startsWith('Error:')) {
+      toast(result);
+    } else {
+      textarea.value = result;
+      notePendingDiagramCode = null;
+      document.getElementById('note-diagram-save-wrap').style.display = 'none';
+      toast('Notes reorganized — review, then Save Note');
+    }
+  } finally {
+    btn.disabled = false;
+    btn.textContent = originalLabel;
+  }
 }
 
 // ─── GENERATE DIAGRAM ───
+let notePendingDiagramCode = null;
+let noteDiagramRenderSeq = 0;
+
+function invalidatePendingDiagram() {
+  if (!notePendingDiagramCode) return;
+  notePendingDiagramCode = null;
+  const wrap = document.getElementById('note-diagram-save-wrap');
+  if (wrap) wrap.style.display = 'none';
+}
+
+// ─── FULL-SIZE DIAGRAM VIEWER (zoom + drag-to-pan) ───
+let diagramViewZoom = 1;
+let _lastDiagramSVG = '';
+let _lastDiagramTitle = '';
+
+function setDiagramViewZoom(z) {
+  diagramViewZoom = Math.min(3, Math.max(0.3, z));
+  const content = document.getElementById('diagram-view-content');
+  if (content) content.style.transform = `scale(${diagramViewZoom})`;
+  const label = document.getElementById('diagram-view-zoom-label');
+  if (label) label.textContent = Math.round(diagramViewZoom * 100) + '%';
+}
+function zoomDiagramView(delta) { setDiagramViewZoom(diagramViewZoom + delta); }
+function resetDiagramViewZoom() { setDiagramViewZoom(1); }
+
+// Opens the large zoomable/pannable modal with the given rendered SVG markup.
+function showDiagramInModal(svg, title) {
+  if (!svg) return;
+  _lastDiagramSVG = svg;
+  _lastDiagramTitle = title || 'Diagram';
+  document.getElementById('diagram-view-title').textContent = _lastDiagramTitle;
+  document.getElementById('diagram-view-content').innerHTML = svg;
+  setDiagramViewZoom(1);
+  openModal('diagram-view-modal');
+}
+// Re-opens the most recently rendered diagram without re-rendering it.
+function reopenDiagramModal() { showDiagramInModal(_lastDiagramSVG, _lastDiagramTitle); }
+
+// Click-and-drag panning for the diagram viewer's scroll area.
+(function initDiagramPan() {
+  document.addEventListener('DOMContentLoaded', function() {
+    const scroller = document.getElementById('diagram-view-scroll');
+    if (!scroller) return;
+    let isDown = false, startX = 0, startY = 0, scrollL = 0, scrollT = 0;
+    scroller.addEventListener('mousedown', function(e) {
+      isDown = true;
+      scroller.style.cursor = 'grabbing';
+      startX = e.pageX; startY = e.pageY;
+      scrollL = scroller.scrollLeft; scrollT = scroller.scrollTop;
+    });
+    window.addEventListener('mouseup', function() { isDown = false; scroller.style.cursor = ''; });
+    scroller.addEventListener('mouseleave', function() { isDown = false; scroller.style.cursor = ''; });
+    scroller.addEventListener('mousemove', function(e) {
+      if (!isDown) return;
+      e.preventDefault();
+      scroller.scrollLeft = scrollL - (e.pageX - startX);
+      scroller.scrollTop = scrollT - (e.pageY - startY);
+    });
+    scroller.style.cursor = 'grab';
+  });
+})();
+
+// Splits the AI's raw output into one or more {title, code} diagram sections.
+// Sections are marked with a "## Title" heading line above each mermaid block.
+function parseDiagramSections(raw) {
+  const cleaned = raw.replace(/```mermaid\n?/g, '').replace(/```\n?/g, '');
+  const parts = cleaned.split(/^##\s+(.+)$/m);
+  const sections = [];
+  for (let i = 1; i < parts.length; i += 2) {
+    const title = parts[i].trim();
+    const code = (parts[i + 1] || '').trim();
+    if (code) sections.push({ title, code });
+  }
+  if (sections.length === 0) {
+    const code = cleaned.trim();
+    if (code) sections.push({ title: 'Diagram', code });
+  }
+  return sections;
+}
+
 async function generateDiagram() {
   const textarea = document.getElementById('note-input');
   const text = textarea.value.trim();
   if (!text) return alert('Please enter notes first.');
+  const btn = document.getElementById('generate-diagram-btn');
+  const saveWrap = document.getElementById('note-diagram-save-wrap');
   const container = document.getElementById('note-diagram-container');
+  btn.disabled = true;
+  btn.textContent = 'Generating...';
+  saveWrap.style.display = 'none';
   container.style.display = '';
-  container.innerHTML = '<p style="color:var(--slate);font-size:0.82rem;">Generating diagram...</p>';
-  const prompt = `Based on these law school notes, create a Mermaid.js diagram (flowchart or mind map) that visualizes the key concepts and their relationships. Return ONLY the mermaid code block, no explanation.\n\n${text}`;
-  const result = await callAI(prompt, 'You are RES. Generate clean Mermaid.js diagram syntax. Use graph TD or mindmap format.', 'quick');
-  const mermaidCode = result.replace(/```mermaid\n?/g, '').replace(/```\n?/g, '').trim();
+  container.innerHTML = '<p style="color:var(--slate);font-size:0.82rem;"><span class="loading-dots"><span></span><span></span><span></span></span> Generating diagram from your notes...</p>';
   try {
-    container.innerHTML = '<div class="mermaid">' + mermaidCode + '</div>';
-    if (typeof mermaid !== 'undefined') mermaid.init(undefined, container.querySelector('.mermaid'));
-  } catch(e) {
-    container.innerHTML = '<pre style="font-size:0.78rem;color:var(--slate);">' + mermaidCode + '</pre>';
+    const prompt = `Below are a law student's class notes. Turn them into one or more clear, well-organized Mermaid.js flowcharts (graph TD) that a student could actually study from.
+
+Rules:
+- Use the notes' own headings/sub-points to drive the structure — do not invent generic placeholder nodes.
+- Build a real hierarchy: main topic at the top, major doctrines/rules as branches, key sub-rules, exceptions, elements, or case names as children of those.
+- Every node label must be short (under 8 words) and specific to the content of the notes, in double quotes, e.g. A["Offer must be definite"].
+- Use plain alphanumeric node IDs (A, B, C1, C2...). Do not use parentheses, colons, or quotation marks inside node IDs.
+- Prefer at least 8-15 nodes per diagram so it is actually useful, unless the notes are very short.
+- If the notes cover more than one distinct major topic that would each be clearer as its own diagram, output SEVERAL separate diagrams instead of cramming everything into one. Otherwise output just one.
+- Format EVERY diagram exactly like this, with a short title heading directly above its code:
+## <Short Topic Title>
+graph TD
+  A["..."] --> B["..."]
+  ...
+- If outputting multiple diagrams, repeat that "## Title" + graph block pattern for each one, one after another.
+- Return ONLY the heading(s) and mermaid code — no prose, no explanation, no markdown code fences.
+
+Notes:
+${text}`;
+    const result = await callAI(prompt, 'You are RES. You generate clean, syntactically valid Mermaid.js "graph TD" flowcharts that accurately reflect the structure of law school notes. Output raw mermaid syntax only, formatted exactly as instructed.', 'quick');
+    if (result.startsWith('Error:')) {
+      container.innerHTML = `<p style="color:var(--crimson);font-size:0.82rem;">${esc(result)}</p>`;
+      return;
+    }
+    const sections = parseDiagramSections(result);
+    if (sections.length === 0) {
+      container.innerHTML = `<p style="color:var(--crimson);font-size:0.82rem;">No diagram was returned. Try again.</p>`;
+      return;
+    }
+    let combinedHtml = '';
+    const rendered = [];
+    for (const sec of sections) {
+      try {
+        const renderId = 'note-mermaid-' + (++noteDiagramRenderSeq);
+        const { svg } = await mermaid.render(renderId, sec.code);
+        combinedHtml += `<div style="margin-bottom:32px;">${sections.length > 1 ? `<div style="font-weight:700;font-size:0.95rem;color:var(--ink);margin-bottom:10px;">${esc(sec.title)}</div>` : ''}${svg}</div>`;
+        rendered.push(sec);
+      } catch (e) {
+        console.error('Diagram section render error:', e, sec.code);
+        combinedHtml += `<div style="margin-bottom:32px;"><div style="font-weight:700;font-size:0.9rem;color:var(--crimson);">${esc(sec.title)} — could not render this section</div></div>`;
+      }
+    }
+    if (rendered.length === 0) {
+      container.innerHTML = `<p style="color:var(--crimson);font-size:0.82rem;">Could not render the diagram (the AI output wasn't valid Mermaid syntax). Try clicking Generate Diagram again.</p>`;
+      return;
+    }
+    notePendingDiagramCode = rendered;
+    const modalTitle = rendered.length > 1 ? `${rendered.length} Diagrams` : rendered[0].title;
+    container.innerHTML = `<p style="color:var(--slate);font-size:0.82rem;">✓ ${rendered.length > 1 ? rendered.length + ' diagrams generated' : 'Diagram generated'} — <button class="btn btn-ghost" style="padding:3px 10px;font-size:0.72rem;" onclick="reopenDiagramModal()">🔍 View Full-Size</button></p>`;
+    saveWrap.style.display = '';
+    showDiagramInModal(combinedHtml, modalTitle);
+  } catch (e) {
+    console.error('Diagram generation error:', e);
+    container.innerHTML = `<p style="color:var(--crimson);font-size:0.82rem;">Could not render the diagram (the AI output wasn't valid Mermaid syntax). Try clicking Generate Diagram again.</p>`;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Generate Diagram';
   }
+}
+
+function saveDiagramWithNote() {
+  if (!notePendingDiagramCode) return;
+  saveNote();
 }
 
 // ─── WEEKLY SCHEDULE GRID ───
 function refreshScheduleGrid() {
   const grid = document.getElementById('weekly-schedule-grid');
   if (!grid) return;
-  const d = appData();
-  const courses = d.courses || [];
-  const dayMap = { Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5 };
-  const hours = ['8 AM','9 AM','10 AM','11 AM','12 PM','1 PM','2 PM','3 PM','4 PM','5 PM'];
-  let html = '<div class="sg-header"></div><div class="sg-header">Mon</div><div class="sg-header">Tue</div><div class="sg-header">Wed</div><div class="sg-header">Thu</div><div class="sg-header">Fri</div>';
-  hours.forEach(h => {
+  const courses = (state.courses || []).filter(c => c.days && c.days.length && c.time);
+  const dayNames = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const hourLabels = ['8 AM','9 AM','10 AM','11 AM','12 PM','1 PM','2 PM','3 PM','4 PM','5 PM','6 PM','7 PM','8 PM'];
+  let html = '<div class="sg-header"></div>' + dayNames.map(d => `<div class="sg-header">${d}</div>`).join('');
+  hourLabels.forEach((h, slotHr) => {
     html += `<div class="sg-time">${h}</div>`;
-    for (let col = 1; col <= 5; col++) {
+    const baseHr = slotHr + 8;
+    for (let col = 0; col < dayNames.length; col++) {
       let cellContent = '';
       courses.forEach(c => {
-        if (c.days && c.time) {
-          const cDays = c.days || [];
-          const dayNames = Object.keys(dayMap);
-          if (cDays.includes(dayNames[col - 1])) {
-            const timeMatch = c.time.match(/(\d{1,2}):?(\d{2})?\s*(AM|PM)/i);
-            if (timeMatch) {
-              let hr = parseInt(timeMatch[1]);
-              const ampm = timeMatch[3].toUpperCase();
-              if (ampm === 'PM' && hr !== 12) hr += 12;
-              if (ampm === 'AM' && hr === 12) hr = 0;
-              const slotHr = hours.indexOf(h);
-              const baseHr = slotHr + 8;
-              if (hr === baseHr) {
-                cellContent += `<div class="class-block">${c.name}${c.room ? '<br>' + c.room : ''}</div>`;
-              }
-            }
-          }
+        if (!c.days.includes(dayNames[col])) return;
+        const timeMatch = c.time.match(/(\d{1,2}):?(\d{2})?\s*(AM|PM)/i);
+        if (!timeMatch) return;
+        let hr = parseInt(timeMatch[1]);
+        const ampm = timeMatch[3].toUpperCase();
+        if (ampm === 'PM' && hr !== 12) hr += 12;
+        if (ampm === 'AM' && hr === 12) hr = 0;
+        if (hr === baseHr) {
+          cellContent += `<div class="class-block">${esc(c.name)}${c.room ? '<br>' + esc(c.room) : ''}</div>`;
         }
       });
       html += `<div class="sg-cell">${cellContent}</div>`;
@@ -8987,7 +9679,13 @@ function refreshScheduleGrid() {
 
 // Initialize mermaid
 if (typeof mermaid !== 'undefined') {
-  mermaid.initialize({ startOnLoad: false, theme: 'neutral' });
+  mermaid.initialize({
+    startOnLoad: false,
+    theme: 'neutral',
+    securityLevel: 'loose',
+    themeVariables: { fontSize: '18px' },
+    flowchart: { useMaxWidth: false, htmlLabels: true, nodeSpacing: 55, rankSpacing: 70 }
+  });
 }
 </script>
 </body>
