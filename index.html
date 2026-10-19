@@ -8251,6 +8251,7 @@ function saveMoodEntry() {
 
   saveState();
   renderMoodHistory();
+  refreshDashboard(); // keep the dashboard's Today mood card in sync
   // Hide the nudge since they just logged
   const nudge = document.getElementById('mood-nudge');
   if (nudge) nudge.style.display = 'none';
@@ -9001,7 +9002,8 @@ function refreshDashboard() {
   // Mood
   const todayMood = (state.moodLog || []).filter(m => new Date(m.date).toDateString() === todayStr);
   const latestMood = todayMood.length > 0 ? todayMood[todayMood.length - 1] : null;
-  const moodEmojis = { great: '😊', good: '🙂', okay: '😐', rough: '😔', bad: '😩' };
+  // Keys match the Wellness mood buttons; rough/bad kept for entries saved under older names
+  const moodEmojis = { great: '😊', good: '🙂', okay: '😐', low: '😔', stressed: '😫', rough: '😔', bad: '😩' };
   const moodDisplay = latestMood ? (moodEmojis[latestMood.mood] || '—') : '—';
 
   // Streak
@@ -9356,32 +9358,31 @@ function logBillableTime() {
   const focusEl = document.getElementById('timer-focus-today');
   const focusTime = focusEl ? focusEl.textContent : '0h 0m';
   if (!activity) return alert('Please enter an activity description.');
-  const d = appData();
-  if (!d.billableLog) d.billableLog = [];
-  d.billableLog.push({ activity, matter, time: focusTime, date: new Date().toISOString() });
-  saveData();
+  if (!state.billableLog) state.billableLog = [];
+  state.billableLog.push({ activity, matter, time: focusTime, date: new Date().toISOString() });
+  saveState();
   document.getElementById('billable-activity').value = '';
   document.getElementById('billable-matter').value = '';
   renderBillableLog();
 }
 
 function renderBillableLog() {
-  const d = appData();
-  const log = d.billableLog || [];
+  const log = state.billableLog || [];
   const ul = document.getElementById('billable-time-log');
   if (!ul) return;
   ul.innerHTML = log.slice(-10).reverse().map(e =>
-    `<li><span>${e.activity}${e.matter ? ' — ' + e.matter : ''}</span><span>${e.time} · ${new Date(e.date).toLocaleDateString()}</span></li>`
+    `<li><span>${esc(e.activity)}${e.matter ? ' — ' + esc(e.matter) : ''}</span><span>${esc(e.time)} · ${new Date(e.date).toLocaleDateString()}</span></li>`
   ).join('');
 }
 
 function exportBillableLog() {
-  const d = appData();
-  const log = d.billableLog || [];
+  const log = state.billableLog || [];
   if (!log.length) return alert('No time entries to export.');
+  // Double embedded quotes so commas/quotes in an activity don't break the CSV columns
+  const csvCell = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
   let csv = 'Date,Activity,Matter,Time\n';
   log.forEach(e => {
-    csv += `"${new Date(e.date).toLocaleDateString()}","${e.activity}","${e.matter}","${e.time}"\n`;
+    csv += [new Date(e.date).toLocaleDateString(), e.activity, e.matter, e.time].map(csvCell).join(',') + '\n';
   });
   const blob = new Blob([csv], { type: 'text/csv' });
   const a = document.createElement('a');
