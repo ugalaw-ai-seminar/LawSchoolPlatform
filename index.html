@@ -1745,6 +1745,11 @@ body.dark-mode .net-contact-card { border-color: rgba(181,101,29,0.15); }
 @media (max-width: 900px) {
   .sidebar { transform: translateX(-100%); }
   .sidebar.open { transform: translateX(0); }
+  /* The top bar holds the only menu button (#menu-toggle); without it the off-canvas sidebar can't be opened */
+  .top-bar { display: flex; align-items: center; padding: 0.75rem 1rem 0; }
+  /* minmax(0, 1fr) lets day columns shrink below their text width so the schedule fits the screen */
+  .schedule-grid { grid-template-columns: 60px repeat(7, minmax(0, 1fr)); overflow-x: auto; }
+  .schedule-grid .sg-cell .class-block { overflow-wrap: anywhere; }
   .main-content { margin-left: 0; }
   .grid-3 { grid-template-columns: 1fr 1fr; }
   .grid-4 { grid-template-columns: 1fr 1fr; }
@@ -1755,6 +1760,10 @@ body.dark-mode .net-contact-card { border-color: rgba(181,101,29,0.15); }
 }
 @media (max-width: 600px) {
   .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  .schedule-grid { grid-template-columns: 44px repeat(7, minmax(0, 1fr)); }
+  .schedule-grid .sg-header { padding: 6px 2px; font-size: 0.7rem; }
+  .schedule-grid .sg-time { padding: 4px 2px; font-size: 0.6rem; }
+  .schedule-grid .sg-cell .class-block { font-size: 0.6rem; }
   #page-hero .hero-title { font-size: 1.25rem; }
   #page-hero .hero-subtitle { font-size: 0.62rem; }
 }
@@ -1960,6 +1969,7 @@ body.dark-mode .net-contact-card { border-color: rgba(181,101,29,0.15); }
 .gdoc-url-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .gdoc-url-row .form-input { flex: 1; min-width: 180px; font-size: 0.82rem; }
 .gdoc-status {
+  white-space: pre-line; /* status messages use \n for numbered steps */
   font-size: 0.74rem; margin-top: 0.6rem;
   line-height: 1.5; padding: 6px 10px;
   border-radius: 6px;
@@ -3278,7 +3288,13 @@ body.dark-mode .reading-name { color: #e8e4dc; }
             Tip: In Google Docs, press <strong>Ctrl+A</strong> then <strong>Ctrl+C</strong> and paste here. For Word, upload the .docx file directly.
           </div>
           <div style="display:flex;align-items:center;justify-content:flex-end;margin-top:1rem;padding-top:0.85rem;border-top:1px solid var(--mist);gap:10px;">
-            <span style="font-size:0.75rem;color:var(--slate);">Builds a <strong>Comprehensive Outline</strong> from your notes</span>
+            <div style="margin-right:auto;min-width:0;flex:1;">
+              <select class="form-select" id="outline-type-select" onchange="onOutlineTypeChange()" style="max-width:260px;">
+                <option value="full">Comprehensive Outline</option>
+                <option value="attack">Attack Outline (Checklist)</option>
+              </select>
+              <div id="outline-type-desc" style="font-size:0.72rem;color:var(--slate);margin-top:4px;line-height:1.45;">A full semester roadmap: black-letter rules, element breakdowns, exceptions, cases, hypos and policy.</div>
+            </div>
             <button class="btn btn-primary" onclick="generateOutline(getOutlineType())" style="display:inline-flex;align-items:center;gap:7px;">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
               Build Outline from Notes
@@ -4708,6 +4724,13 @@ const MODEL_TIERS = {
   openai: { easy: 'gpt-4o-mini', normal: 'gpt-4o', hard: 'gpt-4o' }
 };
 
+// Tasks that use a specific model instead of their difficulty tier
+const TASK_MODEL_OVERRIDES = {
+  claude: { outline_full: 'claude-fable-5-1' } // most capable Claude model for outline building
+};
+// Claude models that accept server-side refusal fallback (fallbacks: "default")
+const CLAUDE_FALLBACK_MODELS = ['claude-fable-5-1', 'claude-opus-5-5'];
+
 function getDifficulty(task) {
   const hard = ['hypo','outline_full','career','bar','issue','draft_cite','cold_call','career_match','interview_prep'];
   const easy = ['cite_gen','cite_fix','motivation','wellness','quick','mood_check'];
@@ -5047,7 +5070,10 @@ async function resolveModel() {
 async function callAI(prompt, systemInstruction, task='normal', opts={}) {
   const diff = typeof task === 'string' && ['easy','normal','hard'].includes(task) ? task : getDifficulty(task);
   if (API_PROVIDER === 'gemini') return callGemini(prompt, systemInstruction, diff, opts);
-  if (API_PROVIDER === 'claude') return callClaude(prompt, systemInstruction, diff, opts);
+  if (API_PROVIDER === 'claude') {
+    const model = TASK_MODEL_OVERRIDES.claude[task];
+    return callClaude(prompt, systemInstruction, diff, model ? { ...opts, model } : opts);
+  }
   if (API_PROVIDER === 'openai') return callOpenAI(prompt, systemInstruction, diff, opts);
   throw new Error('Unknown AI provider: ' + API_PROVIDER);
 }
@@ -5130,7 +5156,7 @@ FORMATTING RULES:
 }
 
 async function callClaude(prompt, systemInstruction, difficulty, opts) {
-  const model = MODEL_TIERS.claude[difficulty] || MODEL_TIERS.claude.normal;
+  const model = opts?.model || MODEL_TIERS.claude[difficulty] || MODEL_TIERS.claude.normal;
   const safePrompt = prompt.length > 30000 ? prompt.slice(0, 30000) + '\n\n[Content truncated]' : prompt;
   const userContent = opts?.pdfBase64
     ? [
@@ -5138,20 +5164,28 @@ async function callClaude(prompt, systemInstruction, difficulty, opts) {
         { type: 'text', text: safePrompt }
       ]
     : safePrompt;
+  // Current Claude models think before answering and that thinking counts toward max_tokens, so a
+  // 4096 cap could be used up entirely by thinking on long tasks (outlines), leaving no text at all.
   const body = {
-    model, max_tokens: opts?.maxTokens || 4096,
+    model, max_tokens: opts?.maxTokens || 16000,
     messages: [{ role: 'user', content: userContent }]
   };
   if (systemInstruction) body.system = systemInstruction;
+  const headers = {
+    'Content-Type': 'application/json',
+    'x-api-key': API_KEY,
+    'anthropic-version': '2023-06-01',
+    'anthropic-dangerous-direct-browser-access': 'true'
+  };
+  if (CLAUDE_FALLBACK_MODELS.includes(model)) {
+    // If a safety classifier declines the request, let the API retry it on the recommended fallback model
+    headers['anthropic-beta'] = 'server-side-fallback-2026-07-01';
+    body.fallbacks = 'default';
+  }
   try {
     const r = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': API_KEY,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
+      headers,
       body: JSON.stringify(body)
     });
     if (!r.ok) {
@@ -5161,9 +5195,16 @@ async function callClaude(prompt, systemInstruction, difficulty, opts) {
     }
     const j = await r.json();
     if (j.error) throw new Error(j.error.message);
-    // Extract text from content blocks
-    const textBlock = (j.content || []).find(b => b.type === 'text');
-    if (textBlock?.text) return textBlock.text;
+    if (j.stop_reason === 'refusal') {
+      return 'Error: Claude declined this request. Try rephrasing it, or switch to another AI provider in ⚙ Settings.';
+    }
+    // A response can hold several text blocks (plus thinking blocks, which carry no answer text)
+    const text = (j.content || []).filter(b => b.type === 'text' && b.text).map(b => b.text).join('');
+    if (j.stop_reason === 'max_tokens') {
+      if (!text) return 'Error: Claude ran out of room before writing an answer. Try again with shorter notes, or build the outline in smaller sections.';
+      return text + '\n\n---\n*Note: this response reached the length limit and may be cut off at the end.*';
+    }
+    if (text) return text;
     console.error('Claude unexpected response:', JSON.stringify(j).slice(0, 500));
     return 'Error: Claude returned a response but it contained no text. Please try again.';
   } catch(e) {
@@ -5298,7 +5339,7 @@ function openCourseDetail(id) {
   const courseQuizzes = (state.quizResults || []).filter(q => q.courseId === course.id && q.pct !== null);
   const courseAvg = courseQuizzes.length > 0 ? Math.round(courseQuizzes.reduce((s, q) => s + q.pct, 0) / courseQuizzes.length) : null;
   const pendingAssigns = course.assignments.filter(a => !a.completed).length;
-  const hasOutline = !!course.outlineData;
+  const hasOutline = !!(course.outlineData || course.attackOutlineData);
 
   const banner = document.getElementById('course-stats-banner');
   banner.innerHTML = `
@@ -6245,8 +6286,30 @@ function extractGoogleDocId(url) {
   return match ? match[1] : null;
 }
 
+const OUTLINE_TYPES = {
+  full: {
+    label: 'Comprehensive Outline',
+    title: 'Outline',
+    field: 'outlineData', // existing saved outlines are comprehensive ones
+    desc: 'A full semester roadmap: black-letter rules, element breakdowns, exceptions, cases, hypos and policy.'
+  },
+  attack: {
+    label: 'Attack Outline (Checklist)',
+    title: 'Attack Outline',
+    field: 'attackOutlineData',
+    desc: 'A 1–5 page exam-day cheat sheet: step-by-step issue checklists, formulas and flowcharts.'
+  }
+};
+
 function getOutlineType() {
-  return 'full'; // Always comprehensive
+  const v = document.getElementById('outline-type-select')?.value;
+  return OUTLINE_TYPES[v] ? v : 'full';
+}
+
+function onOutlineTypeChange() {
+  const desc = document.getElementById('outline-type-desc');
+  if (desc) desc.textContent = OUTLINE_TYPES[getOutlineType()].desc;
+  loadOutline(); // show the saved outline of the chosen type, if any
 }
 
 function updateNotesTypeLabel() {
@@ -6258,33 +6321,43 @@ function updateNotesTypeLabel() {
 async function fetchGoogleDocContent(docId, onStatus) {
   const exportUrl = `https://docs.google.com/document/d/${docId}/export?format=txt`;
 
+  // Google Docs can't be fetched directly from a web page (no CORS), so we go through a free public relay.
+  // corsproxy.io (now requires a paid key), codetabs.com (down) and corsproxy.org (redirects without CORS)
+  // were removed in Oct 2026; allorigins is the only one still working, and it is slow and intermittent.
   const proxies = [
-    { label: 'server 1', url: `https://corsproxy.io/?${encodeURIComponent(exportUrl)}` },
-    { label: 'server 2', url: `https://api.allorigins.win/raw?url=${encodeURIComponent(exportUrl)}` },
-    { label: 'server 3', url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(exportUrl)}` },
-    { label: 'server 4', url: `https://corsproxy.org/?${encodeURIComponent(exportUrl)}` },
-    { label: 'server 5', url: `https://api.allorigins.win/get?url=${encodeURIComponent(exportUrl)}` },
+    { label: 'attempt 1', url: `https://api.allorigins.win/get?url=${encodeURIComponent(exportUrl)}` },
+    { label: 'attempt 2', url: `https://api.allorigins.win/raw?url=${encodeURIComponent(exportUrl)}` },
   ];
 
   let lastError;
+  let accessDenied = false; // remembered so a later timeout doesn't hide a "not shared" answer from Google
   for (let i = 0; i < proxies.length; i++) {
     const { label, url } = proxies[i];
-    onStatus(`⏳ Connecting to Google Docs via ${label} of ${proxies.length}…`);
+    onStatus(`⏳ Fetching your Google Doc through a relay service (${label} of ${proxies.length}) — this can take up to 30 seconds…`);
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 20000);
+    const timer = setTimeout(() => controller.abort(), 30000);
     try {
       const res = await fetch(url, { signal: controller.signal });
       clearTimeout(timer);
-      if (!res.ok) { lastError = new Error(`HTTP ${res.status}`); continue; }
+      // A non-OK status here comes from the relay itself (down, rate-limited…), not from Google
+      if (!res.ok) { lastError = new Error(`relay returned HTTP ${res.status}`); continue; }
       let text = await res.text();
       if (url.includes('/get?url=')) {
-        try { text = JSON.parse(text).contents || text; } catch (_) {}
+        try {
+          const wrapped = JSON.parse(text);
+          // allorigins /get reports Google's own status code separately
+          const upstream = wrapped.status && wrapped.status.http_code;
+          if (upstream >= 400) { lastError = new Error(`Google returned HTTP ${upstream}`); if (upstream < 500) accessDenied = true; continue; }
+          text = wrapped.contents || text;
+        } catch (_) {}
       }
       text = text.trim();
       if (text.length < 30) { lastError = new Error('Empty response'); continue; }
+      // A plain-text export never starts with HTML; an HTML page means Google refused or couldn't find the doc
+      if (/^(<!doctype|<html)/i.test(text)) { lastError = new Error('ACCESS_DENIED'); accessDenied = true; continue; }
       const preview = text.toLowerCase().slice(0, 400);
       const loginHits = ['sign in','forgot email','create account','email or phone'].filter(s => preview.includes(s)).length;
-      if (loginHits >= 2) { lastError = new Error('ACCESS_DENIED'); continue; }
+      if (loginHits >= 2) { lastError = new Error('ACCESS_DENIED'); accessDenied = true; continue; }
       return { text };
     } catch (e) {
       clearTimeout(timer);
@@ -6292,11 +6365,8 @@ async function fetchGoogleDocContent(docId, onStatus) {
     }
   }
 
-  const msg = (lastError?.message || '').toLowerCase();
-  if (msg === 'access_denied' || msg.includes('400') || msg.includes('401') || msg.includes('403')) {
-    throw new Error('ACCESS_DENIED');
-  }
-  throw lastError || new Error('All proxy servers failed');
+  if (accessDenied) throw new Error('ACCESS_DENIED');
+  throw lastError || new Error('All relay attempts failed');
 }
 
 function setGdocStatus(type, message) {
@@ -6348,7 +6418,7 @@ async function syncFromGoogleDoc(autoRebuild = false) {
     document.getElementById('outline-notes-text').value = text;
     const charCount = text.length.toLocaleString();
     const timeStr   = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    setGdocStatus('success', `✓ Synced ${charCount} characters from Google Docs at ${timeStr} (all tabs included). ${autoRebuild ? 'Building comprehensive outline…' : 'Click "Build Outline from Notes" below to generate your outline.'}`);
+    setGdocStatus('success', `✓ Synced ${charCount} characters from Google Docs at ${timeStr} (all tabs included). ${autoRebuild ? `Building ${OUTLINE_TYPES[getOutlineType()].label}…` : 'Click "Build Outline from Notes" below to generate your outline.'}`);
     toast('Notes synced from Google Docs' + (autoRebuild ? ' — building outline...' : ''));
 
     if (autoRebuild) {
@@ -6357,9 +6427,7 @@ async function syncFromGoogleDoc(autoRebuild = false) {
 
   } catch (err) {
     console.error('Google Docs sync error:', err);
-    const msg = (err.message || '').toLowerCase();
-
-    if (err.message === 'ACCESS_DENIED' || msg.includes('400') || msg.includes('401') || msg.includes('403')) {
+    if (err.message === 'ACCESS_DENIED') {
       setGdocStatus('error',
         '✗ Google is blocking external access to this document. Make sure your sharing is set correctly:\n\n' +
         '1. Open your Google Doc\n' +
@@ -6367,14 +6435,20 @@ async function syncFromGoogleDoc(autoRebuild = false) {
         '3. Under "General access" → change to "Anyone with the link"\n' +
         '4. Make sure the role is set to "Viewer"\n' +
         '5. Click Done, then come back and click Sync again\n\n' +
-        'If you are using a school or work Google account and the above does not work, copy-paste your notes directly into the notes box below — that always works.'
+        'If you are using a school or work Google account and the above does not work, download the doc as Word (File → Download → Microsoft Word (.docx)) and click "Upload .docx / .txt" below, or copy-paste your notes into the box below — both always work.'
       );
-    } else if (msg.includes('abort') || msg.includes('timeout')) {
-      setGdocStatus('error', '✗ Connection timed out. Your document may be very large or your connection was slow. Try again, or copy-paste your notes into the box below.');
-    } else if (msg.includes('failed to fetch') || msg.includes('networkerror') || msg.includes('load')) {
-      setGdocStatus('error', '✗ Network error — check your internet connection and try again. If it keeps failing, copy-paste your notes into the box below.');
+    } else if (navigator.onLine === false) {
+      setGdocStatus('error', '✗ You appear to be offline. Reconnect to the internet and click Sync again, or copy-paste your notes into the box below.');
     } else {
-      setGdocStatus('error', `✗ Sync failed: ${err.message || 'Unknown error'}. You can always copy-paste your notes directly into the box below as a reliable fallback.`);
+      // Timeouts, dropped connections and 5xx errors almost always mean the free relay service is down or
+      // overloaded, not that the student's internet is broken — say so, and point to the reliable route.
+      setGdocStatus('error',
+        '✗ Couldn\'t fetch your Google Doc right now. Google Docs sync relies on a free third-party relay service, ' +
+        'which is often slow or unavailable — this usually isn\'t a problem with your internet connection.\n\n' +
+        'Reliable alternative: in Google Docs, choose File → Download → Microsoft Word (.docx), then click ' +
+        '"Upload .docx / .txt" below. Or copy-paste your notes into the box below.\n\n' +
+        `(Details: ${err.message || 'unknown error'})`
+      );
     }
     toast('Google Docs sync failed — see the status message for details');
   } finally {
@@ -6408,10 +6482,11 @@ function loadOutline() {
     setGdocStatus('success', '✓ Google Doc linked — click "Sync Notes" to pull your latest edits, or "Sync & Build" to update your outline automatically.');
   }
 
-  if (course?.outlineData) {
-    showOutlineContent(`<div class="md-rendered">${marked.parse(course.outlineData)}</div>`, course.name);
+  const t = OUTLINE_TYPES[getOutlineType()];
+  if (course?.[t.field]) {
+    showOutlineContent(`<div class="md-rendered">${marked.parse(course[t.field])}</div>`, course.name);
   } else {
-    document.getElementById('outline-display').innerHTML = '<div class="empty-state"><h3>No outline yet</h3><p>Choose an outline type above, add your notes, then click "Build Outline from Notes"</p></div>';
+    document.getElementById('outline-display').innerHTML = `<div class="empty-state"><h3>No ${t.label} yet</h3><p>Add your notes above, then click "Build Outline from Notes"</p></div>`;
     document.getElementById('outline-display-header').style.display = 'none';
   }
 }
@@ -6422,19 +6497,20 @@ function showOutlineContent(html, courseName) {
   if (header) {
     header.style.display = 'flex';
     const title = document.getElementById('outline-display-title');
-    if (title && courseName) title.textContent = courseName + ' — Outline';
+    if (title && courseName) title.textContent = courseName + ' — ' + OUTLINE_TYPES[getOutlineType()].title;
   }
 }
 
 function downloadOutlineAsDoc() {
   const courseId = document.getElementById('outline-course-select').value;
   const course = state.courses.find(c => c.id === courseId);
-  if (!course?.outlineData) return toast('No outline to download — build one first');
+  const t = OUTLINE_TYPES[getOutlineType()];
+  if (!course?.[t.field]) return toast('No outline to download — build one first');
 
   const contentEl = document.querySelector('#outline-display .md-rendered');
   if (!contentEl) return toast('No outline content found');
 
-  const fileName = `${course.name} — Outline`;
+  const fileName = `${course.name} — ${t.title}`;
   const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
   const wordHtml = `<!DOCTYPE html>
@@ -6443,7 +6519,7 @@ function downloadOutlineAsDoc() {
       xmlns="http://www.w3.org/TR/REC-html40">
 <head>
   <meta charset="UTF-8">
-  <title>${course.name} — Outline</title>
+  <title>${esc(course.name)} — ${t.title}</title>
   <!--[if gte mso 9]>
   <xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom></w:WordDocument></xml>
   <![endif]-->
@@ -6468,7 +6544,7 @@ function downloadOutlineAsDoc() {
   </style>
 </head>
 <body>
-  <div class="doc-title">${esc(course.name)} — Outline</div>
+  <div class="doc-title">${esc(course.name)} — ${t.title}</div>
   <div class="doc-meta">Generated by RES · ${date}</div>
   ${contentEl.innerHTML}
 </body>
@@ -6490,8 +6566,9 @@ function clearSavedOutline() {
   const courseId = document.getElementById('outline-course-select').value;
   const course = state.courses.find(c => c.id === courseId);
   if (!course) return;
-  if (!confirm('Clear the saved outline for ' + course.name + '?')) return;
-  course.outlineData = '';
+  const t = OUTLINE_TYPES[getOutlineType()];
+  if (!confirm(`Clear the saved ${t.label} for ${course.name}?`)) return;
+  course[t.field] = '';
   saveState();
   document.getElementById('outline-display').innerHTML = '<div class="empty-state"><h3>Outline cleared</h3><p>Build a new outline from your notes above</p></div>';
   document.getElementById('outline-display-header').style.display = 'none';
@@ -6510,8 +6587,17 @@ async function generateOutline(type) {
   const materialsContext = gatherCourseContext(course);
   const userNotes = document.getElementById('outline-notes-text').value.trim();
   const typeInstructions = {
-    full: 'Create a comprehensive, detailed course outline with all black-letter rules, case holdings, policy rationales, and multi-step doctrine flowcharts.',
-    attack: 'Create a concise attack outline — just the key rules, elements, and analysis frameworks needed for quick exam reference.',
+    full: `Create a comprehensive law school outline: condense the entire semester's case law, statutes, binding precedent and class notes into one cohesive legal roadmap optimized for a timed final exam.
+- Translate judicial opinions into actionable black-letter law statements, using the professor's own wording from the notes wherever it appears.
+- Break every rule into its elements, then list the key exceptions, defenses and limits.
+- For each doctrine, synthesize the major case illustrations (facts in one line, holding, why it matters) alongside any classroom hypotheticals and the underlying policy rationales.
+- Organize by topic and subtopic in the order an exam answer would analyze them, so the outline doubles as an issue-spotting tool and an open-book exam index for building structured, high-scoring essay answers.
+- Aim for active application, not passive archiving: after each major topic, add a short "How to use on the exam" note.`,
+    attack: `Create an attack outline (checklist): a hyper-condensed, 1-to-5-page cheat sheet designed to be used live during a timed exam.
+- Lead with a master issue checklist in the order issues should be spotted, then one compact section per issue.
+- Each section: a step-by-step analysis checklist (numbered questions to ask), the rule or test in a single line, elements as short bullets, key exceptions, and the one or two cases or formulas worth citing.
+- Show multi-step tests as text flowcharts using arrows (e.g. "Offer? → Acceptance? → Consideration? → Defenses?"), not diagrams or code blocks.
+- No case narratives, no policy essays, no full sentences where a phrase will do. Keep the whole thing within about five pages.`,
     checklist: 'Create a one-page exam checklist with every issue to spot, organized by topic, with brief rule triggers.',
     auto: 'Create a well-organized course outline extracting all rules, cases, and doctrines. Include rule statements, case holdings, and policy rationales organized by topic and subtopic.'
   };
@@ -6525,7 +6611,15 @@ async function generateOutline(type) {
   }
   const system = 'You are RES, an expert law school outline builder. Create clear, well-organized, accurate legal outlines that would help a student prepare for exams.';
   const result = await callAI(prompt, system, 'outline_full');
-  course.outlineData = result;
+  const field = (OUTLINE_TYPES[type] || OUTLINE_TYPES.full).field;
+  if (result.startsWith('Error:')) {
+    // Keep any previously saved outline instead of replacing it with the error text
+    toast('Outline not updated — ' + result);
+    if (course[field]) showOutlineContent(`<div class="md-rendered">${marked.parse(course[field])}</div>`, course.name);
+    else display.innerHTML = `<div class="empty-state"><h3>Could not build outline</h3><p>${esc(result)}</p></div>`;
+    return;
+  }
+  course[field] = result;
   saveState();
   showOutlineContent(`<div class="md-rendered">${marked.parse(result)}</div>`, course.name);
 }
@@ -6923,7 +7017,9 @@ ${text.slice(0, 8000)}`;
 
   // Regex fallback
   const lines = text.split('\n').filter(l => l.trim());
-  const gradePattern = /\b(A\+?|A-|B\+|B-?|C\+|C-?|D\+?|D-?|F|CR|NC|P)\b/i;
+  // Uppercase only, longest form first, and bounded by whitespace so "B+" isn't read as "B"
+  // and ordinary words like "a" aren't mistaken for grades
+  const gradePattern = /(?:^|\s)(A\+|A-|A|B\+|B-|B|C\+|C-|C|D\+|D-|D|F|CR|NC|P)(?=\s|$)/;
   const parsed = [];
   lines.forEach(line => {
     const gMatch = line.match(gradePattern);
@@ -6931,7 +7027,8 @@ ${text.slice(0, 8000)}`;
       const grade = gMatch[1].toUpperCase();
       const beforeGrade = line.slice(0, gMatch.index).trim();
       const name = beforeGrade.replace(/^(LAW|JURI?S?|LAWS?)\s*\d+\s*/i, '').replace(/\s+/g, ' ').trim();
-      const credMatch = line.match(/(\d)\s*(?:cr|credits?|hrs?|hours?)/i);
+      // \b stops "504 Criminal" from reading as "4 cr"
+      const credMatch = line.match(/\b(\d{1,2})\s*(?:cr|credits?|hrs?|hours?)\b/i);
       if (name.length > 2) {
         parsed.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 5), name, grade, credits: credMatch ? parseInt(credMatch[1]) : 3 });
       }
@@ -6961,7 +7058,7 @@ function renderParsedCourses() {
       </div>
       <div style="display:flex;align-items:center;gap:8px;">
         ${getSubjectImportanceBadge(c.name)}
-        <span class="grade-pill ${gradePillClass(c.grade)}">${c.grade}</span>
+        <span class="grade-pill ${gradePillClass(c.grade)}">${esc(c.grade)}</span>
         <button class="btn btn-ghost" style="padding:3px 8px;font-size:0.65rem;" onclick="removeTranscriptCourse('${c.id}')">✕</button>
       </div>
     </div>`).join('');
