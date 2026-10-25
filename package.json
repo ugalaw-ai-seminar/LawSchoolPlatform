@@ -1,0 +1,34 @@
+{
+  "name": "loquitur-mcp",
+  "version": "1.0.0",
+  "description": "LOQUITUR / RES legal study tools as an MCP server for coding agents",
+  "main": "loquitur-server.js",
+  "scripts": {
+    "start": "node loquitur-server.js"
+  },
+  "keywords": [
+    "mcp",
+    "law",
+    "bluebook",
+    "legal",
+    "study"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.3.0",
+    "@modelcontextprotocol/sdk": "^1.32.1",
+    "mammoth": "^1.13.0",
+    "zod": "^4.6.7"
+  },
+  "type": "module",
+  "bin": {
+    "loquitur-mcp": "loquitur-server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "*.js"
+  ]
+}

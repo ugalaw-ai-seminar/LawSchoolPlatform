@@ -2776,6 +2776,14 @@ body.dark-mode .improvement-tip.tip-warning { background: rgba(181,101,29,0.1); 
 body.dark-mode .improvement-tip.tip-info { background: rgba(42,127,127,0.08); }
 body.dark-mode .reading-name { color: #e8e4dc; }
 
+
+/* Inline note diagrams */
+.note-inline-diagram { margin: 1rem 0 1.25rem; padding: 12px 14px; border: 1px solid var(--mist); border-radius: var(--radius); background: rgba(42,127,127,0.04); overflow-x: auto; }
+.note-inline-diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+.note-inline-diagram-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.02em; color: var(--teal); margin-bottom: 8px; }
+.note-diagram-preview { max-height: 520px; overflow-y: auto; padding: 12px 14px; border: 1px solid var(--mist); border-radius: var(--radius); background: var(--warm-white); margin-bottom: 0.75rem; }
+body.dark-mode .note-diagram-preview { background: #1e2228; }
+body.dark-mode .note-inline-diagram { background: rgba(42,127,127,0.08); border-color: rgba(255,255,255,0.08); }
 </style>
 </head>
 <body>
@@ -2873,7 +2881,7 @@ body.dark-mode .reading-name { color: #e8e4dc; }
       </div>
       <div class="nav-item" data-page="ai-chat" onclick="navigateTo('ai-chat')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-        RES Assistant
+        Res
       </div>
     </nav>
     <div class="sidebar-footer">
@@ -3070,7 +3078,7 @@ body.dark-mode .reading-name { color: #e8e4dc; }
               <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
                 <button class="btn btn-primary" onclick="saveNote()">Save Note</button>
                 <button class="btn btn-ghost" id="ai-reorganize-btn" onclick="aiReorganizeNotes()">AI Reorganize</button>
-                <button class="btn btn-ghost" id="generate-diagram-btn" onclick="generateDiagram()">Generate Diagram</button>
+                <button class="btn btn-ghost" id="generate-diagram-btn" onclick="generateDiagram()" title="Res adds small diagrams only where a visual clarifies a test, decision path, or comparison">Include Helpful Diagrams</button>
                 <button class="btn btn-ghost" onclick="document.getElementById('note-file-upload').click()">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13" style="vertical-align:-2px;margin-right:4px;"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                   Upload Notes File
@@ -3079,7 +3087,7 @@ body.dark-mode .reading-name { color: #e8e4dc; }
               </div>
               <div class="mermaid-container" id="note-diagram-container" style="display:none;"></div>
               <div id="note-diagram-save-wrap" style="display:none;margin-bottom:1.25rem;">
-                <button class="btn btn-ghost" style="font-size:0.75rem;" onclick="saveDiagramWithNote()">💾 Save Diagram with Note</button>
+                <button class="btn btn-ghost" style="font-size:0.75rem;" onclick="saveDiagramWithNote()">💾 Save Note with Diagrams</button>
               </div>
               <div id="notes-list" style="margin-top:1rem;"></div>
             </div>
@@ -3246,7 +3254,7 @@ body.dark-mode .reading-name { color: #e8e4dc; }
             <span class="gdoc-badge">Google Docs</span>
           </div>
           <p style="font-size:0.8rem;color:var(--slate);margin-bottom:0.9rem;line-height:1.6;">
-            Paste your Google Doc link and click <strong>Sync &amp; Build</strong> — RES will pull all your notes (including every tab) and build a comprehensive outline automatically. Or click <strong>Sync Notes Only</strong> to load the notes first and build manually.
+            Paste your Google Doc link and click <strong>Sync &amp; Build</strong> — Res will pull all your notes (including every tab) and build a comprehensive outline automatically. Or click <strong>Sync Notes Only</strong> to load the notes first and build manually.
             <br><span style="font-size:0.71rem;opacity:0.75;">⚠️ Your Google Doc must be set to <strong>"Anyone with the link can view"</strong> (Share → General Access).</span>
           </p>
           <div class="gdoc-url-row">
@@ -3404,7 +3412,7 @@ body.dark-mode .reading-name { color: #e8e4dc; }
             <span class="card-title">📄 Step 1: Upload Your Transcript</span>
             <span class="card-badge">Auto-Parsed</span>
           </div>
-          <p style="font-size:0.82rem;color:var(--slate);margin-bottom:1rem;">Paste your transcript text or type your courses and grades. RES will automatically extract your course history and grades to power the bar readiness analysis.</p>
+          <p style="font-size:0.82rem;color:var(--slate);margin-bottom:1rem;">Paste your transcript text or type your courses and grades. Res will automatically extract your course history and grades to power the bar readiness analysis.</p>
           
           <div class="tabs">
             <div class="tab active" data-ttab="pdf" onclick="switchTranscriptTab('pdf')">Upload PDF</div>
@@ -3456,7 +3464,7 @@ body.dark-mode .reading-name { color: #e8e4dc; }
           <div id="ttab-paste" style="display:none;">
             <div class="form-group">
               <label class="form-label">Paste Transcript Text</label>
-              <textarea class="form-textarea" id="transcript-text" style="min-height:160px;font-family:var(--font-mono);font-size:0.78rem;" placeholder="Paste your transcript here. RES will extract course names and grades automatically.&#10;&#10;Example format:&#10;LAW 101  Contracts I          A   3 credits&#10;LAW 103  Civil Procedure       A-  4 credits&#10;LAW 105  Torts                 B+  3 credits&#10;&#10;Any format works — tabular, comma-separated, or plain text."></textarea>
+              <textarea class="form-textarea" id="transcript-text" style="min-height:160px;font-family:var(--font-mono);font-size:0.78rem;" placeholder="Paste your transcript here. Res will extract course names and grades automatically.&#10;&#10;Example format:&#10;LAW 101  Contracts I          A   3 credits&#10;LAW 103  Civil Procedure       A-  4 credits&#10;LAW 105  Torts                 B+  3 credits&#10;&#10;Any format works — tabular, comma-separated, or plain text."></textarea>
             </div>
             <button class="btn btn-primary" onclick="parseTranscript()">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg>
@@ -3864,13 +3872,12 @@ body.dark-mode .reading-name { color: #e8e4dc; }
               <label class="form-label">Paste Your Resume (plain text)</label>
               <textarea class="form-input" id="resume-text" rows="8" placeholder="Paste your resume content here, or upload a file below..."></textarea>
             </div>
-            <div style="display:flex;gap:8px;margin:-4px 0 1rem;flex-wrap:wrap;">
-              <button class="btn btn-ghost" onclick="document.getElementById('resume-file-upload').click()">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13" style="vertical-align:-2px;margin-right:4px;"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                Upload Resume File
-              </button>
-              <input type="file" id="resume-file-upload" style="display:none;" accept=".pdf,.docx,.txt,.md" onchange="handleResumeFileUpload(event)">
+            <div class="upload-zone" id="resume-drop-zone" style="margin:-4px 0 1rem;padding:1rem;" onclick="document.getElementById('resume-file-upload').click()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:24px;height:24px;"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <p>Drop your resume here or click to upload</p>
+              <p class="upload-hint">PDF, DOCX, TXT, or MD</p>
             </div>
+            <input type="file" id="resume-file-upload" style="display:none;" accept=".pdf,.docx,.txt,.md" onchange="handleResumeFileUpload(event)">
             <div id="resume-file-chip" style="display:none;font-size:0.72rem;color:var(--slate);background:var(--mist);border-radius:6px;padding:6px 10px;margin:-4px 0 1rem;"></div>
             <div class="grid-2">
               <div class="form-group">
@@ -4068,9 +4075,9 @@ body.dark-mode .reading-name { color: #e8e4dc; }
             <span class="card-badge">AI Powered</span>
           </div>
           <div class="cite-mode-tabs">
-            <button class="active" onclick="switchCiteMode('generate',this)">Generate</button>
-            <button onclick="switchCiteMode('fix',this)">Fix</button>
-            <button onclick="switchCiteMode('draft',this)">Draft with Citations</button>
+            <button class="active" data-cite-mode="generate" onclick="switchCiteMode('generate',this)">Generate</button>
+            <button data-cite-mode="fix" onclick="switchCiteMode('fix',this)">Fix</button>
+            <button data-cite-mode="draft" onclick="switchCiteMode('draft',this)">Draft with Citations</button>
           </div>
 
           <!-- Generate mode -->
@@ -4099,7 +4106,12 @@ body.dark-mode .reading-name { color: #e8e4dc; }
                 <option value="id">Id. Citation</option>
               </select>
             </div>
-            <button class="btn btn-primary" onclick="generateBluebookCite()" style="width:100%;justify-content:center;">Generate Citation</button>
+            <button class="btn btn-primary" id="cite-btn-generate" onclick="generateBluebookCite()" style="width:100%;justify-content:center;">Generate Citation</button>
+            <div class="cite-output-area" id="cite-output-generate" style="display:none;margin-top:16px;">
+              <div class="form-label">Result</div>
+              <div class="cite-output" id="cite-result-generate"></div>
+              <button class="btn btn-ghost" onclick="copyCiteResult('generate')" style="margin-top:8px;">Copy to Clipboard</button>
+            </div>
           </div>
 
           <!-- Fix mode -->
@@ -4108,7 +4120,12 @@ body.dark-mode .reading-name { color: #e8e4dc; }
               <label class="form-label">Paste Your Citation to Fix</label>
               <textarea class="form-textarea" id="cite-fix-input" rows="3" placeholder="Paste your citation here and AI will correct Bluebook formatting..."></textarea>
             </div>
-            <button class="btn btn-primary" onclick="fixBluebookCite()" style="width:100%;justify-content:center;">Fix Citation</button>
+            <button class="btn btn-primary" id="cite-btn-fix" onclick="fixBluebookCite()" style="width:100%;justify-content:center;">Fix Citation</button>
+            <div class="cite-output-area" id="cite-output-fix" style="display:none;margin-top:16px;">
+              <div class="form-label">Result</div>
+              <div class="cite-output" id="cite-result-fix"></div>
+              <button class="btn btn-ghost" onclick="copyCiteResult('fix')" style="margin-top:8px;">Copy to Clipboard</button>
+            </div>
           </div>
 
           <!-- Draft with Citations mode -->
@@ -4121,15 +4138,14 @@ body.dark-mode .reading-name { color: #e8e4dc; }
               <label class="form-label">Jurisdiction (optional)</label>
               <input class="form-input" id="cite-draft-jurisdiction" placeholder="e.g., Georgia, Federal, 11th Circuit">
             </div>
-            <button class="btn btn-primary" onclick="draftWithCitations()" style="width:100%;justify-content:center;">Draft with Citations</button>
+            <button class="btn btn-primary" id="cite-btn-draft" onclick="draftWithCitations()" style="width:100%;justify-content:center;">Draft with Citations</button>
+            <div class="cite-output-area" id="cite-output-draft" style="display:none;margin-top:16px;">
+              <div class="form-label">Result</div>
+              <div class="cite-output" id="cite-result-draft"></div>
+              <button class="btn btn-ghost" onclick="copyCiteResult('draft')" style="margin-top:8px;">Copy to Clipboard</button>
+            </div>
           </div>
 
-          <!-- Output area -->
-          <div id="cite-output-area" style="display:none;margin-top:16px;">
-            <div class="form-label">Result</div>
-            <div class="cite-output" id="cite-result"></div>
-            <button class="btn btn-ghost" onclick="copyCiteResult()" style="margin-top:8px;">Copy to Clipboard</button>
-          </div>
         </div>
       </div>
 
@@ -4192,14 +4208,21 @@ body.dark-mode .reading-name { color: #e8e4dc; }
 
             <!-- Billable Hours Log -->
             <div style="margin-top:1.25rem;padding-top:1rem;border-top:1px solid rgba(0,0,0,0.06);">
-              <div class="form-label">Activity / Matter Log</div>
-              <div class="grid-2" style="margin-bottom:8px;">
-                <input class="form-input" id="billable-activity" placeholder="Activity description...">
-                <input class="form-input" id="billable-matter" placeholder="Matter / Client (optional)">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                <div class="form-label" style="margin:0;">Billable Time</div>
+                <span style="font-size:0.68rem;color:var(--slate);" id="billable-total-label"></span>
               </div>
-              <button class="btn btn-ghost" onclick="logBillableTime()" style="width:100%;justify-content:center;margin-bottom:8px;">Log Time Entry</button>
+              <div class="grid-2" style="margin-bottom:8px;">
+                <input class="form-input" id="billable-activity" placeholder="Activity (e.g., Research memo)">
+                <input class="form-input" id="billable-matter" placeholder="Matter / Client" list="billable-matter-list">
+              </div>
+              <datalist id="billable-matter-list"></datalist>
+              <label class="days-check" style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--slate);margin-bottom:8px;">
+                <input type="checkbox" id="billable-auto"> Bill every completed timer session to this activity and matter
+              </label>
+              <button class="btn btn-ghost" onclick="logBillableTime()" style="width:100%;justify-content:center;margin-bottom:8px;">Stop Timer &amp; Log as Billable</button>
               <ul class="time-log" id="billable-time-log"></ul>
-              <button class="btn btn-ghost" onclick="exportBillableLog()" style="margin-top:6px;font-size:0.72rem;">Export Time Log (CSV)</button>
+              <button class="btn btn-ghost" onclick="exportBillableLog()" style="margin-top:6px;font-size:0.72rem;">Export Billable Time (CSV)</button>
             </div>
           </div>
 
@@ -4274,11 +4297,11 @@ body.dark-mode .reading-name { color: #e8e4dc; }
                 Export CSV
               </button>
             </div>
-            <p style="font-size:0.78rem;color:var(--slate);margin-bottom:1rem;">Forgot to start the timer? Log your study hours here.</p>
+            <p style="font-size:0.78rem;color:var(--slate);margin-bottom:1rem;">Forgot to start the timer? Log hours here. Check "Log as billable time" to add the entry to your billable time as well.</p>
             <div class="manual-log-form">
               <div class="form-group">
                 <label class="form-label">Hours</label>
-                <input class="form-input" id="manual-study-hours" type="number" min="0.25" step="0.25" placeholder="e.g., 2.5">
+                <input class="form-input" id="manual-study-hours" type="number" min="0.1" step="0.1" placeholder="e.g., 2.5">
               </div>
               <div class="form-group">
                 <label class="form-label">Subject</label>
@@ -4290,6 +4313,14 @@ body.dark-mode .reading-name { color: #e8e4dc; }
                 <label class="form-label">Date</label>
                 <input class="form-input" id="manual-study-date" type="date">
               </div>
+            </div>
+            <!-- Billable option -->
+            <label class="days-check" style="display:flex;align-items:center;gap:6px;font-size:0.78rem;color:var(--ink);margin-top:0.75rem;">
+              <input type="checkbox" id="manual-billable" onchange="document.getElementById('manual-billable-fields').style.display=this.checked?'':'none'"> Log as billable time
+            </label>
+            <div id="manual-billable-fields" class="grid-2" style="display:none;margin-top:8px;">
+              <input class="form-input" id="manual-billable-activity" placeholder="Activity (e.g., Client call)">
+              <input class="form-input" id="manual-billable-matter" placeholder="Matter / Client" list="billable-matter-list">
             </div>
             <!-- Custom subject manager -->
             <div style="margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid rgba(26,26,46,0.06);">
@@ -4407,7 +4438,7 @@ body.dark-mode .reading-name { color: #e8e4dc; }
           <div class="ai-panel-header">
             <div style="display:flex;align-items:center;gap:8px;flex:1;">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-              RES AI Assistant — Your Law School Companion
+              Res · Your Law School Companion
             </div>
             <button onclick="clearChat()" title="Clear conversation" style="background:rgba(245,240,232,0.1);border:1px solid rgba(245,240,232,0.2);border-radius:var(--radius);padding:4px 10px;cursor:pointer;color:var(--gold-light);font-size:0.68rem;font-family:var(--font-body);transition:all 0.2s;">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;vertical-align:-1px;"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
@@ -4415,7 +4446,7 @@ body.dark-mode .reading-name { color: #e8e4dc; }
             </button>
           </div>
           <div class="ai-messages" id="chat-messages">
-            <div class="ai-msg assistant">Hello! I'm your RES AI assistant. I can help you with anything related to law school — studying, outlines, bar prep, career planning, and more. What would you like to work on?</div>
+            <div class="ai-msg assistant">Hi, I'm Res. I can help with studying, outlines, bar prep, career planning, or anything else in law school. What would you like to work on?</div>
             <div id="chat-suggestions" style="display:flex;flex-wrap:wrap;gap:6px;padding:4px 0;">
               <button class="chat-chip" onclick="useChip(this)">Help me outline a course</button>
               <button class="chat-chip" onclick="useChip(this)">Quiz me on a topic</button>
@@ -4655,7 +4686,7 @@ body.dark-mode .reading-name { color: #e8e4dc; }
   </div>
 </div>
 
-<button class="fab-chat" onclick="navigateTo('ai-chat')" title="Ask RES Assistant" style="right:2rem;">💬</button>
+<button class="fab-chat" onclick="navigateTo('ai-chat')" title="Ask Res" style="right:2rem;">💬</button>
 <button class="fab-chat" onclick="openQuickAdd()" title="Quick add assignment" style="right:6rem;background:var(--teal);font-size:1.3rem;">+</button>
 
 <!-- Toast container -->
@@ -4741,6 +4772,146 @@ function getDifficulty(task) {
 
 function saveState() {
   try { localStorage.setItem('loquitur_state_' + btoa(API_KEY), JSON.stringify(state)); } catch(e) {}
+  markSyncDirty();
+}
+
+// ═══════════════════════════════════════════
+//  SYNC WITH THE AGENT SERVER
+// ═══════════════════════════════════════════
+// While the LOQUITUR agent server (mcp-server) runs, it serves ~/.loquitur/state.json on
+// 127.0.0.1, so courses Claude adds show up here and courses added here reach Claude.
+// localStorage stays the offline copy; changes made offline are pushed when the server is back.
+const SYNC_URL = 'http://127.0.0.1:47811';
+const SYNC_LOCAL_ONLY = ['currentCourseId', 'calMonth', 'calYear']; // view state, never synced
+let syncRev = null;     // server revision this copy last matched; null = never synced
+let syncDirty = false;  // local changes not yet on the server
+let syncOnline = false;
+let syncBusy = false, syncAgain = false, syncPushTimer = null, syncPollTimer = null;
+
+function syncMetaKey() { return 'loquitur_sync_' + btoa(API_KEY); }
+function loadSyncMeta() {
+  try {
+    const m = JSON.parse(localStorage.getItem(syncMetaKey()) || '{}');
+    syncRev = typeof m.rev === 'number' ? m.rev : null;
+    syncDirty = !!m.dirty;
+  } catch(e) {}
+}
+function saveSyncMeta() {
+  try { localStorage.setItem(syncMetaKey(), JSON.stringify({ rev: syncRev, dirty: syncDirty })); } catch(e) {}
+}
+function markSyncDirty() {
+  syncDirty = true;
+  saveSyncMeta();
+  clearTimeout(syncPushTimer);
+  syncPushTimer = setTimeout(syncNow, 400);
+}
+
+async function syncRequest(path, options) {
+  const res = await fetch(SYNC_URL + path, { cache: 'no-store', ...options });
+  const body = await res.json().catch(() => ({}));
+  return { status: res.status, body };
+}
+
+// Union two lists by id (or by content for entries without one); on a clash the local entry wins.
+function syncMergeList(remote, local, mergeItem) {
+  if (!Array.isArray(remote)) return local;
+  if (!Array.isArray(local)) return remote;
+  const keyOf = x => (x && typeof x === 'object' && x.id != null) ? 'id:' + x.id : 'v:' + JSON.stringify(x);
+  const out = remote.slice();
+  const index = new Map(remote.map((x, i) => [keyOf(x), i]));
+  for (const x of local) {
+    const k = keyOf(x);
+    if (index.has(k)) out[index.get(k)] = mergeItem ? mergeItem(out[index.get(k)], x) : x;
+    else out.push(x);
+  }
+  return out;
+}
+function syncMergeCourse(remote, local) {
+  const c = { ...remote, ...local };
+  for (const k of ['assignments', 'deadlines', 'materials', 'notes']) c[k] = syncMergeList(remote[k] || [], local[k] || []);
+  return c;
+}
+// Used only when both sides changed since the last sync. Deleting something on one side
+// while the other side also changed can bring that item back; delete it again if so.
+function syncMergeStates(local, remote) {
+  const merged = { ...remote, ...local };
+  for (const k of Object.keys(merged)) {
+    if (Array.isArray(local[k]) && Array.isArray(remote[k])) merged[k] = syncMergeList(remote[k], local[k], k === 'courses' ? syncMergeCourse : null);
+  }
+  merged.quizzes = { ...(remote.quizzes || {}), ...(local.quizzes || {}) };
+  return merged;
+}
+
+function syncAdopt(remoteState, rev) {
+  const view = {};
+  SYNC_LOCAL_ONLY.forEach(k => { view[k] = state[k]; });
+  state = { ...state, ...remoteState, ...view };
+  syncRev = rev;
+  try { localStorage.setItem('loquitur_state_' + btoa(API_KEY), JSON.stringify(state)); } catch(e) {}
+  saveSyncMeta();
+  syncRerender();
+}
+function syncRerender() {
+  [refreshDashboard, renderCoursesGrid, refreshCourseSelects, renderCalendar, renderBillableLog].forEach(fn => {
+    try { fn(); } catch(e) {}
+  });
+}
+
+async function syncPush() {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const sent = JSON.stringify(state);
+    const r = await syncRequest('/state', {
+      method: 'PUT',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ baseRev: syncRev ?? -1, state: JSON.parse(sent) }),
+    });
+    if (r.status === 200) {
+      syncRev = r.body.rev;
+      // Edits made while the request was in flight still need sending
+      syncDirty = JSON.stringify(state) !== sent;
+      saveSyncMeta();
+      if (syncDirty) syncAgain = true;
+      return;
+    }
+    if (r.status !== 409) throw new Error('Sync failed: ' + r.status);
+    syncRev = r.body.rev;
+    syncAdopt(syncMergeStates(state, r.body.state), r.body.rev);
+  }
+}
+
+async function syncNow() {
+  if (!API_KEY) return;
+  if (syncBusy) { syncAgain = true; return; }
+  syncBusy = true;
+  try {
+    const { body } = await syncRequest('/rev');
+    syncOnline = true;
+    if (body.rev === syncRev) {
+      if (syncDirty) await syncPush();
+    } else {
+      const remote = (await syncRequest('/state')).body;
+      if (syncRev === null || syncDirty) {
+        // Both sides may have changes: merge, then push the result
+        syncAdopt(syncMergeStates(state, remote.state), remote.rev);
+        await syncPush();
+      } else {
+        syncAdopt(remote.state, remote.rev);
+      }
+    }
+  } catch(e) {
+    syncOnline = false; // server not running: keep working from localStorage
+  } finally {
+    syncBusy = false;
+    if (syncAgain) { syncAgain = false; setTimeout(syncNow, 0); }
+  }
+}
+
+function startSync() {
+  loadSyncMeta();
+  syncNow();
+  clearInterval(syncPollTimer);
+  syncPollTimer = setInterval(syncNow, 5000);
+  window.addEventListener('focus', syncNow);
 }
 function loadState() {
   try {
@@ -4774,6 +4945,7 @@ function enterApp() {
   document.getElementById('app').classList.add('active');
   loadState();
   initApp();
+  startSync();
 }
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -4866,11 +5038,16 @@ function initApp() {
     });
   }
 
+  // Resume drag-and-drop: works on the drop zone and on the resume textarea itself
+  wireFileDrop(['resume-drop-zone', 'resume-text'], file => handleResumeFileUpload({ target: { files: [file], value: '' } }), ['.pdf', '.docx', '.txt', '.md']);
+  // Class notes drag-and-drop onto the note editor
+  wireFileDrop(['note-input'], file => handleNoteFileUpload({ target: { files: [file], value: '' } }), ['.pdf', '.docx', '.txt', '.pptx', '.md']);
+
   // Global drag prevention (prevent browser from opening dropped files)
   document.addEventListener('dragover', function(e) { e.preventDefault(); });
   document.addEventListener('drop', function(e) {
     // Only prevent default if not on a designated drop zone
-    if (!e.target.closest('.upload-zone') && !e.target.closest('#outline-notes-text')) {
+    if (!e.target.closest('.upload-zone') && !e.target.closest('#outline-notes-text') && !e.target.closest('[data-file-drop]')) {
       e.preventDefault();
     }
   });
@@ -4926,7 +5103,7 @@ function navigateTo(page) {
       outlines:  { title: 'Outline Builder', subtitle: 'Organize · Structure · Conquer', svgKey: 'outlines', bg: 'linear-gradient(135deg, #d2eedd 0%, #bfe4cc 100%)', color: '#1e5c38' },
       study:     { title: 'Study Engine', subtitle: 'Adaptive quizzes · Practice · Mastery', svgKey: 'study', bg: 'linear-gradient(135deg, #dce4f7 0%, #c8d4f0 100%)', color: '#2c3e80' },
       bar:       { title: 'Bar Alignment', subtitle: 'Track your readiness · Close the gaps', svgKey: 'bar', bg: 'linear-gradient(135deg, #b8e4e4 0%, #a0d8d8 100%)', color: '#124f4f' },
-      'ai-chat': { title: 'RES Assistant', subtitle: 'Ask anything about law school', svgKey: 'ai-chat', bg: 'linear-gradient(135deg, #c8eeee 0%, #b0e4e4 100%)', color: '#1a6060' },
+      'ai-chat': { title: 'Res', subtitle: 'Ask anything about law school', svgKey: 'ai-chat', bg: 'linear-gradient(135deg, #c8eeee 0%, #b0e4e4 100%)', color: '#1a6060' },
       bluebook:  { title: 'Bluebook Cite', subtitle: 'Generate · Fix · Draft with Citations', svgKey: 'outlines', bg: 'linear-gradient(135deg, #dce4f7 0%, #c8d4f0 100%)', color: '#28378c' },
       wellness:  { title: 'Wellness', subtitle: 'Balance · Rest · Thrive', svgKey: 'wellness', bg: 'linear-gradient(135deg, #fcd8dc 0%, #f8c4c8 100%)', color: '#8f0922' },
       calendar:  { title: 'Calendar', subtitle: 'Deadlines · Study plans · Scheduling', svgKey: 'calendar', bg: 'linear-gradient(135deg, #fde0cc 0%, #f8cdb8 100%)', color: '#8a3820' },
@@ -5524,7 +5701,7 @@ If a date lacks an explicit year, infer the most sensible one based on today's d
 Materials:
 ${materialsText.slice(0, 28000)}`;
 
-  const result = await callAI(prompt, 'You are RES, a precise assistant that extracts dates from law school course materials and returns strict JSON only, with no explanation.', 'easy');
+  const result = await callAI(prompt, 'You are Res, a precise assistant that extracts dates from law school course materials and returns strict JSON only, with no explanation.', 'easy');
   if (result.startsWith('Error:')) {
     if (summaryEl) summaryEl.innerHTML = `<span style="color:var(--crimson);font-size:0.8rem;">${esc(result)}</span>`;
     return;
@@ -5626,32 +5803,26 @@ async function openNoteModal(noteId) {
   const note = course.notes.find(n => n.id === noteId);
   if (!note) return;
   document.getElementById('note-view-date').textContent = new Date(note.createdAt).toLocaleString();
-  document.getElementById('note-view-text').innerHTML = marked.parse(note.text);
   const diagramEl = document.getElementById('note-view-diagram');
-  // Supports both the new multi-diagram array (note.diagrams) and legacy single-diagram
-  // notes saved before this feature (note.diagram, a plain mermaid code string).
+  const textEl = document.getElementById('note-view-text');
+  // Supports the current anchored diagrams, earlier multi-diagram notes, and legacy single-diagram notes.
   const sections = note.diagrams && note.diagrams.length ? note.diagrams
     : note.diagram ? [{ title: 'Diagram', code: note.diagram }] : [];
-  if (sections.length > 0) {
-    diagramEl.style.display = 'flex';
-    diagramEl.innerHTML = '<p style="color:var(--slate);font-size:0.8rem;">Rendering diagram...</p>';
-    try {
-      let combinedHtml = '';
-      for (const sec of sections) {
-        const { svg } = await mermaid.render('note-view-mermaid-' + (++noteDiagramRenderSeq), sec.code);
-        combinedHtml += `<div style="margin-bottom:24px;">${sections.length > 1 ? `<div style="font-weight:700;font-size:0.9rem;margin-bottom:8px;">${esc(sec.title)}</div>` : ''}${svg}</div>`;
-      }
-      // Stash into the shared viewer state (avoids embedding raw SVG markup inside
-      // an onclick="..." attribute string, which would break on internal quotes).
-      _lastDiagramSVG = combinedHtml;
-      _lastDiagramTitle = sections.length > 1 ? sections.length + ' Diagrams' : sections[0].title;
-      diagramEl.innerHTML = `<button class="btn btn-ghost" style="font-size:0.75rem;" onclick="reopenDiagramModal()">🔍 View Full-Size Diagram${sections.length > 1 ? 's' : ''}</button>`;
-    } catch (e) {
-      diagramEl.innerHTML = '<p style="color:var(--crimson);font-size:0.8rem;">Could not render saved diagram.</p>';
-    }
+  diagramEl.style.display = 'none';
+  diagramEl.innerHTML = '';
+  if (sections.length === 0) {
+    textEl.innerHTML = marked.parse(note.text);
   } else {
-    diagramEl.style.display = 'none';
-    diagramEl.innerHTML = '';
+    textEl.innerHTML = marked.parse(note.text);
+    openModal('note-view-modal');
+    const { combined, count } = await renderNotesWithDiagrams(textEl, note.text, sections);
+    if (count) {
+      _lastDiagramSVG = combined;
+      _lastDiagramTitle = count > 1 ? count + ' Diagrams' : sections[0].title;
+      diagramEl.style.display = 'flex';
+      diagramEl.innerHTML = `<button class="btn btn-ghost" style="font-size:0.75rem;" onclick="reopenDiagramModal()">🔍 View diagram${count > 1 ? 's' : ''} full-size</button>`;
+    }
+    return;
   }
   openModal('note-view-modal');
 }
@@ -5706,7 +5877,9 @@ function toggleAssignment(aid) {
 async function runAITool(type) {
   const course = state.courses.find(c => c.id === state.currentCourseId);
   if (!course) return;
-  const materialsContext = gatherCourseContext(course);
+  const studyInfo = gatherStudyContext(course);
+  const grounding = studyGroundingRules(studyInfo);
+  const materialsContext = (studyInfo.ctx || 'No notes or materials uploaded yet. Use foundational topics for this course.') + (grounding ? `\n\n${grounding}` : '');
   const outputEl = document.getElementById('ai-tool-output');
   const contentEl = document.getElementById('ai-tool-content');
   const titleEl = document.getElementById('ai-tool-title');
@@ -5734,7 +5907,7 @@ async function runAITool(type) {
 
   const p = prompts[type];
   titleEl.textContent = p.title;
-  const system = `You are RES, an expert law school AI tutor. You help law students study effectively. Be thorough, accurate, and pedagogically sound. Format your responses cleanly with proper structure using headers and lists.`;
+  const system = `You are Res, an expert law school AI tutor. You help law students study effectively. Be thorough, accurate, and pedagogically sound. Format your responses cleanly with proper structure using headers and lists.`;
   const result = await callAI(p.prompt, system);
   contentEl.innerHTML = `<div class="md-rendered">${marked.parse(result)}</div>`;
 }
@@ -5748,6 +5921,59 @@ function gatherCourseContext(course) {
     ctx += `\n--- Note (${n.createdAt}) ---\n${n.text.slice(0, 3000)}\n`;
   });
   return ctx.slice(0, 30000) || 'No materials uploaded yet. Generate based on common topics for this type of law course.';
+}
+
+// A syllabus lists topics the class may not have reached yet, so it must never drive question topics.
+function isSyllabusLike(m) {
+  const name = (m.name || '').toLowerCase();
+  if (/syllabus|schedule|course\s*info|reading\s*list|assignments?/.test(name)) return true;
+  const head = (m.content || '').slice(0, 4000).toLowerCase();
+  const dateHits = (head.match(/\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s+\d{1,2}\b|\b\d{1,2}\/\d{1,2}\b|\bweek\s+\d+\b|\bclass\s+\d+\b/g) || []).length;
+  return /syllabus|office hours|grading policy|attendance policy/.test(head) || dateHits >= 8;
+}
+
+// Builds the context the Study Engine quizzes from. The student's own notes come first and are
+// the only source questions may be drawn from; readings support them; the syllabus is reference only.
+function gatherStudyContext(course, budget = 60000) {
+  const notes = [];
+  (course.notes || []).forEach(n => n.text && notes.push(`--- Class note (${new Date(n.createdAt).toLocaleDateString()}) ---\n${n.text}`));
+  if (course.outlineNotes) notes.push(`--- Notes loaded on the Outlines page ---\n${course.outlineNotes}`);
+  const readings = [], syllabi = [];
+  (course.materials || []).forEach(m => {
+    if (!m.content) return;
+    (isSyllabusLike(m) ? syllabi : readings).push(`--- ${m.name} ---\n${m.content}`);
+  });
+
+  let notesText = notes.join('\n\n');
+  if (notesText.length > budget * 0.75) notesText = notesText.slice(0, budget * 0.75) + '\n[notes truncated]';
+  const remaining = budget - notesText.length;
+  let readingsText = readings.join('\n\n').slice(0, Math.max(0, remaining - 4000));
+  const syllabusText = syllabi.join('\n\n').slice(0, 4000);
+
+  const hasNotes = notesText.trim().length > 0;
+  const hasReadings = readingsText.trim().length > 0;
+  let ctx = '';
+  if (hasNotes) ctx += `STUDENT NOTES (what has actually been covered in class):\n${notesText}\n\n`;
+  if (hasReadings) ctx += `${hasNotes ? 'SUPPLEMENTAL READINGS (use only to support topics that appear in the notes)' : 'COURSE READINGS'}:\n${readingsText}\n\n`;
+  if (syllabusText) ctx += `SYLLABUS (reference only; it lists topics the class may NOT have covered yet; never choose a question topic from it):\n${syllabusText}\n\n`;
+  return { ctx: ctx.trim(), hasNotes, hasReadings };
+}
+
+// Grounding rules added to every Study Engine prompt.
+function studyGroundingRules(info) {
+  if (info.hasNotes) {
+    return `GROUNDING RULES (strict):
+- Every question must test a rule, case, doctrine, or concept that is actually discussed in the STUDENT NOTES above.
+- Do NOT test topics that appear only in the syllabus or readings, or topics that are commonly part of this course but absent from the notes. The class may not have reached them yet.
+- Use cases and terminology the way the notes use them.
+- If a requested topic is not covered in the notes, write questions on the covered material instead.`;
+  }
+  if (info.hasReadings) {
+    return `GROUNDING RULES (strict):
+- Every question must test material that actually appears in the COURSE READINGS above.
+- Do NOT test topics that appear only in the syllabus or that are merely typical of this course.`;
+  }
+  return '';
 }
 
 // ═══════════════════════════════════════════
@@ -5777,11 +6003,29 @@ async function generateQuiz() {
   document.getElementById('quiz-text-submit-section').style.display = 'none';
   document.getElementById('grade-output').style.display = 'none';
 
-  const materialsContext = gatherCourseContext(course);
+  const info = gatherStudyContext(course);
   const diffLabels = { early: 'early-semester comprehension level', mid: 'midterm reinforcement level', final: 'final exam complexity level' };
-  const topicClause = topic ? ` focused specifically on the topic: "${topic}"` : '';
+  let topicClause = topic ? ` focused specifically on the topic: "${topic}"` : '';
+  // "Focus on weak areas": steer toward this course's lowest-scoring topics (still limited to covered material)
+  const weakBox = document.getElementById('quiz-weak-areas');
+  if (!topic && weakBox && weakBox.checked) {
+    const weak = getWeakAreas().filter(w => w.course === course.name && w.topic && w.topic !== course.name);
+    if (weak.length) {
+      topicClause = ` emphasizing the student's weakest topics: ${weak.slice(0, 3).map(w => `"${w.topic}" (${w.avg}% average)`).join(', ')}`;
+      currentQuizMeta.topic = weak[0].topic;
+    } else {
+      toast('No weak areas recorded for this course yet, so the quiz covers all of your notes');
+    }
+  }
+  const grounding = studyGroundingRules(info);
+  const sourceBlock = info.ctx
+    ? `${grounding}\n\nStart your response with one line in this form, listing only topics found in the notes you drew from:\nCOVERED: topic one; topic two; topic three\n===\n\nSource material:\n${info.ctx}`
+    : `The student has not uploaded notes or readings for this course, so write general questions on foundational topics for "${course.name}".\n\nStart your response with one line in this form:\nCOVERED: General (no notes uploaded)\n===`;
+  if (!info.hasNotes && !info.hasReadings) {
+    toast('No notes uploaded for this course. Questions will be general until you add notes.');
+  }
 
-  const system = 'You are RES, an expert law school quiz generator. Create challenging, pedagogically sound questions that test understanding of legal doctrines, rules, and analytical skills.';
+  const system = 'You are Res, an expert law school quiz generator. Create challenging, pedagogically sound questions that test understanding of legal doctrines, rules, and analytical skills.';
 
   if (qtype === 'mbe') {
     document.getElementById('quiz-output-title').textContent = 'Multiple Choice Quiz';
@@ -5797,8 +6041,9 @@ D: [option text]
 
 Do NOT include the correct answer or any explanation yet. The student will answer first.
 
-Base questions on these materials:\n${materialsContext}`;
+${sourceBlock}`;
     const result = await callAI(prompt, system);
+    const covered = extractCoveredTopics(result);
     mbeQuestions = parseMBEQuestions(result);
     if (mbeQuestions.length === 0) {
       // Fallback: AI didn't follow format, render as markdown
@@ -5806,6 +6051,7 @@ Base questions on these materials:\n${materialsContext}`;
       document.getElementById('quiz-text-answer-section').style.display = 'block';
     } else {
       renderMBEQuestions(mbeQuestions);
+      showCoveredBanner(contentEl, covered, info);
       document.getElementById('quiz-mbe-submit-section').style.display = 'block';
       updateMBEProgress();
     }
@@ -5827,9 +6073,10 @@ QUESTION: [full question text, may include a detailed fact pattern]
 
 Do NOT include answers, rubrics, or explanations. The student will answer first.
 
-Base questions on these materials:\n${materialsContext}`;
+${sourceBlock}`;
 
     const result = await callAI(prompt, system);
+    const covered = extractCoveredTopics(result);
     textQuestions = parseTextQuestions(result);
 
     if (textQuestions.length === 0) {
@@ -5838,11 +6085,27 @@ Base questions on these materials:\n${materialsContext}`;
       toast('Questions generated — use AI Chat to discuss your answers');
     } else {
       renderTextQuestions(textQuestions, qtype);
+      showCoveredBanner(contentEl, covered, info);
       const label = document.getElementById('text-progress-label');
       if (label) label.textContent = `0 of ${textQuestions.length} answered`;
       document.getElementById('quiz-text-submit-section').style.display = 'block';
     }
   }
+}
+
+
+// Reads the "COVERED: a; b; c" line the quiz prompt asks for.
+function extractCoveredTopics(text) {
+  const m = text.match(/^\s*COVERED:\s*(.+)$/im);
+  return m ? m[1].split(/;|,/).map(t => t.trim()).filter(Boolean).slice(0, 8) : [];
+}
+
+function showCoveredBanner(contentEl, covered, info) {
+  const src = info.hasNotes ? 'your notes' : info.hasReadings ? 'your course readings' : 'general course topics (no notes uploaded)';
+  const banner = document.createElement('div');
+  banner.style.cssText = 'font-size:0.75rem;color:var(--slate);background:var(--teal-soft);border-radius:8px;padding:8px 12px;margin-bottom:1rem;line-height:1.5;';
+  banner.innerHTML = `<strong style="color:var(--teal);">Drawn from ${src}</strong>${covered.length ? `: ${covered.map(esc).join(' · ')}` : ''}`;
+  contentEl.prepend(banner);
 }
 
 // ── Text question parsing ──
@@ -5924,7 +6187,7 @@ Use ## Question N — [brief topic] as the heading for each question.
 
 ${qaText}`;
 
-  const system = 'You are RES, an expert law professor. Grade each answer rigorously but constructively. Always produce a rubric first, then score against it. Use clean formatting with headers and lists.';
+  const system = 'You are Res, an expert law professor. Grade each answer rigorously but constructively. Always produce a rubric first, then score against it. Use clean formatting with headers and lists.';
   const result = await callAI(prompt, system, 'hypo');
   gradeContent.innerHTML = `<div class="md-rendered">${marked.parse(result)}</div>`;
 
@@ -5942,7 +6205,7 @@ async function gradeAnswer() {
   gradeEl.style.display = 'block';
   gradeContent.innerHTML = '<div style="text-align:center;padding:1.5rem;"><div class="loading-dots"><span></span><span></span><span></span></div></div>';
   const prompt = `Grade this law student answer.\n\nQuestion:\n${question}\n\nAnswer:\n${answer}\n\nProvide a rubric, score each criterion, give a total out of 10, and 2-3 sentences of feedback.`;
-  const system = 'You are RES, an expert law professor. Use clean formatting with clear headings.';
+  const system = 'You are Res, an expert law professor. Use clean formatting with clear headings.';
   const result = await callAI(prompt, system);
   gradeContent.innerHTML = `<div class="md-rendered">${marked.parse(result)}</div>`;
 }
@@ -6021,7 +6284,7 @@ async function submitMBEQuiz() {
   ).join('\n\n');
 
   const prompt = `A law student just completed a multiple choice quiz. Grade their answers.\n\nFor EACH question:\n1. State whether they were CORRECT or INCORRECT\n2. Reveal the correct answer and letter\n3. Briefly explain the controlling rule and why the correct answer is right\n4. If wrong, explain why their choice was incorrect\n\nEnd with a total score (X out of ${mbeQuestions.length}) and 1-2 sentences of overall feedback.\n\nStudent's answers:\n${answersText}`;
-  const system = 'You are RES, an expert law professor. Grade MBE answers clearly and educationally. Use ## for each question heading.';
+  const system = 'You are Res, an expert law professor. Grade MBE answers clearly and educationally. Use ## for each question heading.';
   const result = await callAI(prompt, system);
   gradeContent.innerHTML = `<div class="md-rendered">${marked.parse(result)}</div>`;
 
@@ -6416,6 +6679,8 @@ async function syncFromGoogleDoc(autoRebuild = false) {
     const { text } = await fetchGoogleDocContent(docId, msg => setGdocStatus('info', msg));
 
     document.getElementById('outline-notes-text').value = text;
+    course.outlineNotes = text.slice(0, 120000);
+    saveState();
     const charCount = text.length.toLocaleString();
     const timeStr   = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     setGdocStatus('success', `✓ Synced ${charCount} characters from Google Docs at ${timeStr} (all tabs included). ${autoRebuild ? `Building ${OUTLINE_TYPES[getOutlineType()].label}…` : 'Click "Build Outline from Notes" below to generate your outline.'}`);
@@ -6545,7 +6810,7 @@ function downloadOutlineAsDoc() {
 </head>
 <body>
   <div class="doc-title">${esc(course.name)} — ${t.title}</div>
-  <div class="doc-meta">Generated by RES · ${date}</div>
+  <div class="doc-meta">Generated by Res · ${date}</div>
   ${contentEl.innerHTML}
 </body>
 </html>`;
@@ -6586,6 +6851,7 @@ async function generateOutline(type) {
 
   const materialsContext = gatherCourseContext(course);
   const userNotes = document.getElementById('outline-notes-text').value.trim();
+  if (userNotes) course.outlineNotes = userNotes.slice(0, 120000);
   const typeInstructions = {
     full: `Create a comprehensive law school outline: condense the entire semester's case law, statutes, binding precedent and class notes into one cohesive legal roadmap optimized for a timed final exam.
 - Translate judicial opinions into actionable black-letter law statements, using the professor's own wording from the notes wherever it appears.
@@ -6609,7 +6875,7 @@ async function generateOutline(type) {
   } else {
     prompt = `For the course "${course.name}", ${typeInstructions[type]}\n\nBase this on the following materials:\n${materialsContext}`;
   }
-  const system = 'You are RES, an expert law school outline builder. Create clear, well-organized, accurate legal outlines that would help a student prepare for exams.';
+  const system = 'You are Res, an expert law school outline builder. Create clear, well-organized, accurate legal outlines that would help a student prepare for exams.';
   const result = await callAI(prompt, system, 'outline_full');
   const field = (OUTLINE_TYPES[type] || OUTLINE_TYPES.full).field;
   if (result.startsWith('Error:')) {
@@ -6886,7 +7152,7 @@ async function generateStudyPlan() {
   el.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div> Generating study plan...';
 
   const prompt = `Create a detailed weekly study plan based on these courses and upcoming assignments:\n\n${JSON.stringify(courses, null, 2)}\n\nToday is ${new Date().toLocaleDateString()}. Include spaced repetition, break reminders, and prioritize upcoming deadlines.`;
-  const system = 'You are RES, a law school study planning assistant. Create practical, time-blocked study plans that incorporate spaced repetition and prevent burnout.';
+  const system = 'You are Res, a law school study planning assistant. Create practical, time-blocked study plans that incorporate spaced repetition and prevent burnout.';
   const result = await callAI(prompt, system);
   el.innerHTML = `<div class="md-rendered">${marked.parse(result)}</div>`;
 }
@@ -7268,7 +7534,7 @@ Suggest a realistic bar prep timeline and approach given the student's current p
 
 Be direct, specific, and actionable. Reference the student's actual grades where visible.`;
 
-  const system = 'You are RES, an expert bar exam preparation advisor for law students. Be specific, accurate, and practical.';
+  const system = 'You are Res, an expert bar exam preparation advisor for law students. Be specific, accurate, and practical.';
   const result = await callAI(prompt, system, 'bar');
 
   outputEl.innerHTML = `
@@ -7449,7 +7715,7 @@ Provide comprehensive career intelligence with:
 3. Skill gaps to address and courses/clinics to prioritize
 4. Concrete next steps for this ${year} student in the next 6 months`;
 
-  const system = 'You are RES, an expert legal career counselor. Provide realistic, data-informed guidance. Use clean formatting with headers, lists, and tables for clarity.';
+  const system = 'You are Res, an expert legal career counselor. Provide realistic, data-informed guidance. Use clean formatting with headers, lists, and tables for clarity.';
   const result = await callAI(prompt, system, 'career');
   outputEl.innerHTML = `<div class="md-rendered">${marked.parse(result)}</div>`;
 }
@@ -7574,7 +7840,7 @@ async function researchEmployer() {
   if (!name) { toast('Add an employer first'); return; }
   toast('Researching ' + name + '...');
   const prompt = `Give a concise employer intelligence brief for a law student considering ${name}. Include: firm type/size, practice strengths, culture/WLB reputation, summer associate program info, typical entry salary, and 2-3 tips for impressing them in interviews. Use bullet points.`;
-  const result = await callAI(prompt, 'You are RES, a legal career advisor. Be concise and practical.', 'career_match');
+  const result = await callAI(prompt, 'You are Res, a legal career advisor. Be concise and practical.', 'career_match');
   const card = document.getElementById('career-results');
   const out = document.getElementById('career-output');
   card.style.display = 'block';
@@ -7742,7 +8008,7 @@ Use clean formatting with headers and lists.`;
 
     const result = await callAI(
       prompt,
-      'You are RES, an expert legal resume coach at a top law school career services office. Be honest, specific, and constructive.',
+      'You are Res, an expert legal resume coach at a top law school career services office. Be honest, specific, and constructive.',
       'career',
       useFile ? { pdfBase64: resumeFileBase64, pdfMimeType: resumeFileMime } : {}
     );
@@ -7783,7 +8049,7 @@ Key strengths: ${strengths || 'Strong academic record, research skills'}
 Personal hook/connection: ${hook || 'N/A'}
 
 Format as a complete, ready-to-use cover letter (3–4 short paragraphs). Professional but not stiff. Do NOT use hollow phrases like "I am writing to express my interest." Open with something specific and compelling.`;
-    const result = await callAI(prompt, 'You are RES, an expert legal writing coach. Write cover letters that are specific, confident, and memorable without being over-the-top.', 'career');
+    const result = await callAI(prompt, 'You are Res, an expert legal writing coach. Write cover letters that are specific, confident, and memorable without being over-the-top.', 'career');
 
     if (typeof result === 'string' && result.startsWith('Error:')) {
       out.innerHTML = `<p style="color:var(--crimson);font-size:0.85rem;">${esc(result)}</p>`;
@@ -7911,7 +8177,7 @@ Evaluate this answer for a legal job interview:
 2. Weaknesses or missed opportunities (2–3 points)
 3. A stronger version of the answer (rewrite it)
 4. Score: /10 with one-sentence rationale`;
-  const result = await callAI(prompt, 'You are RES, a legal interview coach. Give honest, constructive feedback. Be specific. Use clean formatting.', 'interview_prep');
+  const result = await callAI(prompt, 'You are Res, a legal interview coach. Give honest, constructive feedback. Be specific. Use clean formatting.', 'interview_prep');
   feedbackEl.innerHTML = `<div class="md-rendered">${marked.parse(result)}</div>`;
 }
 
@@ -8268,13 +8534,23 @@ function resetTimer() {
   updateTimerButton();
 }
 
-function logTimerSession(minutes) {
+function logTimerSession(minutes, opts) {
   const hours = Math.round(minutes / 60 * 100) / 100;
   if (hours <= 0) return;
   const subjectEl = document.getElementById('timer-subject');
   const subject = (subjectEl && subjectEl.value) ? subjectEl.value : 'General study';
   state.timerSessions.push({ date: new Date().toISOString(), minutes, subject });
   state.studyLog.push({ hours, subject, date: new Date().toISOString(), source: 'timer' });
+  if (opts && opts.billed) {
+    // Caller is billing this session itself
+  } else if (document.getElementById('billable-auto')?.checked) {
+    const activity = document.getElementById('billable-activity')?.value.trim() || subject;
+    const matter = document.getElementById('billable-matter')?.value.trim() || '';
+    addBillableEntry({ activity, matter, minutes, date: new Date().toISOString(), source: 'timer' });
+    toast(`${formatTenths(minutes)} hr billed${matter ? ' to ' + matter : ''}`);
+  } else {
+    state.lastUnbilledSession = { minutes, date: new Date().toISOString(), subject };
+  }
   saveState();
   refreshDashboard();
   renderWeeklyChart();
@@ -8413,6 +8689,16 @@ function manualLogHours() {
   if (!dateVal) return toast('Select a date');
 
   const date = new Date(dateVal + 'T12:00:00').toISOString();
+  const billable = document.getElementById('manual-billable')?.checked;
+  let billMsg = '';
+  if (billable) {
+    const activity = document.getElementById('manual-billable-activity').value.trim();
+    const matter = document.getElementById('manual-billable-matter').value.trim();
+    if (!activity) return toast('Enter an activity for the billable entry');
+    addBillableEntry({ activity, matter, minutes: hours * 60, date, source: 'manual' });
+    document.getElementById('manual-billable-activity').value = '';
+    billMsg = ` (${formatTenths(hours * 60)} hr billable${matter ? ' to ' + matter : ''})`;
+  }
   state.studyLog.push({ hours, subject: subject || 'General study', date, source: 'manual' });
   saveState();
   document.getElementById('manual-study-hours').value = '';
@@ -8420,7 +8706,7 @@ function manualLogHours() {
   renderWeeklyChart();
   refreshTimerStats();
   checkDailyLimit();
-  toast(`${hours} hours logged`);
+  toast(`${hours} hours logged${billMsg}`);
 }
 
 // ═══════════════════════════════════════════
@@ -8908,7 +9194,7 @@ Provide:
 
 Be warm, specific, and constructive. Reference their actual numbers and patterns — don't be generic.`;
 
-  const system = 'You are RES wellness advisor. You help law students maintain healthy study habits, manage stress, and prevent burnout. Be warm, supportive, practical, and specific. Always reference the student\'s actual data in your advice.';
+  const system = 'You are Res, a wellness advisor for law students. You help law students maintain healthy study habits, manage stress, and prevent burnout. Be warm, supportive, practical, and specific. Always reference the student\'s actual data in your advice.';
   const result = await callAI(prompt, system, 'wellness');
   el.innerHTML = `<div class="md-rendered">${marked.parse(result)}</div>`;
 }
@@ -8988,7 +9274,7 @@ function exportStudyLog() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `RES_Study_Hours_${new Date().toISOString().split('T')[0]}.csv`;
+  a.download = `Loquitur_Study_Hours_${new Date().toISOString().split('T')[0]}.csv`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
@@ -9024,7 +9310,7 @@ async function sendChat() {
   }).join('\n');
   const contextPrompt = `Student context: Courses: [${courseSummary || 'none'}]. Semester: ${state.semester}.\n\nRecent conversation:\n${recentHistory}\n\nRespond to the student's latest message.`;
 
-  const system = `You are RES, an intelligent law school AI assistant for law students. You help with studying, outlines, bar prep, career planning, and general law school advice. Be knowledgeable, supportive, and thorough. Reference the student's actual courses and materials when relevant. Use clean formatting with headers, lists, and line breaks to make responses clear and scannable.`;
+  const system = `Your name is Res, and you are an AI assistant for law students. Res is your name, the way a person has a name: refer to yourself simply as Res, never as "RES", "the Res AI assistant", or "your AI assistant". You help with studying, outlines, bar prep, career planning, and general law school advice. Be knowledgeable, supportive, and thorough. Reference the student's actual courses and materials when relevant. Use clean formatting with headers, lists, and line breaks to make responses clear and scannable.`;
   const result = await callAI(contextPrompt, system);
 
   state.chatHistory.push({ role: 'assistant', content: result });
@@ -9048,7 +9334,7 @@ function clearChat() {
   state.chatHistory = [];
   const msgsEl = document.getElementById('chat-messages');
   msgsEl.innerHTML = `
-    <div class="ai-msg assistant">Hello! I'm your RES AI assistant. I can help you with anything related to law school — studying, outlines, bar prep, career planning, and more. What would you like to work on?</div>
+    <div class="ai-msg assistant">Hi, I'm Res. I can help with studying, outlines, bar prep, career planning, or anything else in law school. What would you like to work on?</div>
     <div id="chat-suggestions" style="display:flex;flex-wrap:wrap;gap:6px;padding:4px 0;">
       <button class="chat-chip" onclick="useChip(this)">Help me outline a course</button>
       <button class="chat-chip" onclick="useChip(this)">Quiz me on a topic</button>
@@ -9404,87 +9690,160 @@ function initCardTilt() {
 
 // ─── BLUEBOOK CITATION FUNCTIONS ───
 function switchCiteMode(mode, btn) {
-  document.querySelectorAll('.cite-mode-tabs button').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('cite-panel-generate').style.display = mode === 'generate' ? '' : 'none';
-  document.getElementById('cite-panel-fix').style.display = mode === 'fix' ? '' : 'none';
-  document.getElementById('cite-panel-draft').style.display = mode === 'draft' ? '' : 'none';
-  document.getElementById('cite-output-area').style.display = 'none';
+  document.querySelectorAll('.cite-mode-tabs button').forEach(b => b.classList.toggle('active', b.dataset.citeMode === mode));
+  ['generate', 'fix', 'draft'].forEach(m => {
+    document.getElementById('cite-panel-' + m).style.display = m === mode ? '' : 'none';
+  });
+  // Each mode keeps its own result, so switching tabs never moves or clears output.
+}
+
+// Runs a citation request and writes the result into that mode's own panel.
+async function runCiteMode(mode, prompt, system, task, asMarkdown) {
+  switchCiteMode(mode);
+  const area = document.getElementById('cite-output-' + mode);
+  const res = document.getElementById('cite-result-' + mode);
+  const btn = document.getElementById('cite-btn-' + mode);
+  const label = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = mode === 'draft' ? 'Drafting...' : 'Working...';
+  area.style.display = '';
+  res.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div>';
+  try {
+    const result = await callAI(prompt, system, task);
+    if (asMarkdown && !result.startsWith('Error:')) res.innerHTML = `<div class="md-rendered">${marked.parse(result)}</div>`;
+    else res.textContent = result;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = label;
+  }
 }
 
 async function generateBluebookCite() {
   const srcType = document.getElementById('cite-source-type').value;
   const details = document.getElementById('cite-source-details').value.trim();
   const format = document.getElementById('cite-format').value;
-  if (!details) return alert('Please enter source details.');
+  if (!details) return toast('Enter the source details first');
   const prompt = `Generate a proper Bluebook citation (${format} form) for this ${srcType}:\n${details}\n\nReturn ONLY the formatted citation, nothing else.`;
-  const result = await callAI(prompt, 'You are RES, an expert in Bluebook legal citation format. Produce accurate citations following The Bluebook: A Uniform System of Citation (21st ed.).', 'cite_gen');
-  document.getElementById('cite-result').textContent = result;
-  document.getElementById('cite-output-area').style.display = '';
+  await runCiteMode('generate', prompt, 'You are Res, an expert in Bluebook legal citation format. Produce accurate citations following The Bluebook: A Uniform System of Citation (21st ed.).', 'cite_gen', false);
 }
 
 async function fixBluebookCite() {
   const input = document.getElementById('cite-fix-input').value.trim();
-  if (!input) return alert('Please paste a citation to fix.');
+  if (!input) return toast('Paste a citation to fix first');
   const prompt = `Fix this citation to proper Bluebook format:\n${input}\n\nReturn the corrected citation, then on a new line explain what was changed.`;
-  const result = await callAI(prompt, 'You are RES, an expert in Bluebook legal citation format.', 'cite_fix');
-  document.getElementById('cite-result').innerHTML = marked.parse(result);
-  document.getElementById('cite-output-area').style.display = '';
+  await runCiteMode('fix', prompt, 'You are Res, an expert in Bluebook legal citation format (21st ed.).', 'cite_fix', true);
 }
 
 async function draftWithCitations() {
   const topic = document.getElementById('cite-draft-input').value.trim();
   const jurisdiction = document.getElementById('cite-draft-jurisdiction').value.trim();
-  if (!topic) return alert('Please describe the legal point.');
+  if (!topic) return toast('Describe the legal point first');
   const jNote = jurisdiction ? ` Focus on ${jurisdiction} law.` : '';
-  const prompt = `Draft a well-written legal paragraph about: ${topic}${jNote}\n\nInclude proper Bluebook citations to real, verifiable cases and statutes. Use footnote-style citation placement.`;
-  const result = await callAI(prompt, 'You are RES, an expert legal writer. Draft paragraphs with accurate Bluebook citations to real authorities.', 'draft_cite');
-  document.getElementById('cite-result').innerHTML = marked.parse(result);
-  document.getElementById('cite-output-area').style.display = '';
+  const prompt = `Draft a well-written legal paragraph about: ${topic}${jNote}\n\nInclude proper Bluebook citations to real, verifiable cases and statutes. Use footnote-style citation placement. Do not invent authorities; if you are not confident a source exists, say so in a bracketed note.`;
+  await runCiteMode('draft', prompt, 'You are Res, an expert legal writer. Draft paragraphs with accurate Bluebook citations to real authorities.', 'draft_cite', true);
 }
 
-function copyCiteResult() {
-  const text = document.getElementById('cite-result').innerText;
-  navigator.clipboard.writeText(text).then(() => alert('Copied to clipboard.'));
+function copyCiteResult(mode) {
+  const el = document.getElementById('cite-result-' + (mode || 'generate'));
+  if (!el) return;
+  navigator.clipboard.writeText(el.innerText).then(() => toast('Copied to clipboard'));
 }
 
 // ─── BILLABLE HOURS LOG ───
+// One shared log for the stopwatch and the manual study log. Durations are stored in minutes and
+// reported in tenths of an hour, rounding each entry up to the next 0.1 (standard 6-minute billing).
+function formatTenths(minutes) { return (Math.ceil(Math.round(minutes * 100) / 100 / 6) / 10).toFixed(1); }
+
+function billableEntries() {
+  if (!Array.isArray(state.billableLog)) state.billableLog = [];
+  // Upgrade entries saved by the earlier version, which stored a "2h 15m" string
+  state.billableLog.forEach(e => {
+    if (typeof e.minutes !== 'number') {
+      const m = String(e.time || '').match(/(?:(\d+)h)?\s*(?:(\d+)m)?/);
+      e.minutes = m ? (Number(m[1] || 0) * 60 + Number(m[2] || 0)) : 0;
+      e.source = e.source || 'timer';
+      e.id = e.id || Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    }
+  });
+  return state.billableLog;
+}
+
+function addBillableEntry({ activity, matter, minutes, date, source }) {
+  if (!minutes || minutes <= 0) return;
+  billableEntries().push({
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+    activity, matter: matter || '', minutes: Math.round(minutes * 100) / 100,
+    date: date || new Date().toISOString(), source: source || 'manual'
+  });
+  saveState();
+  renderBillableLog();
+}
+
+// Stops the timer and bills the time on it. If the timer is idle, bills the last unbilled session.
 function logBillableTime() {
   const activity = document.getElementById('billable-activity').value.trim();
   const matter = document.getElementById('billable-matter').value.trim();
-  const focusEl = document.getElementById('timer-focus-today');
-  const focusTime = focusEl ? focusEl.textContent : '0h 0m';
-  if (!activity) return alert('Please enter an activity description.');
-  if (!state.billableLog) state.billableLog = [];
-  state.billableLog.push({ activity, matter, time: focusTime, date: new Date().toISOString() });
-  saveState();
+  if (!activity) return toast('Enter an activity description first');
+  let minutes = 0;
+  if (timerState.phase === 'work' && timerState.elapsed > 0) {
+    minutes = timerState.elapsed / 60;
+    clearInterval(timerState.intervalId);
+    logTimerSession(Math.round(minutes * 100) / 100, { billed: true });
+    timerState.sessionsCompleted++;
+    timerState.running = false;
+    timerState.phase = 'idle';
+    timerState.elapsed = 0;
+    timerState.secondsLeft = timerState.mode === 'pomodoro' ? timerState.workMinutes * 60 : 0;
+    updateTimerDisplay(); updateTimerPhaseLabel(); updateTimerButton(); refreshTimerStats();
+  } else if (state.lastUnbilledSession) {
+    minutes = state.lastUnbilledSession.minutes;
+    state.lastUnbilledSession = null;
+  } else {
+    return toast('Start the timer first, or use the Manual Study Log to enter billable time after the fact');
+  }
+  addBillableEntry({ activity, matter, minutes, source: 'timer' });
   document.getElementById('billable-activity').value = '';
-  document.getElementById('billable-matter').value = '';
+  toast(`${formatTenths(minutes)} hr logged${matter ? ' to ' + matter : ''}`);
+}
+
+function deleteBillableEntry(id) {
+  state.billableLog = billableEntries().filter(e => e.id !== id);
+  saveState();
   renderBillableLog();
 }
 
 function renderBillableLog() {
-  const log = state.billableLog || [];
+  const log = billableEntries();
   const ul = document.getElementById('billable-time-log');
   if (!ul) return;
-  ul.innerHTML = log.slice(-10).reverse().map(e =>
-    `<li><span>${esc(e.activity)}${e.matter ? ' — ' + esc(e.matter) : ''}</span><span>${esc(e.time)} · ${new Date(e.date).toLocaleDateString()}</span></li>`
-  ).join('');
+  ul.innerHTML = log.length ? log.slice(-10).reverse().map(e => `
+    <li>
+      <span>${esc(e.activity)}${e.matter ? ' · <em>' + esc(e.matter) + '</em>' : ''} <span class="tag" style="font-size:0.55rem;padding:1px 6px;">${e.source === 'manual' ? 'Manual' : 'Timer'}</span></span>
+      <span>${formatTenths(e.minutes)} hr · ${new Date(e.date).toLocaleDateString()}
+        <button onclick="deleteBillableEntry('${e.id}')" title="Delete entry" style="background:none;border:none;cursor:pointer;color:var(--slate);font-size:0.75rem;margin-left:4px;">✕</button></span>
+    </li>`).join('') : '<li style="justify-content:center;color:var(--slate);background:transparent;">No billable time logged yet</li>';
+  const total = log.reduce((a, e) => a + Math.ceil(e.minutes / 6) / 10, 0);
+  const label = document.getElementById('billable-total-label');
+  if (label) label.textContent = log.length ? `${total.toFixed(1)} hr total` : '';
+  const dl = document.getElementById('billable-matter-list');
+  if (dl) dl.innerHTML = [...new Set(log.map(e => e.matter).filter(Boolean))].map(m => `<option value="${esc(m)}">`).join('');
 }
 
 function exportBillableLog() {
-  const log = state.billableLog || [];
-  if (!log.length) return alert('No time entries to export.');
-  // Double embedded quotes so commas/quotes in an activity don't break the CSV columns
-  const csvCell = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
-  let csv = 'Date,Activity,Matter,Time\n';
-  log.forEach(e => {
-    csv += [new Date(e.date).toLocaleDateString(), e.activity, e.matter, e.time].map(csvCell).join(',') + '\n';
+  const log = billableEntries();
+  if (!log.length) return toast('No billable time to export');
+  const q = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
+  let csv = 'Date,Activity,Matter,Hours,Minutes,Source\n';
+  log.slice().sort((a, b) => new Date(a.date) - new Date(b.date)).forEach(e => {
+    csv += [new Date(e.date).toLocaleDateString('en-US'), e.activity, e.matter, formatTenths(e.minutes), Math.round(e.minutes), e.source].map(q).join(',') + '\n';
   });
+  const byMatter = {};
+  log.forEach(e => { const k = e.matter || '(no matter)'; byMatter[k] = (byMatter[k] || 0) + Math.ceil(e.minutes / 6) / 10; });
+  csv += '\nTOTALS BY MATTER\n' + Object.entries(byMatter).map(([m, h]) => `${q(m)},,,${h.toFixed(1)}`).join('\n') + '\n';
   const blob = new Blob([csv], { type: 'text/csv' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = `RES_Billable_Hours_${new Date().toISOString().split('T')[0]}.csv`;
+  a.download = `Loquitur_Billable_Time_${new Date().toISOString().split('T')[0]}.csv`;
   a.click();
 }
 
@@ -9504,6 +9863,27 @@ async function handleNoteFileUpload(event) {
   } catch (e) {
     toast(`Could not read ${file.name}`);
   }
+}
+
+// Makes each element accept a dropped file and hands the first matching file to onFile.
+function wireFileDrop(ids, onFile, exts) {
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.setAttribute('data-file-drop', '');
+    const on = e => { e.preventDefault(); e.stopPropagation(); el.classList.add('drag-active'); el.style.outline = '2px dashed var(--teal)'; };
+    const off = () => { el.classList.remove('drag-active'); el.style.outline = ''; };
+    el.addEventListener('dragenter', on);
+    el.addEventListener('dragover', on);
+    el.addEventListener('dragleave', off);
+    el.addEventListener('drop', e => {
+      e.preventDefault(); e.stopPropagation(); off();
+      const file = e.dataTransfer?.files?.[0];
+      if (!file) return;
+      if (exts && !exts.some(x => file.name.toLowerCase().endsWith(x))) return toast(`Unsupported file type. Use ${exts.join(', ')}`);
+      onFile(file);
+    });
+  });
 }
 
 // ─── RESUME: FILE UPLOAD ───
@@ -9570,7 +9950,7 @@ async function aiReorganizeNotes() {
   btn.textContent = 'Reorganizing...';
   try {
     const prompt = `Reorganize and structure these law school class notes into a clear, well-organized format using markdown-style headings (##), sub-headings, and bullet points. Preserve every substantive point from the original notes — do not drop content, only restructure and clarify it.\n\n${text}`;
-    const result = await callAI(prompt, 'You are RES, an expert at organizing law school class notes. Structure notes clearly with headings, sub-points, and logical flow. Never omit substantive content from the original notes.', 'quick');
+    const result = await callAI(prompt, 'You are Res, an expert at organizing law school class notes. Structure notes clearly with headings, sub-points, and logical flow. Never omit substantive content from the original notes.', 'quick');
     if (result.startsWith('Error:')) {
       toast(result);
     } else {
@@ -9666,6 +10046,71 @@ function parseDiagramSections(raw) {
   return sections;
 }
 
+// Parses "Include helpful diagrams" output into [{title, anchor, code}] sections.
+function parseHelpfulDiagrams(raw) {
+  const cleaned = raw.replace(/```mermaid\n?/g, '').replace(/```\n?/g, '').trim();
+  if (/^NONE\b/i.test(cleaned)) return [];
+  const parts = cleaned.split(/^##\s+(.+)$/m);
+  const out = [];
+  for (let i = 1; i < parts.length; i += 2) {
+    let body = (parts[i + 1] || '').trim();
+    let anchor = '';
+    const m = body.match(/^ANCHOR:\s*(.+)$/im);
+    if (m) { anchor = m[1].trim().replace(/^["']|["']$/g, ''); body = body.replace(m[0], '').trim(); }
+    body = body.replace(/^TYPE:.*$/im, '').trim();
+    if (body) out.push({ title: parts[i].trim(), anchor, code: body });
+  }
+  return out;
+}
+
+// Inserts placeholder slots for each diagram right after the section of the notes it belongs to.
+// Diagrams whose anchor cannot be found are placed at the end.
+function notesWithDiagramSlots(text, sections) {
+  const lines = text.split('\n');
+  const inserts = {}; // line index -> [diagram idx]
+  const trailing = [];
+  const norm = t => t.toLowerCase().replace(/^[#>*\-\d.\s]+/, '').replace(/[*_`]/g, '').trim();
+  sections.forEach((sec, idx) => {
+    const a = norm(sec.anchor || '');
+    let hit = a ? lines.findIndex(l => norm(l) && (norm(l).includes(a) || (a.length > 12 && a.includes(norm(l))))) : -1;
+    if (hit < 0) { trailing.push(idx); return; }
+    // Place the diagram at the end of the anchored section or paragraph
+    const headingLevel = (lines[hit].match(/^(#{1,6})\s/) || [])[1]?.length;
+    let at = hit;
+    for (let j = hit + 1; j < lines.length; j++) {
+      const lvl = (lines[j].match(/^(#{1,6})\s/) || [])[1]?.length;
+      if (headingLevel ? (lvl && lvl <= headingLevel) : (lvl || !lines[j].trim())) break;
+      at = j;
+    }
+    (inserts[at] ||= []).push(idx);
+  });
+  const slot = i => `\n\n<div class="note-inline-diagram" data-diagram-idx="${i}"></div>\n\n`;
+  let outText = lines.map((l, i) => l + (inserts[i] ? inserts[i].map(slot).join('') : '')).join('\n');
+  outText += trailing.map(slot).join('');
+  return outText;
+}
+
+// Renders notes markdown with each diagram drawn inline in its slot. Returns the combined SVG
+// markup (for the full-size viewer) and how many diagrams rendered.
+async function renderNotesWithDiagrams(el, text, sections) {
+  el.innerHTML = marked.parse(notesWithDiagramSlots(text, sections));
+  let combined = '', count = 0;
+  for (const slot of el.querySelectorAll('.note-inline-diagram')) {
+    const sec = sections[Number(slot.dataset.diagramIdx)];
+    if (!sec) continue;
+    try {
+      const { svg } = await mermaid.render('note-mermaid-' + (++noteDiagramRenderSeq), sec.code);
+      slot.innerHTML = `<div class="note-inline-diagram-title">📊 ${esc(sec.title)}</div>${svg}`;
+      combined += `<div style="margin-bottom:28px;"><div style="font-weight:700;font-size:0.9rem;margin-bottom:8px;">${esc(sec.title)}</div>${svg}</div>`;
+      count++;
+    } catch (e) {
+      console.error('Diagram render error:', e, sec.code);
+      slot.remove();
+    }
+  }
+  return { combined, count };
+}
+
 async function generateDiagram() {
   const textarea = document.getElementById('note-input');
   const text = textarea.value.trim();
@@ -9673,69 +10118,72 @@ async function generateDiagram() {
   const btn = document.getElementById('generate-diagram-btn');
   const saveWrap = document.getElementById('note-diagram-save-wrap');
   const container = document.getElementById('note-diagram-container');
+  const label = btn.textContent;
   btn.disabled = true;
-  btn.textContent = 'Generating...';
+  btn.textContent = 'Finding where diagrams help...';
   saveWrap.style.display = 'none';
   container.style.display = '';
-  container.innerHTML = '<p style="color:var(--slate);font-size:0.82rem;"><span class="loading-dots"><span></span><span></span><span></span></span> Generating diagram from your notes...</p>';
+  container.innerHTML = '<p style="color:var(--slate);font-size:0.82rem;"><span class="loading-dots"><span></span><span></span><span></span></span> Reading your notes for concepts a diagram would clarify...</p>';
   try {
-    const prompt = `Below are a law student's class notes. Turn them into one or more clear, well-organized Mermaid.js flowcharts (graph TD) that a student could actually study from.
+    const prompt = `Below are a law student's class notes. Do NOT diagram the notes as a whole. Instead, find the specific concepts in them that a small visual would make easier to learn, and make one focused diagram for each.
+
+Good candidates:
+- a multi-element test or rule (e.g. the elements of a claim, a standard of review)
+- a step-by-step analysis or decision path (e.g. "if X, then ask Y; if not, Z")
+- a rule with exceptions or branching outcomes
+- a comparison of related doctrines, tiers, or standards
+- a sequence or timeline of procedural stages
 
 Rules:
-- Use the notes' own headings/sub-points to drive the structure — do not invent generic placeholder nodes.
-- Build a real hierarchy: main topic at the top, major doctrines/rules as branches, key sub-rules, exceptions, elements, or case names as children of those.
-- Every node label must be short (under 8 words) and specific to the content of the notes, in double quotes, e.g. A["Offer must be definite"].
-- Use plain alphanumeric node IDs (A, B, C1, C2...). Do not use parentheses, colons, or quotation marks inside node IDs.
-- Prefer at least 8-15 nodes per diagram so it is actually useful, unless the notes are very short.
-- If the notes cover more than one distinct major topic that would each be clearer as its own diagram, output SEVERAL separate diagrams instead of cramming everything into one. Otherwise output just one.
-- Format EVERY diagram exactly like this, with a short title heading directly above its code:
-## <Short Topic Title>
+- Make between 0 and 5 diagrams. Only include a diagram if it adds something the text does not already make obvious. Short or simple notes may need none or one.
+- Each diagram covers ONE concept and uses only content that appears in the notes. Do not add doctrines, cases, or rules the notes do not mention.
+- Keep each diagram small and readable: 4 to 12 nodes. Node labels under 8 words, in double quotes, e.g. A["Strict scrutiny"]. Plain alphanumeric node IDs.
+- Use "graph TD" for hierarchies and decision paths, and "graph LR" for sequences and comparisons.
+- For each diagram, give an ANCHOR: copy the exact heading or a short exact phrase from the notes where this concept is discussed, so the diagram can be placed there.
+- If no part of the notes would benefit from a diagram, return only the word NONE.
+
+Format each diagram exactly like this, with nothing else:
+## <Short title naming the concept>
+ANCHOR: <exact heading or phrase from the notes>
 graph TD
   A["..."] --> B["..."]
-  ...
-- If outputting multiple diagrams, repeat that "## Title" + graph block pattern for each one, one after another.
-- Return ONLY the heading(s) and mermaid code — no prose, no explanation, no markdown code fences.
+
+No prose, no explanations, no code fences.
 
 Notes:
 ${text}`;
-    const result = await callAI(prompt, 'You are RES. You generate clean, syntactically valid Mermaid.js "graph TD" flowcharts that accurately reflect the structure of law school notes. Output raw mermaid syntax only, formatted exactly as instructed.', 'quick');
+    const result = await callAI(prompt, 'You are Res. You add a few small, focused Mermaid.js diagrams to law school notes, only where a visual clarifies a specific test, decision path, exception structure, comparison, or sequence. Every diagram must be syntactically valid Mermaid and must reflect only what the notes say.', 'quick');
     if (result.startsWith('Error:')) {
       container.innerHTML = `<p style="color:var(--crimson);font-size:0.82rem;">${esc(result)}</p>`;
       return;
     }
-    const sections = parseDiagramSections(result);
+    const sections = parseHelpfulDiagrams(result);
     if (sections.length === 0) {
-      container.innerHTML = `<p style="color:var(--crimson);font-size:0.82rem;">No diagram was returned. Try again.</p>`;
+      container.innerHTML = `<p style="color:var(--slate);font-size:0.82rem;">Res did not find anything in these notes that a diagram would clarify. Notes with multi-part tests, decision paths, or comparisons work best.</p>`;
       return;
     }
-    let combinedHtml = '';
-    const rendered = [];
-    for (const sec of sections) {
-      try {
-        const renderId = 'note-mermaid-' + (++noteDiagramRenderSeq);
-        const { svg } = await mermaid.render(renderId, sec.code);
-        combinedHtml += `<div style="margin-bottom:32px;">${sections.length > 1 ? `<div style="font-weight:700;font-size:0.95rem;color:var(--ink);margin-bottom:10px;">${esc(sec.title)}</div>` : ''}${svg}</div>`;
-        rendered.push(sec);
-      } catch (e) {
-        console.error('Diagram section render error:', e, sec.code);
-        combinedHtml += `<div style="margin-bottom:32px;"><div style="font-weight:700;font-size:0.9rem;color:var(--crimson);">${esc(sec.title)} — could not render this section</div></div>`;
-      }
-    }
-    if (rendered.length === 0) {
-      container.innerHTML = `<p style="color:var(--crimson);font-size:0.82rem;">Could not render the diagram (the AI output wasn't valid Mermaid syntax). Try clicking Generate Diagram again.</p>`;
+    container.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+        <span style="font-size:0.8rem;color:var(--slate);" id="note-diagram-status">Rendering...</span>
+        <button class="btn btn-ghost" style="padding:3px 10px;font-size:0.72rem;" onclick="reopenDiagramModal()">🔍 View diagrams full-size</button>
+      </div>
+      <div class="md-rendered note-diagram-preview" id="note-diagram-preview"></div>`;
+    const { combined, count } = await renderNotesWithDiagrams(document.getElementById('note-diagram-preview'), text, sections);
+    if (count === 0) {
+      container.innerHTML = `<p style="color:var(--crimson);font-size:0.82rem;">The diagrams Res produced could not be drawn. Try again.</p>`;
       return;
     }
-    notePendingDiagramCode = rendered;
-    const modalTitle = rendered.length > 1 ? `${rendered.length} Diagrams` : rendered[0].title;
-    container.innerHTML = `<p style="color:var(--slate);font-size:0.82rem;">✓ ${rendered.length > 1 ? rendered.length + ' diagrams generated' : 'Diagram generated'} — <button class="btn btn-ghost" style="padding:3px 10px;font-size:0.72rem;" onclick="reopenDiagramModal()">🔍 View Full-Size</button></p>`;
+    const kept = sections.filter((_, i) => document.querySelector(`#note-diagram-preview .note-inline-diagram[data-diagram-idx="${i}"]`));
+    notePendingDiagramCode = kept;
+    _lastDiagramSVG = combined;
+    _lastDiagramTitle = count > 1 ? `${count} Diagrams` : kept[0].title;
+    document.getElementById('note-diagram-status').textContent = `Preview: ${count} diagram${count > 1 ? 's' : ''} placed with the notes ${count > 1 ? 'they explain' : 'it explains'}.`;
     saveWrap.style.display = '';
-    showDiagramInModal(combinedHtml, modalTitle);
   } catch (e) {
     console.error('Diagram generation error:', e);
-    container.innerHTML = `<p style="color:var(--crimson);font-size:0.82rem;">Could not render the diagram (the AI output wasn't valid Mermaid syntax). Try clicking Generate Diagram again.</p>`;
+    container.innerHTML = `<p style="color:var(--crimson);font-size:0.82rem;">Something went wrong adding diagrams. Try again.</p>`;
   } finally {
     btn.disabled = false;
-    btn.textContent = 'Generate Diagram';
+    btn.textContent = label;
   }
 }
 
